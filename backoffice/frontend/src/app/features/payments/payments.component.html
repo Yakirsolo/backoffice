@@ -1,0 +1,37 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">תשלומים</h1>
+      <p class="page-subtitle">הכנסות החודש: {{ totalThisMonth() }} ₪</p>
+    </div>
+  </div>
+
+  <div class="filters">
+    @for (status of statusOptions; track status) {
+      <button class="filter-chip" [class.active]="statusFilter() === status" (click)="setStatus(status)">
+        {{ status === 'all' ? 'הכל' : statusLabels[status] }}
+      </button>
+    }
+  </div>
+
+  @if (filteredPayments().length === 0) {
+    <div class="card empty-state">אין תשלומים בסטטוס זה</div>
+  } @else {
+    <div class="payments-table card">
+      <div class="table-row table-header">
+        <span>לקוחה</span>
+        <span>תאריך</span>
+        <span>סכום</span>
+        <span>סטטוס</span>
+      </div>
+      @for (p of filteredPayments(); track p.id) {
+        <a class="table-row" [routerLink]="['/customers', p.customerId]">
+          <span class="cell-name">{{ p.customerName }}</span>
+          <span>{{ formatDate(p.date) }}</span>
+          <span class="cell-amount">{{ p.amount }} ₪</span>
+          <span [class]="paymentStatusBadgeClass(p.status)">{{ statusLabels[p.status] }}</span>
+        </a>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,58 @@
+@if (measurements.length < 2) {
+  <div class="empty-state">אין עדיין מספיק נתונים להצגת גרף</div>
+} @else {
+  <div class="chart-wrap">
+    <svg
+      #svg
+      class="chart-svg"
+      [attr.viewBox]="viewBox"
+      preserveAspectRatio="none"
+      (pointermove)="onPointerMove($event)"
+      (pointerleave)="onPointerLeave()"
+    >
+      <!-- gridlines + y-axis ticks -->
+      @for (tick of yTicks(); track tick) {
+        <line class="gridline" [attr.x1]="plotLeft" [attr.x2]="plotRight" [attr.y1]="yForTick(tick)" [attr.y2]="yForTick(tick)" />
+        <text class="axis-label y-label" [attr.x]="plotLeft - 8" [attr.y]="yForTick(tick)">{{ tick }}</text>
+      }
+
+      <!-- x-axis date labels -->
+      @for (i of xLabelIndices(); track i) {
+        <text class="axis-label x-label" [attr.x]="points()[i].x" [attr.y]="plotBottom + 18">
+          {{ formatDateShort(points()[i].date) }}
+        </text>
+      }
+
+      <!-- area + line -->
+      <path class="area" [attr.d]="areaPath()" />
+      <path class="line" [attr.d]="linePath()" />
+
+      <!-- markers -->
+      @for (p of points(); track $index; let i = $index) {
+        <circle
+          class="marker"
+          [class.marker-hovered]="hoveredIndex() === i"
+          [attr.cx]="p.x" [attr.cy]="p.y"
+          [attr.r]="hoveredIndex() === i ? 6 : 4"
+        />
+      }
+
+      <!-- end label: current weight -->
+      @if (lastPoint(); as last) {
+        <text class="end-label" [attr.x]="last.x" [attr.y]="last.y - 14">{{ last.weight }} ק"ג</text>
+      }
+
+      <!-- crosshair -->
+      @if (hovered(); as h) {
+        <line class="crosshair" [attr.x1]="h.x" [attr.x2]="h.x" [attr.y1]="plotTop" [attr.y2]="plotBottom" />
+      }
+    </svg>
+
+    @if (hovered(); as h) {
+      <div class="tooltip" [style]="tooltipStyle()">
+        <div class="tooltip-value">{{ h.weight }} ק"ג</div>
+        <div class="tooltip-date">{{ formatDateShort(h.date) }}</div>
+      </div>
+    }
+  </div>
+}

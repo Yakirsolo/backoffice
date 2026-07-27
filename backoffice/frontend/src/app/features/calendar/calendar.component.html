@@ -1,0 +1,37 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">יומן</h1>
+      <p class="page-subtitle">כל הפגישות שלכם, לפי תאריך</p>
+    </div>
+  </div>
+
+  @if (groupedMeetings().length === 0) {
+    <div class="card empty-state">אין פגישות מתוכננות</div>
+  } @else {
+    <div class="day-groups">
+      @for (group of groupedMeetings(); track group.date) {
+        <section class="day-group">
+          <div class="day-header" [class.today]="group.date === today">
+            {{ formatDate(group.date) }}
+            @if (group.date === today) { <span class="badge badge-primary">היום</span> }
+          </div>
+          <div class="day-meetings">
+            @for (m of group.items; track m.id) {
+              <a class="card meeting-row" [routerLink]="['/customers', m.customerId]">
+                <div class="meeting-time">{{ formatTime(m.time) }}</div>
+                <div class="meeting-info">
+                  <div class="meeting-name">{{ m.customerName }}</div>
+                  <div class="meeting-type">{{ m.type }}</div>
+                </div>
+                <span class="badge" [class.badge-success]="m.completed" [class.badge-neutral]="!m.completed">
+                  {{ m.completed ? 'התקיימה' : 'מתוכננת' }}
+                </span>
+              </a>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+</div>

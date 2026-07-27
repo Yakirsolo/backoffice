@@ -1,0 +1,102 @@
+@if (data(); as d) {
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">שלום דורין 👋</h1>
+        <p class="page-subtitle">הנה מה שקורה היום, {{ formatDate(today) }}</p>
+      </div>
+      <a class="btn btn-primary" routerLink="/customers/new">
+        <span>➕</span> לקוחה חדשה
+      </a>
+    </div>
+
+    <div class="stats-grid">
+      <div class="card stat-card">
+        <div class="stat-icon stat-icon-primary">📅</div>
+        <div>
+          <div class="stat-value">{{ d.todaysMeetings.length }}</div>
+          <div class="stat-label">פגישות היום</div>
+        </div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon stat-icon-success">✨</div>
+        <div>
+          <div class="stat-value">{{ d.newCustomersThisMonth }}</div>
+          <div class="stat-label">לקוחות חדשים</div>
+        </div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon stat-icon-warning">💳</div>
+        <div>
+          <div class="stat-value">{{ d.upcomingPayments.length }}</div>
+          <div class="stat-label">תשלומים קרובים</div>
+        </div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon stat-icon-danger">⚑</div>
+        <div>
+          <div class="stat-value">{{ d.followUpCustomers.length }}</div>
+          <div class="stat-label">דורשות מעקב</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="columns">
+      <section class="card panel">
+        <h2 class="panel-title">פגישות היום</h2>
+        @if (d.todaysMeetings.length === 0) {
+          <div class="empty-state">אין פגישות מתוכננות להיום</div>
+        } @else {
+          <div class="meeting-list">
+            @for (meeting of d.todaysMeetings; track meeting.id) {
+              <a class="meeting-row" [routerLink]="['/customers', meeting.customerId]">
+                <div class="meeting-time">{{ formatTime(meeting.time) }}</div>
+                <div class="meeting-info">
+                  <div class="meeting-name">{{ meeting.customerName }}</div>
+                  <div class="meeting-type">{{ meeting.type }}</div>
+                </div>
+                @if (meeting.zoomLink) {
+                  <span class="badge badge-primary">Zoom</span>
+                }
+              </a>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="card panel">
+        <h2 class="panel-title">תזכורות תשלום</h2>
+        @if (d.upcomingPayments.length === 0) {
+          <div class="empty-state">אין תשלומים שממתינים</div>
+        } @else {
+          <div class="payment-list">
+            @for (payment of d.upcomingPayments; track payment.id) {
+              <a class="payment-row" [routerLink]="['/customers', payment.customerId]">
+                <div>
+                  <div class="payment-name">{{ payment.customerName }}</div>
+                  <div class="payment-note" [class.overdue]="payment.status === 'overdue'">
+                    {{ paymentNote(payment.date, payment.status) }}
+                  </div>
+                </div>
+                <div class="payment-amount">{{ payment.amount }} ₪</div>
+              </a>
+            }
+          </div>
+        }
+      </section>
+    </div>
+
+    @if (d.followUpCustomers.length > 0) {
+      <section class="card panel followup-panel">
+        <h2 class="panel-title">לקוחות שדורשות מעקב</h2>
+        <div class="followup-list">
+          @for (customer of d.followUpCustomers; track customer.id) {
+            <a class="followup-chip" [routerLink]="['/customers', customer.id]">
+              <span>{{ customer.name }}</span>
+            </a>
+          }
+        </div>
+      </section>
+    }
+  </div>
+}

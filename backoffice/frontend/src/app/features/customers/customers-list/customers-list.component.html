@@ -1,0 +1,69 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">לקוחות</h1>
+      <p class="page-subtitle">{{ filteredCustomers().length }} לקוחות</p>
+    </div>
+    <a class="btn btn-primary" routerLink="/customers/new">
+      <span>➕</span> לקוחה חדשה
+    </a>
+  </div>
+
+  <div class="toolbar">
+    <input
+      class="input-field search-input"
+      type="text"
+      placeholder="חיפוש לפי שם או טלפון..."
+      [ngModel]="searchTerm()"
+      (ngModelChange)="searchTerm.set($event)"
+    />
+    <div class="filters">
+      @for (status of statusOptions; track status) {
+        <button
+          class="filter-chip"
+          [class.active]="statusFilter() === status"
+          (click)="setStatus(status)"
+        >
+          {{ status === 'all' ? 'הכל' : statusLabels[status] }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (filteredCustomers().length === 0) {
+    <div class="card empty-state">לא נמצאו לקוחות מתאימות</div>
+  } @else {
+    <div class="customers-grid">
+      @for (customer of filteredCustomers(); track customer.id) {
+        <a class="card customer-card" [routerLink]="['/customers', customer.id]">
+          <div class="customer-top">
+            <div class="avatar">{{ customer.name.charAt(0) }}</div>
+            <div class="customer-name-block">
+              <div class="customer-name">{{ customer.name }}</div>
+              <div class="customer-program">{{ customer.program }}</div>
+            </div>
+            <span [class]="customerStatusBadgeClass(customer.status)">
+              {{ statusLabels[customer.status] }}
+            </span>
+          </div>
+          <div class="customer-stats">
+            <div class="customer-stat">
+              <div class="customer-stat-value">{{ customer.currentWeight }} ק"ג</div>
+              <div class="customer-stat-label">משקל נוכחי</div>
+            </div>
+            <div class="customer-stat">
+              <div class="customer-stat-value" [class.success-text]="weightLoss(customer.id) >= 0" [class.danger-text]="weightLoss(customer.id) < 0">
+                {{ weightChangeText(customer.id) }}
+              </div>
+              <div class="customer-stat-label">ירידה במשקל</div>
+            </div>
+            <div class="customer-stat">
+              <div class="customer-stat-value">{{ formatDate(customer.startDate) }}</div>
+              <div class="customer-stat-label">תאריך התחלה</div>
+            </div>
+          </div>
+        </a>
+      }
+    </div>
+  }
+</div>

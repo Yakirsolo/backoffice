@@ -1,0 +1,141 @@
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.stat-icon-primary { background: var(--color-primary-soft); }
+.stat-icon-success { background: var(--color-success-soft); }
+.stat-icon-warning { background: var(--color-warning-soft); }
+.stat-icon-danger { background: var(--color-danger-soft); }
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.stat-label {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.panel {
+  padding: 20px;
+}
+
+.panel-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.meeting-list, .payment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meeting-row, .payment-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s ease;
+}
+
+.meeting-row:hover, .payment-row:hover, .followup-chip:hover {
+  background: var(--color-surface);
+}
+
+.meeting-time {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--color-primary);
+  width: 46px;
+  flex-shrink: 0;
+}
+
+.meeting-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.meeting-name {
+  font-weight: 600;
+}
+
+.meeting-type {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.payment-row {
+  justify-content: space-between;
+}
+
+.payment-name {
+  font-weight: 600;
+}
+
+.payment-note {
+  font-size: 13px;
+  color: var(--color-warning);
+}
+
+.payment-note.overdue {
+  color: var(--color-danger);
+}
+
+.payment-amount {
+  font-weight: 700;
+}
+
+.followup-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.followup-chip {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+@media (max-width: 860px) {
+  .stats-grid, .columns {
+    grid-template-columns: 1fr;
+  }
+}

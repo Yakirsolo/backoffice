@@ -1,0 +1,44 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/backoffice_dev}
+    username: ${DB_USERNAME:yakirsolomon}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+app:
+  cors:
+    allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:4200}
+  jwt:
+    secret: ${JWT_SECRET:dev-only-secret-key-change-me-please-32chars-min}
+    access-token-minutes: ${JWT_ACCESS_MINUTES:15}
+    refresh-token-days: ${JWT_REFRESH_DAYS:14}
+  admin:
+    seed-email: ${ADMIN_EMAIL}
+    seed-password: ${ADMIN_PASSWORD}
+  storage:
+    provider: r2
+    endpoint: ${R2_ENDPOINT:}
+    bucket: ${R2_BUCKET:}
+    access-key: ${R2_ACCESS_KEY:}
+    secret-key: ${R2_SECRET_KEY:}
+    presign-minutes: 10
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
