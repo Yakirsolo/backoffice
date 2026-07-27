@@ -1,0 +1,96 @@
+.chart-wrap {
+  position: relative;
+  /* Time reads left-to-right even inside an RTL page - the universal chart convention. */
+  direction: ltr;
+  margin-top: 4px;
+}
+
+.chart-svg {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 640 / 220;
+  overflow: visible;
+  touch-action: none;
+}
+
+.gridline {
+  stroke: var(--color-border);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.axis-label {
+  font-size: 11px;
+  fill: var(--color-text-muted);
+  font-family: inherit;
+}
+
+.y-label {
+  text-anchor: end;
+  dominant-baseline: middle;
+}
+
+.x-label {
+  text-anchor: middle;
+}
+
+.area {
+  fill: var(--color-primary);
+  fill-opacity: 0.1;
+  stroke: none;
+}
+
+.line {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.marker {
+  fill: var(--color-primary);
+  stroke: var(--color-bg);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  transition: r 0.1s ease;
+}
+
+.end-label {
+  text-anchor: end;
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--color-text);
+}
+
+.crosshair {
+  stroke: var(--color-text-faint);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  background: #1c1e21;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--shadow-md);
+}
+
+.tooltip-value {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.tooltip-date {
+  opacity: 0.75;
+  font-size: 11px;
+  margin-top: 1px;
+}

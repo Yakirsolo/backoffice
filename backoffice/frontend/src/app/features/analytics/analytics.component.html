@@ -1,0 +1,57 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">אנליטיקה</h1>
+      <p class="page-subtitle">סיכום פעילות העסק</p>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="card stat-card">
+      <div class="stat-value">{{ activeCount() }}</div>
+      <div class="stat-label">לקוחות פעילות</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-value" [class.success-text]="averageWeightLoss() >= 0" [class.danger-text]="averageWeightLoss() < 0">
+        {{ averageWeightLossText() }}
+      </div>
+      <div class="stat-label">ירידה ממוצעת במשקל</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-value">{{ monthRevenue() }} ₪</div>
+      <div class="stat-label">הכנסות החודש</div>
+    </div>
+  </div>
+
+  <div class="columns">
+    <section class="card panel">
+      <h2 class="panel-title">פילוח לפי סטטוס</h2>
+      <div class="bars">
+        @for (item of statusBreakdown(); track item.status) {
+          <div class="bar-row">
+            <span class="bar-label">{{ statusLabels[item.status] }}</span>
+            <div class="bar-track">
+              <div class="bar-fill" [style.width.%]="item.percent"></div>
+            </div>
+            <span class="bar-count">{{ item.count }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="card panel">
+      <h2 class="panel-title">פילוח לפי מקור הגעה</h2>
+      <div class="bars">
+        @for (item of sourceBreakdown(); track item.source) {
+          <div class="bar-row">
+            <span class="bar-label">{{ item.source }}</span>
+            <div class="bar-track">
+              <div class="bar-fill secondary" [style.width.%]="item.percent"></div>
+            </div>
+            <span class="bar-count">{{ item.count }}</span>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</div>

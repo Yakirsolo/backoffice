@@ -1,0 +1,144 @@
+.wizard-page {
+  max-width: 720px;
+}
+
+.back-link {
+  display: inline-block;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  margin: 24px 0 28px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+}
+
+.step-index {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.step-label {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.step.active .step-index {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.step.active .step-label {
+  color: var(--color-text);
+}
+
+.step.done .step-index {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: #fff;
+}
+
+.step-line {
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+  margin: 0 10px;
+  min-width: 16px;
+}
+
+.wizard-card {
+  padding: 28px;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.billing-cadence {
+  display: grid;
+  grid-template-columns: auto 90px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.three-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.upload-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.agreement-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.agreement-option {
+  padding: 20px;
+  text-align: center;
+  border: 1px solid var(--color-border);
+}
+
+.agreement-option.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.option-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.option-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.option-desc {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.wizard-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+  .two-col, .three-col, .agreement-options {
+    grid-template-columns: 1fr;
+  }
+  .step-label {
+    display: none;
+  }
+}

@@ -1,0 +1,31 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">🥗</span>
+      <span class="brand-name">המערכת שלי</span>
+    </div>
+
+    <nav class="nav">
+      @for (item of navItems; track item.path) {
+        <a class="nav-item" [routerLink]="item.path" routerLinkActive="active">
+          <span class="nav-icon">{{ item.icon }}</span>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <a class="nav-item add-customer" routerLink="/customers/new">
+      <span class="nav-icon">➕</span>
+      <span>לקוחה חדשה</span>
+    </a>
+
+    <div class="user-row">
+      <span class="user-name">{{ currentUser()?.name }}</span>
+      <button class="logout-btn" (click)="logout()" title="יציאה">🚪</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

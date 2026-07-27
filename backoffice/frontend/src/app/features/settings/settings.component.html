@@ -1,0 +1,56 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">הגדרות</h1>
+      <p class="page-subtitle">פרטי העסק והעדפות</p>
+    </div>
+  </div>
+
+  <div class="settings-grid">
+    <section class="card panel">
+      <h2 class="panel-title">פרטי העסק</h2>
+      <div class="field-group">
+        <label class="field-label">שם מלא</label>
+        <input class="input-field" type="text" placeholder="השם שלך" [ngModel]="coachName()" (ngModelChange)="coachName.set($event)" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">שם העסק</label>
+        <input class="input-field" type="text" placeholder="שם העסק" [ngModel]="businessName()" (ngModelChange)="businessName.set($event)" />
+      </div>
+      <div class="two-col">
+        <div class="field-group">
+          <label class="field-label">אימייל (לא ניתן לשינוי)</label>
+          <input class="input-field" type="email" [ngModel]="email()" disabled />
+        </div>
+        <div class="field-group">
+          <label class="field-label">טלפון</label>
+          <input class="input-field" type="tel" [ngModel]="phone()" (ngModelChange)="phone.set($event)" />
+        </div>
+      </div>
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+        {{ saving() ? 'שומרת...' : 'שמירת שינויים' }}
+      </button>
+      @if (saveMessage()) {
+        <p class="save-message">{{ saveMessage() }}</p>
+      }
+    </section>
+
+    <section class="card panel">
+      <h2 class="panel-title">התראות</h2>
+      <label class="toggle-row">
+        <div>
+          <div class="toggle-title">תזכורות תשלום</div>
+          <div class="toggle-desc">קבלי התראה על תשלומים קרובים ובאיחור</div>
+        </div>
+        <input type="checkbox" [ngModel]="notifyPaymentReminders()" (ngModelChange)="notifyPaymentReminders.set($event)" />
+      </label>
+      <label class="toggle-row">
+        <div>
+          <div class="toggle-title">לקוחות שדורשות מעקב</div>
+          <div class="toggle-desc">קבלי התראה כשלקוחה זקוקה למעקב</div>
+        </div>
+        <input type="checkbox" [ngModel]="notifyFollowUp()" (ngModelChange)="notifyFollowUp.set($event)" />
+      </label>
+    </section>
+  </div>
+</div>

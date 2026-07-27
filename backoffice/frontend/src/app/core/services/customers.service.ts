@@ -1,0 +1,121 @@
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+import { Observable, tap } from 'rxjs';
+import {
+  BillingIntervalUnit, Customer, CustomerStatus, DashboardData, CustomerDocument, Meeting, Payment,
+  PaymentStatus, ProgressMeasurement, TimelineEvent
+} from '../models/customer.model';
+import { API_BASE_URL } from '../config/api-config';
+
+export interface NewCustomerData {
+  name: string; age: number; phone: string; instagram?: string; facebook?: string; description?: string;
+  program: string; price: number; billingIntervalValue: number; billingIntervalUnit: BillingIntervalUnit;
+  startDate: string; source: Customer['source'];
+  startWeight: number; targetWeight: number; waist?: number; thigh?: number; hip?: number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class CustomersService {
+  private http = inject(HttpClient);
+
+  /** Cached full collections - loaded once and kept in sync after writes, filtered client-side per customer. */
+  readonly customers = signal<Customer[]>([]);
+  readonly payments = signal<Payment[]>([]);
+  readonly meetings = signal<Meeting[]>([]);
+
+  constructor() {
+    this.refreshCustomers();
+    this.refreshPayments();
+    this.refreshMeetings();
+  }
+
+  refreshCustomers(status?: CustomerStatus, search?: string) {
+    let params = new HttpParams();
+    if (status) params = params.set('status', status);
+    if (search) params = params.set('search', search);
+    this.http.get<Customer[]>(`${API_BASE_URL}/customers`, { params })
+      .subscribe(list => this.customers.set(list));
+  }
+
+  private refreshPayments() {
+    this.http.get<Payment[]>(`${API_BASE_URL}/payments`).subscribe(list => this.payments.set(list));
+  }
+
+  private refreshMeetings() {
+    this.http.get<Meeting[]>(`${API_BASE_URL}/meetings`).subscribe(list => this.meetings.set(list));
+  }
+
+  getCustomer(id: string): Customer | undefined {
+    return this.customers().find(c => c.id === id);
+  }
+
+  paymentsFor(customerId: string): Payment[] {
+    return this.payments()
+      .filter(p => p.customerId === customerId)
+      .sort((a, b) => b.date.localeCompare(a.date));
+  }
+
+  meetingsFor(customerId: string): Meeting[] {
+    return this.meetings()
+      .filter(m => m.customerId === customerId)
+      .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
+  }
+
+  measurementsFor$(customerId: string): Observable<ProgressMeasurement[]> {
+    return this.http.get<ProgressMeasurement[]>(`${API_BASE_URL}/customers/${customerId}/measurements`);
+  }
+
+  documentsFor$(customerId: string): Observable<CustomerDocument[]> {
+    return this.http.get<CustomerDocument[]>(`${API_BASE_URL}/customers/${customerId}/documents`);
+  }
+
+  timelineFor$(customerId: string): Observable<TimelineEvent[]> {
+    return this.http.get<TimelineEvent[]>(`${API_BASE_URL}/customers/${customerId}/timeline`);
+  }
+
+  addMeasurement(customerId: string, data: { date: string; weight: number; waist?: number; thigh?: number; hip?: number }) {
+    return this.http.post<ProgressMeasurement>(`${API_BASE_URL}/customers/${customerId}/measurements`, data)
+      .pipe(tap(() => this.refreshCustomers()));
+  }
+
+  addMeeting(customerId: string, data: { date: string; time: string; type: string; zoomLink?: string }) {
+    return this.http.post<Meeting>(`${API_BASE_URL}/customers/${customerId}/meetings`, data)
+      .pipe(tap(() => this.refreshMeetings()));
+  }
+
+  addPayment(customerId: string, data: { amount: number; date: string; status: PaymentStatus }) {
+    return this.http.post<Payment>(`${API_BASE_URL}/customers/${customerId}/payments`, data)
+      .pipe(tap(() => {
+        this.refreshPayments();
+        this.refreshCustomers();
+      }));
+  }
+
+  weightLoss(customer: Customer): number {
+    return Math.round((customer.startWeight - customer.currentWeight) * 10) / 10;
+  }
+
+  addCustomer(data: NewCustomerData): Observable<Customer> {
+    return this.http.post<Customer>(`${API_BASE_URL}/customers`, data).pipe(
+      tap(() => {
+        this.refreshCustomers();
+        this.refreshPayments();
+      }),
+    );
+  }
+
+  updateCustomerStatus(customerId: string, status: CustomerStatus) {
+    return this.http.patch<Customer>(`${API_BASE_URL}/customers/${customerId}`, { status })
+      .pipe(tap(() => this.refreshCustomers()));
+  }
+
+  dashboard(): Observable<DashboardData> {
+    return this.http.get<DashboardData>(`${API_BASE_URL}/dashboard`);
+  }
+
+  generateAgreement(customerId?: string): Observable<{ customerName: string; program: string; price: number | null }> {
+    return this.http.post<{ customerName: string; program: string; price: number | null }>(
+      `${API_BASE_URL}/agreements/generate`, { customerId },
+    );
+  }
+}

@@ -1,0 +1,164 @@
+<div class="page wizard-page">
+  <a class="back-link" routerLink="/customers">→ ביטול וחזרה לרשימת הלקוחות</a>
+  <h1 class="page-title">לקוחה חדשה</h1>
+
+  <div class="stepper">
+    @for (step of steps; track step; let i = $index) {
+      <button
+        class="step"
+        [class.active]="currentStep() === i"
+        [class.done]="currentStep() > i"
+        (click)="goToStep(i)"
+      >
+        <span class="step-index">{{ currentStep() > i ? '✓' : i + 1 }}</span>
+        <span class="step-label">{{ step }}</span>
+      </button>
+      @if (i < steps.length - 1) { <span class="step-line"></span> }
+    }
+  </div>
+
+  <div class="card wizard-card">
+    @switch (currentStep()) {
+      @case (0) {
+        <div class="step-form">
+          <div class="field-group">
+            <label class="field-label">שם *</label>
+            <input class="input-field" type="text" [(ngModel)]="data.name" />
+          </div>
+          <div class="two-col">
+            <div class="field-group">
+              <label class="field-label">גיל *</label>
+              <input class="input-field" type="number" [(ngModel)]="data.age" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">טלפון *</label>
+              <input class="input-field" type="tel" [(ngModel)]="data.phone" />
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="field-group">
+              <label class="field-label">Instagram</label>
+              <input class="input-field" type="text" placeholder="@username" [(ngModel)]="data.instagram" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">Facebook</label>
+              <input class="input-field" type="text" [(ngModel)]="data.facebook" />
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">תיאור קצר</label>
+            <textarea class="input-field" rows="3" [(ngModel)]="data.description"></textarea>
+          </div>
+        </div>
+      }
+      @case (1) {
+        <div class="step-form">
+          <div class="two-col">
+            <div class="field-group">
+              <label class="field-label">תדירות תשלום *</label>
+              <div class="billing-cadence">
+                <span>כל</span>
+                <input class="input-field" type="number" min="1" [(ngModel)]="data.billingIntervalValue" />
+                <select class="input-field" [(ngModel)]="data.billingIntervalUnit">
+                  @for (u of billingUnitOptions; track u) {
+                    <option [value]="u">{{ billingUnitLabels[u] }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">מחיר *</label>
+              <input class="input-field" type="number" placeholder="₪" [(ngModel)]="data.price" />
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">מסלול</label>
+            <input class="input-field" type="text" [value]="programName" disabled />
+          </div>
+          <div class="two-col">
+            <div class="field-group">
+              <label class="field-label">תאריך התחלה *</label>
+              <input class="input-field" type="date" [(ngModel)]="data.startDate" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">מקור הגעה</label>
+              <select class="input-field" [(ngModel)]="data.source">
+                @for (s of sourceOptions; track s) {
+                  <option [value]="s">{{ sourceLabels[s] }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+      }
+      @case (2) {
+        <div class="step-form">
+          <div class="field-group">
+            <label class="field-label">משקל (ק"ג) *</label>
+            <input class="input-field" type="number" [(ngModel)]="data.weight" />
+          </div>
+          <div class="three-col">
+            <div class="field-group">
+              <label class="field-label">היקף בטן (ס"מ)</label>
+              <input class="input-field" type="number" [(ngModel)]="data.waist" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">היקף ירך (ס"מ)</label>
+              <input class="input-field" type="number" [(ngModel)]="data.thigh" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">היקף ישבן (ס"מ)</label>
+              <input class="input-field" type="number" [(ngModel)]="data.hip" />
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">תמונות לפני</label>
+            <button class="btn btn-secondary upload-btn" (click)="data.hasBeforePhoto = true">
+              {{ data.hasBeforePhoto ? '✓ תמונה נוספה' : '⬆️ העלאת תמונה' }}
+            </button>
+          </div>
+        </div>
+      }
+      @case (3) {
+        <div class="step-form">
+          <p class="field-label">בחרו כיצד להוסיף את ההסכם</p>
+          <div class="agreement-options">
+            <button
+              class="card agreement-option"
+              [class.selected]="data.agreementMode === 'upload'"
+              (click)="data.agreementMode = 'upload'"
+            >
+              <div class="option-icon">⬆️</div>
+              <div class="option-title">העלאת הסכם קיים</div>
+              <div class="option-desc">כבר יש לכם הסכם חתום? העלו אותו כקובץ</div>
+            </button>
+            <button
+              class="card agreement-option"
+              [class.selected]="data.agreementMode === 'generate'"
+              (click)="data.agreementMode = 'generate'"
+            >
+              <div class="option-icon">📝</div>
+              <div class="option-title">יצירת הסכם במערכת</div>
+              <div class="option-desc">המערכת תכין הסכם מוכן לפי פרטי הלקוחה</div>
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+  <div class="wizard-actions">
+    <button class="btn btn-secondary" (click)="back()" [disabled]="currentStep() === 0">
+      → הקודם
+    </button>
+    @if (currentStep() < steps.length - 1) {
+      <button class="btn btn-primary" (click)="next()" [disabled]="!canGoNext">
+        הבא ←
+      </button>
+    } @else {
+      <button class="btn btn-primary" (click)="finish()" [disabled]="submitting">
+        {{ submitting ? 'יוצרת...' : '✓ יצירת לקוחה' }}
+      </button>
+    }
+  </div>
+</div>

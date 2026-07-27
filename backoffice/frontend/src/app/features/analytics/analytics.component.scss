@@ -1,0 +1,96 @@
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  padding: 22px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.success-text {
+  color: var(--color-success);
+}
+
+.danger-text {
+  color: var(--color-danger);
+}
+
+.stat-label {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.panel {
+  padding: 20px;
+}
+
+.panel-title {
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bar-label {
+  width: 70px;
+  flex-shrink: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  text-transform: capitalize;
+}
+
+.bar-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 999px;
+}
+
+.bar-fill.secondary {
+  background: var(--color-success);
+}
+
+.bar-count {
+  width: 20px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+@media (max-width: 860px) {
+  .stats-grid, .columns {
+    grid-template-columns: 1fr;
+  }
+}

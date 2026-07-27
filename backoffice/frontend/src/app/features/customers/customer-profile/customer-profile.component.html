@@ -1,0 +1,58 @@
+@if (customer(); as c) {
+  <div class="page">
+    <a class="back-link" routerLink="/customers">→ חזרה לרשימת הלקוחות</a>
+
+    <div class="profile-header card">
+      <div class="avatar-lg">{{ c.name.charAt(0) }}</div>
+      <div class="profile-info">
+        <div class="profile-name-row">
+          <h1 class="page-title">{{ c.name }}</h1>
+          <span [class]="customerStatusBadgeClass(c.status)">{{ statusLabels[c.status] }}</span>
+          <button class="btn btn-secondary status-toggle-btn" [disabled]="changingStatus()" (click)="toggleStatus(c)">
+            {{ c.status === 'active' ? '🏁 סימון כהסתיים' : '↺ החזרה לפעיל' }}
+          </button>
+        </div>
+        <p class="page-subtitle">{{ c.program }} · גיל {{ c.age }} · {{ c.phone }}</p>
+      </div>
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <div class="profile-stat-value">{{ c.currentWeight }} ק"ג</div>
+          <div class="profile-stat-label">משקל נוכחי</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value" [class.success-text]="weightLoss() >= 0" [class.danger-text]="weightLoss() < 0">
+            {{ weightChangeText() }}
+          </div>
+          <div class="profile-stat-label">ירידה במשקל</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value">{{ c.targetWeight }} ק"ג</div>
+          <div class="profile-stat-label">משקל יעד</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs-nav">
+      @for (tab of tabs; track tab.id) {
+        <button class="tab-btn" [class.active]="activeTab() === tab.id" (click)="setTab(tab.id)">
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+
+    <div class="tab-content">
+      @switch (activeTab()) {
+        @case ('overview') { <app-overview-tab [customer]="c" /> }
+        @case ('progress') { <app-progress-tab [customerId]="c.id" /> }
+        @case ('history') { <app-history-tab [customerId]="c.id" /> }
+        @case ('payments') { <app-payments-tab [customer]="c" /> }
+        @case ('documents') { <app-documents-tab [customerId]="c.id" /> }
+        @case ('meetings') { <app-meetings-tab [customerId]="c.id" /> }
+      }
+    </div>
+  </div>
+} @else {
+  <div class="page">
+    <div class="card empty-state">הלקוחה לא נמצאה</div>
+  </div>
+}

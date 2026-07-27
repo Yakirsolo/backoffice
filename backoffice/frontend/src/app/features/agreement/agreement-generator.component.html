@@ -1,0 +1,67 @@
+<div class="page">
+  <a class="back-link" routerLink="/customers">→ חזרה ללקוחות</a>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">יצירת הסכם</h1>
+      <p class="page-subtitle">מלאו את הפרטים ותקבלו הסכם מוכן להדפסה או הורדה</p>
+    </div>
+  </div>
+
+  <div class="generator-layout">
+    <section class="card form-card no-print">
+      <div class="field-group">
+        <label class="field-label">שם הלקוחה</label>
+        <input class="input-field" type="text" [ngModel]="customerName()" (ngModelChange)="customerName.set($event)" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">מסלול</label>
+        <input class="input-field" type="text" [ngModel]="program()" (ngModelChange)="program.set($event)" />
+      </div>
+      <div class="two-col">
+        <div class="field-group">
+          <label class="field-label">משך (חודשים)</label>
+          <input class="input-field" type="number" [ngModel]="durationMonths()" (ngModelChange)="durationMonths.set($event)" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">מחיר (₪)</label>
+          <input class="input-field" type="number" [ngModel]="price()" (ngModelChange)="price.set($event)" />
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">תנאי תשלום</label>
+        <input class="input-field" type="text" [ngModel]="paymentTerms()" (ngModelChange)="paymentTerms.set($event)" />
+      </div>
+      <button class="btn btn-primary full-width" [disabled]="!isReady()" (click)="print()">
+        🖨️ הורדה / הדפסת ההסכם
+      </button>
+    </section>
+
+    <section class="card agreement-preview">
+      <div class="agreement-doc">
+        <h2 class="doc-title">הסכם התקשרות</h2>
+        <p class="doc-date">תאריך: {{ today }}</p>
+
+        <p class="doc-paragraph">
+          הסכם זה נחתם בין המאמנת לבין <strong>{{ customerName() || '[שם הלקוחה]' }}</strong>
+          לצורך ליווי תזונתי במסגרת המסלול <strong>{{ program() || '[מסלול]' }}</strong>.
+        </p>
+
+        <div class="doc-terms">
+          <div class="doc-term"><span>משך ההתקשרות</span><span>{{ durationMonths() || '-' }} חודשים</span></div>
+          <div class="doc-term"><span>עלות התהליך</span><span>{{ price() || '-' }} ₪</span></div>
+          <div class="doc-term"><span>תנאי תשלום</span><span>{{ paymentTerms() }}</span></div>
+        </div>
+
+        <p class="doc-paragraph">
+          הלקוחה מתחייבת לשתף פעולה עם ההנחיות התזונתיות שיינתנו במסגרת התהליך,
+          ומאשרת כי קראה והבינה את תנאי ההתקשרות.
+        </p>
+
+        <div class="doc-signatures">
+          <div class="doc-signature"><span>חתימת המאמנת</span></div>
+          <div class="doc-signature"><span>חתימת הלקוחה</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
