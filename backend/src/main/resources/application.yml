@@ -30,11 +30,12 @@ app:
     seed-email: ${ADMIN_EMAIL}
     seed-password: ${ADMIN_PASSWORD}
   storage:
-    provider: r2
-    endpoint: ${R2_ENDPOINT:}
-    bucket: ${R2_BUCKET:}
-    access-key: ${R2_ACCESS_KEY:}
-    secret-key: ${R2_SECRET_KEY:}
+    provider: ${STORAGE_PROVIDER:r2}
+    endpoint: ${STORAGE_ENDPOINT:}
+    region: ${STORAGE_REGION:auto}
+    bucket: ${STORAGE_BUCKET:}
+    access-key: ${STORAGE_ACCESS_KEY:}
+    secret-key: ${STORAGE_SECRET_KEY:}
     presign-minutes: 10
 
 management:

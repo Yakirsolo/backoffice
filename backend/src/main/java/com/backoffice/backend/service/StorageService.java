@@ -19,8 +19,8 @@ import java.time.Duration;
 import java.util.UUID;
 
 /**
- * Presigned-URL access to an S3-compatible bucket (Cloudflare R2). The Spring Boot app never
- * proxies file bytes - the browser uploads/downloads directly against these URLs.
+ * Presigned-URL access to an S3-compatible bucket (AWS S3, Cloudflare R2, etc). The Spring Boot
+ * app never proxies file bytes - the browser uploads/downloads directly against these URLs.
  */
 @Service
 @RequiredArgsConstructor
@@ -65,10 +65,10 @@ public class StorageService {
     private S3Presigner buildPresigner() {
         if (!properties.isConfigured()) {
             throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE,
-                    "File storage is not configured yet (missing R2 endpoint/bucket/credentials)");
+                    "File storage is not configured yet (missing storage endpoint/bucket/credentials)");
         }
         return S3Presigner.builder()
-                .region(Region.of("auto"))
+                .region(Region.of(properties.region()))
                 .endpointOverride(URI.create(properties.endpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(
                         AwsBasicCredentials.create(properties.accessKey(), properties.secretKey())))

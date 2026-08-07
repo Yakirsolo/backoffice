@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record StorageProperties(
         String provider,
         String endpoint,
+        String region,
         String bucket,
         String accessKey,
         String secretKey,
