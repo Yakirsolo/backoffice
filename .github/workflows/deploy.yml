@@ -40,6 +40,7 @@ jobs:
           context: ./backend
           platforms: linux/arm64
           push: true
+          provenance: false
           tags: ${{ env.ECR_REGISTRY }}/backoffice-backend:latest
 
       - name: Build and push frontend image (arm64 — matches the Graviton EC2 host)
@@ -48,6 +49,7 @@ jobs:
           context: ./frontend
           platforms: linux/arm64
           push: true
+          provenance: false
           tags: ${{ env.ECR_REGISTRY }}/backoffice-frontend:latest
 
       - name: Trigger deploy on EC2 via SSM
