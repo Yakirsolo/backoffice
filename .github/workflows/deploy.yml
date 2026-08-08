@@ -14,7 +14,25 @@ env:
   INSTANCE_ID: i-0d472203470d241e7
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
+
   build-and-deploy:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,6 +53,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build and push backend image (arm64 — matches the Graviton EC2 host)
+        if: needs.changes.outputs.backend == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ./backend
@@ -44,6 +63,7 @@ jobs:
           tags: ${{ env.ECR_REGISTRY }}/backoffice-backend:latest
 
       - name: Build and push frontend image (arm64 — matches the Graviton EC2 host)
+        if: needs.changes.outputs.frontend == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
