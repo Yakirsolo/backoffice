@@ -2,7 +2,7 @@ import { Component, Input, OnChanges, computed, inject, signal } from '@angular/
 import { FormsModule } from '@angular/forms';
 import { CustomersService } from '../../../../core/services/customers.service';
 import {
-  BILLING_INTERVAL_UNIT_LABELS, Customer, PAYMENT_STATUS_LABELS, PaymentStatus
+  BILLING_INTERVAL_UNIT_LABELS, Customer, PAYMENT_STATUS_LABELS, Payment, PaymentStatus
 } from '../../../../core/models/customer.model';
 import { formatDate, paymentStatusBadgeClass } from '../../../../shared/status-utils';
 
@@ -72,11 +72,46 @@ import { formatDate, paymentStatusBadgeClass } from '../../../../shared/status-u
         } @else {
           <div class="payment-list">
             @for (p of payments(); track p.id) {
-              <div class="card payment-row">
-                <div class="payment-date">{{ formatDate(p.date) }}</div>
-                <div class="payment-amount">{{ p.amount }} ₪</div>
-                <span [class]="paymentStatusBadgeClass(p.status)">{{ statusLabels[p.status] }}</span>
-              </div>
+              @if (editingId() === p.id) {
+                <div class="card new-payment-card">
+                  <div class="three-col">
+                    <div class="field-group">
+                      <label class="field-label">סכום (₪) *</label>
+                      <input class="input-field" type="number" [(ngModel)]="editAmount" />
+                    </div>
+                    <div class="field-group">
+                      <label class="field-label">תאריך *</label>
+                      <input class="input-field" type="date" [(ngModel)]="editDate" />
+                    </div>
+                    <div class="field-group">
+                      <label class="field-label">סטטוס</label>
+                      <select class="input-field" [(ngModel)]="editStatus">
+                        @for (s of statusOptions; track s) {
+                          <option [value]="s">{{ statusLabels[s] }}</option>
+                        }
+                      </select>
+                    </div>
+                  </div>
+                  <div class="edit-actions">
+                    <button class="btn btn-primary" (click)="saveEdit(p.id)" [disabled]="!editAmount || !editDate || saving()">
+                      {{ saving() ? 'שומרת...' : '✓ שמירה' }}
+                    </button>
+                    <button class="btn btn-secondary" (click)="cancelEdit()">ביטול</button>
+                  </div>
+                </div>
+              } @else {
+                <div class="card payment-row">
+                  <div class="payment-date">{{ formatDate(p.date) }}</div>
+                  <div class="payment-amount">{{ p.amount }} ₪</div>
+                  <span [class]="paymentStatusBadgeClass(p.status)">{{ statusLabels[p.status] }}</span>
+                  <div class="payment-actions">
+                    @if (p.status !== 'paid') {
+                      <button class="btn btn-secondary btn-small" (click)="markPaid(p)">✓ סמן כשולם</button>
+                    }
+                    <button class="btn btn-secondary btn-small" (click)="startEdit(p)">✎ עריכה</button>
+                  </div>
+                </div>
+              }
             }
           </div>
         }
@@ -146,6 +181,20 @@ import { formatDate, paymentStatusBadgeClass } from '../../../../shared/status-u
       font-weight: 700;
       flex: 1;
     }
+    .payment-actions {
+      display: flex;
+      gap: 8px;
+      margin-inline-start: auto;
+    }
+    .btn-small {
+      padding: 5px 10px;
+      font-size: 13px;
+    }
+    .edit-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
     @media (max-width: 720px) {
       .three-col {
         grid-template-columns: 1fr;
@@ -174,6 +223,11 @@ export class PaymentsTabComponent implements OnChanges {
   newDate = '';
   newStatus: PaymentStatus = 'paid';
 
+  editingId = signal<string | null>(null);
+  editAmount: number | null = null;
+  editDate = '';
+  editStatus: PaymentStatus = 'paid';
+
   ngOnChanges() {
     this.idSignal.set(this.customer.id);
     this.newAmount = this.lastAmount() || this.newAmount;
@@ -194,5 +248,40 @@ export class PaymentsTabComponent implements OnChanges {
       },
       error: () => this.saving.set(false)
     });
+  }
+
+  startEdit(p: Payment) {
+    this.editingId.set(p.id);
+    this.editAmount = p.amount;
+    this.editDate = p.date;
+    this.editStatus = p.status;
+  }
+
+  cancelEdit() {
+    this.editingId.set(null);
+  }
+
+  saveEdit(paymentId: string) {
+    if (!this.editAmount || !this.editDate) return;
+    this.saving.set(true);
+    this.customersService.updatePayment(this.customer.id, paymentId, {
+      amount: this.editAmount,
+      date: this.editDate,
+      status: this.editStatus
+    }).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.editingId.set(null);
+      },
+      error: () => this.saving.set(false)
+    });
+  }
+
+  markPaid(p: Payment) {
+    this.customersService.updatePayment(this.customer.id, p.id, {
+      amount: p.amount,
+      date: p.date,
+      status: 'paid'
+    }).subscribe();
   }
 }

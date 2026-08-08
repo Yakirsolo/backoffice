@@ -54,6 +54,8 @@ public class PaymentService {
                 .orElseThrow(() -> new NotFoundException("Payment not found: " + paymentId));
 
         boolean becamePaid = payment.getStatus() != PaymentStatus.paid && request.status() == PaymentStatus.paid;
+        payment.setAmount(request.amount());
+        payment.setDate(request.date());
         payment.setStatus(request.status());
         payment = paymentRepository.save(payment);
 
@@ -73,10 +75,6 @@ public class PaymentService {
         return status == null
                 ? paymentRepository.findAllByOrderByDateDesc()
                 : paymentRepository.findByStatusOrderByDateDesc(status);
-    }
-
-    public List<Payment> paidBetween(LocalDate from, LocalDate to) {
-        return paymentRepository.findByStatusAndDateBetween(PaymentStatus.paid, from, to);
     }
 
     /** Called when a customer's process ends - open payments are no longer expected, so they're cancelled, not left dangling. */

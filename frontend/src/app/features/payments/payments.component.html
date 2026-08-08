@@ -23,6 +23,7 @@
         <span>תאריך</span>
         <span>סכום</span>
         <span>סטטוס</span>
+        <span></span>
       </div>
       @for (p of filteredPayments(); track p.id) {
         <a class="table-row" [routerLink]="['/customers', p.customerId]">
@@ -30,6 +31,11 @@
           <span>{{ formatDate(p.date) }}</span>
           <span class="cell-amount">{{ p.amount }} ₪</span>
           <span [class]="paymentStatusBadgeClass(p.status)">{{ statusLabels[p.status] }}</span>
+          <span class="action-cell">
+            @if (p.status !== 'paid') {
+              <button class="btn btn-secondary btn-small" (click)="markPaid(p, $event)">✓ סמן כשולם</button>
+            }
+          </span>
         </a>
       }
     </div>
