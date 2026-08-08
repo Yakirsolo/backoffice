@@ -26,6 +26,7 @@ export class ShellComponent {
     { label: 'לקוחות', path: '/customers', icon: '👥' },
     { label: 'יומן', path: '/calendar', icon: '📅' },
     { label: 'תשלומים', path: '/payments', icon: '💳' },
+    { label: 'משימות', path: '/todos', icon: '📝' },
     { label: 'אנליטיקה', path: '/analytics', icon: '📊' },
     { label: 'הגדרות', path: '/settings', icon: '⚙️' }
   ];

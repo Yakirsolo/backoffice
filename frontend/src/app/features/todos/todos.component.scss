@@ -1,0 +1,78 @@
+.add-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.add-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 280px;
+  padding: 16px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.add-popover textarea {
+  resize: vertical;
+}
+
+.popover-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.notes-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+}
+
+.sticky-note {
+  position: relative;
+  background: #fff59d;
+  border-radius: 4px;
+  padding: 22px 16px 18px;
+  min-height: 120px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+  transform: rotate(var(--rot, 0deg));
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sticky-note:hover {
+  transform: rotate(0deg) scale(1.04);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  z-index: 2;
+}
+
+.note-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  color: #5c5230;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.note-close:hover {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.note-text {
+  margin: 12px 2px 0;
+  font-size: 14px;
+  color: #4a4315;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
