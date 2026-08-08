@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CustomersService } from '../../core/services/customers.service';
-import { PAYMENT_STATUS_LABELS, PaymentStatus } from '../../core/models/customer.model';
+import { Payment, PAYMENT_STATUS_LABELS, PaymentStatus } from '../../core/models/customer.model';
 import { formatDate, paymentStatusBadgeClass, todayIso } from '../../shared/status-utils';
 
 type StatusFilter = PaymentStatus | 'all';
@@ -40,5 +40,15 @@ export class PaymentsComponent {
 
   setStatus(status: StatusFilter) {
     this.statusFilter.set(status);
+  }
+
+  markPaid(p: Payment, event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.customersService.updatePayment(p.customerId, p.id, {
+      amount: p.amount,
+      date: p.date,
+      status: 'paid'
+    }).subscribe();
   }
 }

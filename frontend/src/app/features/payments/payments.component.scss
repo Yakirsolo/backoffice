@@ -30,7 +30,7 @@
 
 .table-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
   align-items: center;
   gap: 12px;
   padding: 14px 20px;
@@ -61,11 +61,25 @@
   font-weight: 700;
 }
 
+.action-cell {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-small {
+  padding: 5px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 @media (max-width: 700px) {
   .table-row {
     grid-template-columns: 1.5fr 1fr 1fr;
   }
   .table-row span:nth-child(2) {
+    display: none;
+  }
+  .action-cell {
     display: none;
   }
 }

@@ -91,6 +91,14 @@ export class CustomersService {
       }));
   }
 
+  updatePayment(customerId: string, paymentId: string, data: { amount: number; date: string; status: PaymentStatus }) {
+    return this.http.patch<Payment>(`${API_BASE_URL}/customers/${customerId}/payments/${paymentId}`, data)
+      .pipe(tap(() => {
+        this.refreshPayments();
+        this.refreshCustomers();
+      }));
+  }
+
   weightLoss(customer: Customer): number {
     return Math.round((customer.startWeight - customer.currentWeight) * 10) / 10;
   }

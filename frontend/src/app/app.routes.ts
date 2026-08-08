@@ -9,6 +9,7 @@ import { CalendarComponent } from './features/calendar/calendar.component';
 import { PaymentsComponent } from './features/payments/payments.component';
 import { AnalyticsComponent } from './features/analytics/analytics.component';
 import { SettingsComponent } from './features/settings/settings.component';
+import { TodosComponent } from './features/todos/todos.component';
 import { LoginComponent } from './features/login/login.component';
 import { authGuard } from './core/guards/auth.guard';
 
@@ -28,6 +29,7 @@ export const routes: Routes = [
       { path: 'calendar', component: CalendarComponent },
       { path: 'payments', component: PaymentsComponent },
       { path: 'analytics', component: AnalyticsComponent },
+      { path: 'todos', component: TodosComponent },
       { path: 'settings', component: SettingsComponent },
       { path: '**', redirectTo: 'dashboard' }
     ]

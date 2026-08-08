@@ -89,6 +89,12 @@ export interface Payment {
   status: PaymentStatus;
 }
 
+export interface Todo {
+  id: string;
+  text: string;
+  createdAt: string;
+}
+
 export interface Meeting {
   id: string;
   customerId: string;

@@ -1,0 +1,41 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">משימות</h1>
+      <p class="page-subtitle">פתקים ותזכורות כלליות - לחצי על ה-× כשהמשימה בוצעה</p>
+    </div>
+    <div class="add-wrapper">
+      <button class="btn btn-primary" (click)="togglePopover()">➕ משימה חדשה</button>
+      @if (showPopover()) {
+        <div class="add-popover card">
+          <textarea
+            class="input-field"
+            rows="3"
+            placeholder="מה צריך לזכור?"
+            [(ngModel)]="newText"
+            (keydown.enter)="onEnter($event)"
+          ></textarea>
+          <div class="popover-actions">
+            <button class="btn btn-primary" (click)="add()" [disabled]="!newText.trim() || saving()">
+              {{ saving() ? 'מוסיפה...' : 'הוספה' }}
+            </button>
+            <button class="btn btn-ghost" (click)="closePopover()">ביטול</button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (todos().length === 0) {
+    <div class="card empty-state">אין משימות פתוחות</div>
+  } @else {
+    <div class="notes-board">
+      @for (t of todos(); track t.id; let i = $index) {
+        <div class="sticky-note" [style.--rot.deg]="rotation(i)">
+          <button class="note-close" (click)="complete(t.id)" title="בוצע - הסרה">×</button>
+          <p class="note-text">{{ t.text }}</p>
+        </div>
+      }
+    </div>
+  }
+</div>
