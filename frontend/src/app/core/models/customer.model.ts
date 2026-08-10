@@ -56,6 +56,17 @@ export interface ProgressMeasurement {
   hasPhotos: boolean;
 }
 
+export type PhotoType = 'before' | 'progress';
+
+export interface Photo {
+  id: string;
+  customerId: string;
+  measurementId?: string;
+  type: PhotoType;
+  date: string;
+  viewUrl: string;
+}
+
 export type DocumentType = 'agreement' | 'menu' | 'other';
 
 export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {

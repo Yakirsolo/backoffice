@@ -112,9 +112,10 @@
             </div>
           </div>
           <div class="field-group">
-            <label class="field-label">תמונות לפני</label>
-            <button class="btn btn-secondary upload-btn" (click)="data.hasBeforePhoto = true">
-              {{ data.hasBeforePhoto ? '✓ תמונה נוספה' : '⬆️ העלאת תמונה' }}
+            <label class="field-label">תמונת לפני</label>
+            <input #beforePhotoInput type="file" accept="image/*" hidden (change)="onBeforePhotoSelected($event)" />
+            <button class="btn btn-secondary upload-btn" (click)="beforePhotoInput.click()">
+              {{ data.beforePhotoFile ? '✓ ' + data.beforePhotoFile.name : '⬆️ העלאת תמונה' }}
             </button>
           </div>
         </div>

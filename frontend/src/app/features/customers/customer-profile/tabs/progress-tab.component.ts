@@ -1,7 +1,8 @@
 import { Component, Input, OnChanges, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { CustomersService } from '../../../../core/services/customers.service';
-import { ProgressMeasurement } from '../../../../core/models/customer.model';
+import { Photo, ProgressMeasurement } from '../../../../core/models/customer.model';
 import { formatDate, todayIso } from '../../../../shared/status-utils';
 import { WeightChartComponent } from '../../../../shared/components/weight-chart/weight-chart.component';
 
@@ -134,15 +135,48 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
       </section>
 
       <section class="card photos-section">
-        <h3 class="section-title">תמונות לפני / אחרי</h3>
-        <div class="photos-grid">
-          <div class="photo-placeholder">
-            <span>תמונה לפני</span>
-          </div>
-          <div class="photo-placeholder">
-            <span>תמונה עדכנית</span>
+        <div class="carousel-header">
+          <h3 class="section-title">תמונות התקדמות</h3>
+          <div class="add-wrapper">
+            <button class="btn btn-secondary" (click)="showUploadPopover.set(!showUploadPopover())">
+              📷 העלאת תמונות
+            </button>
+            @if (showUploadPopover()) {
+              <div class="upload-popover card">
+                <div class="field-group">
+                  <label class="field-label">תאריך</label>
+                  <input class="input-field" type="date" [(ngModel)]="uploadDate" />
+                </div>
+                <input
+                  #progressPhotoInput
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  hidden
+                  (change)="onProgressFilesSelected($event)"
+                />
+                <button class="btn btn-primary" (click)="progressPhotoInput.click()" [disabled]="uploading()">
+                  {{ uploading() ? 'מעלה...' : '⬆️ בחירת תמונות' }}
+                </button>
+              </div>
+            }
           </div>
         </div>
+
+        @if (progressPhotosAsc().length === 0) {
+          <div class="card empty-state">עדיין לא הועלו תמונות התקדמות</div>
+        } @else {
+          <div class="carousel">
+            @for (p of progressPhotosAsc(); track p.id; let i = $index) {
+              @if (i === 0 || progressPhotosAsc()[i - 1].date !== p.date) {
+                <div class="carousel-date-divider">{{ formatDate(p.date) }}</div>
+              }
+              <a class="carousel-photo" [href]="p.viewUrl" target="_blank">
+                <img [src]="p.viewUrl" [alt]="formatDate(p.date)" />
+              </a>
+            }
+          </div>
+        }
       </section>
     </div>
   `,
@@ -222,21 +256,60 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
       gap: 10px;
       margin-top: 14px;
     }
-    .photos-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
+    .carousel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
     }
-    .photo-placeholder {
-      aspect-ratio: 3 / 4;
-      border: 1px dashed var(--color-border);
-      border-radius: var(--radius-md);
-      background: var(--color-surface);
+    .add-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+    .upload-popover {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: 240px;
+      padding: 16px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .carousel {
+      direction: ltr;
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+    .carousel-date-divider {
+      flex-shrink: 0;
+      writing-mode: vertical-rl;
+      font-size: 11px;
+      color: var(--color-text-muted);
+      font-weight: 600;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--color-text-faint);
-      font-size: 13px;
+      padding: 0 4px;
+      border-inline-start: 1px dashed var(--color-border);
+    }
+    .carousel-photo {
+      flex-shrink: 0;
+      width: 110px;
+      aspect-ratio: 3 / 4;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      display: block;
+    }
+    .carousel-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
     @media (max-width: 720px) {
       .four-col {
@@ -251,6 +324,13 @@ export class ProgressTabComponent implements OnChanges {
 
   measurements = signal<ProgressMeasurement[]>([]);
   reversedMeasurements = computed(() => [...this.measurements()].reverse());
+
+  photos = signal<Photo[]>([]);
+  progressPhotosAsc = computed(() => [...this.photos()].filter(p => p.type === 'progress').reverse());
+
+  showUploadPopover = signal(false);
+  uploading = signal(false);
+  uploadDate = todayIso();
 
   formatDate = formatDate;
 
@@ -271,6 +351,7 @@ export class ProgressTabComponent implements OnChanges {
 
   ngOnChanges() {
     this.loadMeasurements();
+    this.loadPhotos();
   }
 
   addMeasurement() {
@@ -339,5 +420,31 @@ export class ProgressTabComponent implements OnChanges {
 
   private loadMeasurements() {
     this.customersService.measurementsFor$(this.customerId).subscribe(list => this.measurements.set(list));
+  }
+
+  private loadPhotos() {
+    this.customersService.photosFor$(this.customerId).subscribe(list => this.photos.set(list));
+  }
+
+  onProgressFilesSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    input.value = '';
+    if (files.length === 0) return;
+
+    this.uploading.set(true);
+    const uploads = files.map(file => this.customersService.uploadPhoto(this.customerId, file, 'progress', this.uploadDate));
+    forkJoin(uploads).subscribe({
+      next: () => {
+        this.uploading.set(false);
+        this.showUploadPopover.set(false);
+        this.loadPhotos();
+      },
+      error: () => {
+        this.uploading.set(false);
+        alert('העלאת חלק מהתמונות נכשלה, נסי שוב');
+        this.loadPhotos();
+      }
+    });
   }
 }
