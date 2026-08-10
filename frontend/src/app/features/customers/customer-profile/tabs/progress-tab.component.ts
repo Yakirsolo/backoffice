@@ -33,19 +33,19 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
             <div class="four-col">
               <div class="field-group">
                 <label class="field-label">משקל (ק"ג) *</label>
-                <input class="input-field" type="number" [(ngModel)]="newWeight" />
+                <input class="input-field" type="number" step="0.1" [(ngModel)]="newWeight" />
               </div>
               <div class="field-group">
                 <label class="field-label">היקף בטן (ס"מ)</label>
-                <input class="input-field" type="number" [(ngModel)]="newWaist" />
+                <input class="input-field" type="number" step="0.1" [(ngModel)]="newWaist" />
               </div>
               <div class="field-group">
                 <label class="field-label">היקף ירך (ס"מ)</label>
-                <input class="input-field" type="number" [(ngModel)]="newThigh" />
+                <input class="input-field" type="number" step="0.1" [(ngModel)]="newThigh" />
               </div>
               <div class="field-group">
                 <label class="field-label">היקף ישבן (ס"מ)</label>
-                <input class="input-field" type="number" [(ngModel)]="newHip" />
+                <input class="input-field" type="number" step="0.1" [(ngModel)]="newHip" />
               </div>
             </div>
             <button class="btn btn-primary" (click)="addMeasurement()" [disabled]="!newDate || !newWeight || saving()">
@@ -59,36 +59,75 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
         } @else {
           <div class="event-list">
             @for (m of reversedMeasurements(); track m.id) {
-              <div class="card event-card">
-                <div class="event-date">{{ formatDate(m.date) }}</div>
-                <div class="event-metrics">
-                  <div class="metric">
-                    <div class="metric-label">משקל</div>
-                    <div class="metric-value">{{ m.weight }} ק"ג</div>
+              @if (editingId() === m.id) {
+                <div class="card new-measurement-card">
+                  <div class="field-group">
+                    <label class="field-label">תאריך</label>
+                    <input class="input-field" type="date" [(ngModel)]="editDate" />
                   </div>
-                  @if (m.waist) {
-                    <div class="metric">
-                      <div class="metric-label">היקף בטן</div>
-                      <div class="metric-value">{{ m.waist }} ס"מ</div>
+                  <div class="four-col">
+                    <div class="field-group">
+                      <label class="field-label">משקל (ק"ג) *</label>
+                      <input class="input-field" type="number" step="0.1" [(ngModel)]="editWeight" />
                     </div>
-                  }
-                  @if (m.thigh) {
-                    <div class="metric">
-                      <div class="metric-label">היקף ירך</div>
-                      <div class="metric-value">{{ m.thigh }} ס"מ</div>
+                    <div class="field-group">
+                      <label class="field-label">היקף בטן (ס"מ)</label>
+                      <input class="input-field" type="number" step="0.1" [(ngModel)]="editWaist" />
                     </div>
-                  }
-                  @if (m.hip) {
-                    <div class="metric">
-                      <div class="metric-label">היקף ישבן</div>
-                      <div class="metric-value">{{ m.hip }} ס"מ</div>
+                    <div class="field-group">
+                      <label class="field-label">היקף ירך (ס"מ)</label>
+                      <input class="input-field" type="number" step="0.1" [(ngModel)]="editThigh" />
                     </div>
-                  }
+                    <div class="field-group">
+                      <label class="field-label">היקף ישבן (ס"מ)</label>
+                      <input class="input-field" type="number" step="0.1" [(ngModel)]="editHip" />
+                    </div>
+                  </div>
+                  <div class="edit-actions">
+                    <button class="btn btn-primary" (click)="saveEdit(m.id)" [disabled]="!editDate || !editWeight || saving()">
+                      {{ saving() ? 'שומרת...' : '✓ שמירה' }}
+                    </button>
+                    <button class="btn btn-secondary" (click)="cancelEdit()">ביטול</button>
+                  </div>
                 </div>
-                @if (m.hasPhotos) {
-                  <div class="photos-note">📷 הועלו תמונות</div>
-                }
-              </div>
+              } @else {
+                <div class="card event-card">
+                  <div class="event-date">{{ formatDate(m.date) }}</div>
+                  <div class="event-metrics">
+                    <div class="metric">
+                      <div class="metric-label">משקל</div>
+                      <div class="metric-value">{{ m.weight }} ק"ג</div>
+                    </div>
+                    @if (m.waist) {
+                      <div class="metric">
+                        <div class="metric-label">היקף בטן</div>
+                        <div class="metric-value">{{ m.waist }} ס"מ</div>
+                      </div>
+                    }
+                    @if (m.thigh) {
+                      <div class="metric">
+                        <div class="metric-label">היקף ירך</div>
+                        <div class="metric-value">{{ m.thigh }} ס"מ</div>
+                      </div>
+                    }
+                    @if (m.hip) {
+                      <div class="metric">
+                        <div class="metric-label">היקף ישבן</div>
+                        <div class="metric-value">{{ m.hip }} ס"מ</div>
+                      </div>
+                    }
+                  </div>
+                  @if (m.hasPhotos) {
+                    <div class="photos-note">📷 הועלו תמונות</div>
+                  }
+                  <div class="event-actions">
+                    <button class="btn btn-secondary btn-small" (click)="startEdit(m)">✎ עריכה</button>
+                    @if (measurements().length > 1) {
+                      <button class="btn btn-secondary btn-small" (click)="deleteMeasurement(m)">🗑 מחיקה</button>
+                    }
+                  </div>
+                </div>
+              }
             }
           </div>
         }
@@ -169,6 +208,20 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
       font-size: 12px;
       color: var(--color-text-muted);
     }
+    .event-actions {
+      display: flex;
+      gap: 8px;
+      margin-inline-start: auto;
+    }
+    .btn-small {
+      padding: 5px 10px;
+      font-size: 13px;
+    }
+    .edit-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
     .photos-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -209,6 +262,13 @@ export class ProgressTabComponent implements OnChanges {
   newThigh: number | null = null;
   newHip: number | null = null;
 
+  editingId = signal<string | null>(null);
+  editDate = '';
+  editWeight: number | null = null;
+  editWaist: number | null = null;
+  editThigh: number | null = null;
+  editHip: number | null = null;
+
   ngOnChanges() {
     this.loadMeasurements();
   }
@@ -234,6 +294,46 @@ export class ProgressTabComponent implements OnChanges {
         this.loadMeasurements();
       },
       error: () => this.saving.set(false)
+    });
+  }
+
+  startEdit(m: ProgressMeasurement) {
+    this.editingId.set(m.id);
+    this.editDate = m.date;
+    this.editWeight = m.weight;
+    this.editWaist = m.waist ?? null;
+    this.editThigh = m.thigh ?? null;
+    this.editHip = m.hip ?? null;
+  }
+
+  cancelEdit() {
+    this.editingId.set(null);
+  }
+
+  saveEdit(measurementId: string) {
+    if (!this.editDate || !this.editWeight) return;
+    this.saving.set(true);
+    this.customersService.updateMeasurement(this.customerId, measurementId, {
+      date: this.editDate,
+      weight: this.editWeight,
+      waist: this.editWaist ?? undefined,
+      thigh: this.editThigh ?? undefined,
+      hip: this.editHip ?? undefined
+    }).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.editingId.set(null);
+        this.loadMeasurements();
+      },
+      error: () => this.saving.set(false)
+    });
+  }
+
+  deleteMeasurement(m: ProgressMeasurement) {
+    if (!confirm(`למחוק את המדידה מתאריך ${this.formatDate(m.date)}?`)) return;
+    this.customersService.deleteMeasurement(this.customerId, m.id).subscribe({
+      next: () => this.loadMeasurements(),
+      error: () => alert('מחיקת המדידה נכשלה')
     });
   }
 

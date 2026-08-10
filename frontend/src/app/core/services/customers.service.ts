@@ -78,6 +78,16 @@ export class CustomersService {
       .pipe(tap(() => this.refreshCustomers()));
   }
 
+  updateMeasurement(customerId: string, measurementId: string, data: { date: string; weight: number; waist?: number; thigh?: number; hip?: number }) {
+    return this.http.patch<ProgressMeasurement>(`${API_BASE_URL}/customers/${customerId}/measurements/${measurementId}`, data)
+      .pipe(tap(() => this.refreshCustomers()));
+  }
+
+  deleteMeasurement(customerId: string, measurementId: string) {
+    return this.http.delete<void>(`${API_BASE_URL}/customers/${customerId}/measurements/${measurementId}`)
+      .pipe(tap(() => this.refreshCustomers()));
+  }
+
   addMeeting(customerId: string, data: { date: string; time: string; type: string; zoomLink?: string }) {
     return this.http.post<Meeting>(`${API_BASE_URL}/customers/${customerId}/meetings`, data)
       .pipe(tap(() => this.refreshMeetings()));
@@ -113,7 +123,15 @@ export class CustomersService {
   }
 
   updateCustomerStatus(customerId: string, status: CustomerStatus) {
-    return this.http.patch<Customer>(`${API_BASE_URL}/customers/${customerId}`, { status })
+    return this.updateCustomer(customerId, { status });
+  }
+
+  updateCustomer(customerId: string, data: Partial<{
+    name: string; age: number; phone: string; instagram: string; facebook: string;
+    description: string; source: Customer['source']; program: string; targetWeight: number;
+    status: CustomerStatus;
+  }>) {
+    return this.http.patch<Customer>(`${API_BASE_URL}/customers/${customerId}`, data)
       .pipe(tap(() => this.refreshCustomers()));
   }
 

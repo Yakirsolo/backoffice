@@ -8,6 +8,7 @@ const EVENT_ICONS: Record<TimelineEventType, string> = {
   agreement_signed: '📝',
   weight_update: '⚖️',
   measurement_update: '📏',
+  measurement_deleted: '🗑️',
   photo_upload: '📷',
   menu_uploaded: '🍽️',
   meeting_completed: '💬',

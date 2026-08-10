@@ -16,18 +16,24 @@ A Hebrew RTL back-office system for a nutrition coach to manage clients through 
 ### Backend (`backend/`)
 Requires a local Postgres running with a `backoffice_dev` database (trust-auth, no password, matches `application.yml` defaults — see `DB_URL`/`DB_USERNAME`/`DB_PASSWORD` env vars to override). Java 17 must be the active `java`/`JAVA_HOME` (project targets 17; Spring Boot 3.3.5 will not build on 11 or run cleanly on other majors without checking compatibility first).
 
+`ADMIN_EMAIL`/`ADMIN_PASSWORD` env vars are always required to start the app — even if the `users` table already has a row and `AdminSeeder` won't actually use them, Spring fails to resolve the `${ADMIN_EMAIL}`/`${ADMIN_PASSWORD}` placeholders in `application.yml` at boot without them. Use real values the first time (empty `users` table); any placeholder value works on subsequent runs.
+
 ```bash
+brew services start postgresql@16   # start local Postgres if not already running (no Docker used here)
+
+export ADMIN_EMAIL=dev@local.test ADMIN_PASSWORD=devLocalPass123   # only actually used to seed the admin on first boot (empty users table)
+
 ./mvnw compile              # compile only
 ./mvnw -DskipTests package  # build the runnable jar (target/backend-0.0.1-SNAPSHOT.jar)
 java -jar target/backend-0.0.1-SNAPSHOT.jar   # run it (applies Flyway migrations on boot, seeds the admin user if the users table is empty)
+# or, for dev with reload-on-recompile:
+./mvnw spring-boot:run
 ./mvnw test                 # run tests (currently just the default context-load smoke test — no real test suite exists yet)
 ```
 
-No Docker is used for local Postgres in this project — it runs via Homebrew (`brew services start postgresql@16`).
-
 ### Frontend (`frontend/`)
 ```bash
-npm start          # ng serve, http://localhost:4200
+npm start          # ng serve --proxy-config proxy.conf.json, http://localhost:4200
 npm run build      # ng build (production)
 npm test           # ng test (karma/jasmine — scaffold default, no real specs written)
 ```
