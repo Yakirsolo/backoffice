@@ -112,6 +112,7 @@ export type TimelineEventType =
   | 'agreement_signed'
   | 'weight_update'
   | 'measurement_update'
+  | 'measurement_deleted'
   | 'photo_upload'
   | 'menu_uploaded'
   | 'meeting_completed'
@@ -124,6 +125,7 @@ export const TIMELINE_EVENT_LABELS: Record<TimelineEventType, string> = {
   agreement_signed: 'הסכם נחתם',
   weight_update: 'משקל עודכן',
   measurement_update: 'מדידות עודכנו',
+  measurement_deleted: 'מדידה נמחקה',
   photo_upload: 'תמונות הועלו',
   menu_uploaded: 'תפריט חדש הועלה',
   meeting_completed: 'שיחה התקיימה',

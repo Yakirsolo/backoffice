@@ -5,6 +5,7 @@ public enum TimelineEventType {
     agreement_signed,
     weight_update,
     measurement_update,
+    measurement_deleted,
     photo_upload,
     menu_uploaded,
     meeting_completed,
