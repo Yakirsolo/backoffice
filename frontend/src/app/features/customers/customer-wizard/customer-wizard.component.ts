@@ -23,7 +23,7 @@ interface WizardData {
   waist: number | null;
   thigh: number | null;
   hip: number | null;
-  hasBeforePhoto: boolean;
+  beforePhotoFile: File | null;
   agreementMode: 'upload' | 'generate' | null;
 }
 
@@ -51,9 +51,14 @@ export class CustomerWizardComponent {
     name: '', age: null, phone: '', instagram: '', facebook: '', description: '',
     price: null, billingIntervalValue: 1, billingIntervalUnit: 'month',
     startDate: new Date().toISOString().slice(0, 10), source: 'instagram',
-    weight: null, waist: null, thigh: null, hip: null, hasBeforePhoto: false,
+    weight: null, waist: null, thigh: null, hip: null, beforePhotoFile: null,
     agreementMode: null
   };
+
+  onBeforePhotoSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.data.beforePhotoFile = input.files?.[0] ?? null;
+  }
 
   /** The plan name is derived from its billing cadence - no need to type it separately. */
   get programName(): string {
@@ -110,7 +115,20 @@ export class CustomerWizardComponent {
       thigh: this.data.thigh ?? undefined,
       hip: this.data.hip ?? undefined
     }).subscribe({
-      next: customer => this.router.navigate(['/customers', customer.id]),
+      next: customer => {
+        const photoFile = this.data.beforePhotoFile;
+        if (!photoFile) {
+          this.router.navigate(['/customers', customer.id]);
+          return;
+        }
+        this.customersService.uploadPhoto(customer.id, photoFile, 'before', this.data.startDate).subscribe({
+          next: () => this.router.navigate(['/customers', customer.id]),
+          error: () => {
+            alert('הלקוחה נוצרה בהצלחה, אך העלאת התמונה נכשלה. ניתן להעלות תמונה מאוחר יותר מדף הלקוחה.');
+            this.router.navigate(['/customers', customer.id]);
+          }
+        });
+      },
       error: () => { this.submitting = false; }
     });
   }

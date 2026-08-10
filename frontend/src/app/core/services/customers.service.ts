@@ -1,11 +1,12 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Observable, from, switchMap, tap } from 'rxjs';
 import {
   BillingIntervalUnit, Customer, CustomerStatus, DashboardData, CustomerDocument, Meeting, Payment,
-  PaymentStatus, ProgressMeasurement, TimelineEvent
+  PaymentStatus, Photo, PhotoType, ProgressMeasurement, TimelineEvent
 } from '../models/customer.model';
 import { API_BASE_URL } from '../config/api-config';
+import { resizeImage } from '../../shared/image-resize';
 
 export interface NewCustomerData {
   name: string; age: number; phone: string; instagram?: string; facebook?: string; description?: string;
@@ -71,6 +72,29 @@ export class CustomersService {
 
   timelineFor$(customerId: string): Observable<TimelineEvent[]> {
     return this.http.get<TimelineEvent[]>(`${API_BASE_URL}/customers/${customerId}/timeline`);
+  }
+
+  photosFor$(customerId: string): Observable<Photo[]> {
+    return this.http.get<Photo[]>(`${API_BASE_URL}/customers/${customerId}/photos`);
+  }
+
+  uploadPhoto(customerId: string, file: File, type: PhotoType, date: string): Observable<Photo> {
+    return from(resizeImage(file)).pipe(
+      switchMap(blob =>
+        this.http.post<{ uploadUrl: string; storageKey: string }>(
+          `${API_BASE_URL}/customers/${customerId}/photos/upload-url`,
+          { fileName: file.name, contentType: 'image/jpeg' }
+        ).pipe(
+          switchMap(({ uploadUrl, storageKey }) =>
+            this.http.put(uploadUrl, blob, { headers: { 'Content-Type': 'image/jpeg' } }).pipe(
+              switchMap(() =>
+                this.http.post<Photo>(`${API_BASE_URL}/customers/${customerId}/photos`, { storageKey, type, date })
+              )
+            )
+          )
+        )
+      )
+    );
   }
 
   addMeasurement(customerId: string, data: { date: string; weight: number; waist?: number; thigh?: number; hip?: number }) {
