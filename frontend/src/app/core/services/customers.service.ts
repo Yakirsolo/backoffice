@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, from, switchMap, tap } from 'rxjs';
 import {
-  BillingIntervalUnit, Customer, CustomerStatus, DashboardData, CustomerDocument, Meeting, Payment,
+  BillingIntervalUnit, Customer, CustomerStatus, DashboardData, CustomerDocument, DocumentType, Meeting, Payment,
   PaymentStatus, Photo, PhotoType, ProgressMeasurement, TimelineEvent
 } from '../models/customer.model';
 import { API_BASE_URL } from '../config/api-config';
@@ -91,6 +91,24 @@ export class CustomersService {
                 this.http.post<Photo>(`${API_BASE_URL}/customers/${customerId}/photos`, { storageKey, type, date })
               )
             )
+          )
+        )
+      )
+    );
+  }
+
+  uploadDocument(customerId: string, file: File, type: DocumentType, date: string): Observable<CustomerDocument> {
+    const contentType = file.type || 'application/octet-stream';
+    return this.http.post<{ uploadUrl: string; storageKey: string }>(
+      `${API_BASE_URL}/customers/${customerId}/documents/upload-url`,
+      { fileName: file.name, contentType, sizeBytes: file.size }
+    ).pipe(
+      switchMap(({ uploadUrl, storageKey }) =>
+        this.http.put(uploadUrl, file, { headers: { 'Content-Type': contentType } }).pipe(
+          switchMap(() =>
+            this.http.post<CustomerDocument>(`${API_BASE_URL}/customers/${customerId}/documents`, {
+              storageKey, type, name: file.name, date, contentType, sizeBytes: file.size
+            })
           )
         )
       )

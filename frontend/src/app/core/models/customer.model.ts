@@ -81,6 +81,9 @@ export interface CustomerDocument {
   type: DocumentType;
   name: string;
   date: string;
+  contentType?: string;
+  sizeBytes?: number;
+  downloadUrl: string;
 }
 
 export type PaymentStatus = 'paid' | 'pending' | 'overdue' | 'cancelled';
@@ -126,6 +129,7 @@ export type TimelineEventType =
   | 'measurement_deleted'
   | 'photo_upload'
   | 'menu_uploaded'
+  | 'document_uploaded'
   | 'meeting_completed'
   | 'payment_received'
   | 'customer_finished'
@@ -139,6 +143,7 @@ export const TIMELINE_EVENT_LABELS: Record<TimelineEventType, string> = {
   measurement_deleted: 'מדידה נמחקה',
   photo_upload: 'תמונות הועלו',
   menu_uploaded: 'תפריט חדש הועלה',
+  document_uploaded: 'מסמך הועלה',
   meeting_completed: 'שיחה התקיימה',
   payment_received: 'תשלום התקבל',
   customer_finished: 'התהליך הסתיים',

@@ -8,6 +8,7 @@ public enum TimelineEventType {
     measurement_deleted,
     photo_upload,
     menu_uploaded,
+    document_uploaded,
     meeting_completed,
     payment_received,
     customer_finished,

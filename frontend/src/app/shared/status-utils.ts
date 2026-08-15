@@ -44,6 +44,13 @@ export function formatTime(time: string): string {
   return time.slice(0, 5);
 }
 
+export function formatFileSize(bytes?: number): string {
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 /**
  * `loss` is (startWeight - currentWeight): positive means weight was lost, negative means gained.
  * Formats the sign itself rather than assuming loss is always positive.
