@@ -2,7 +2,7 @@ package com.backoffice.backend.web;
 
 import com.backoffice.backend.dto.document.DocumentConfirmRequest;
 import com.backoffice.backend.dto.document.DocumentResponse;
-import com.backoffice.backend.dto.storage.UploadUrlRequest;
+import com.backoffice.backend.dto.document.DocumentUploadUrlRequest;
 import com.backoffice.backend.dto.storage.UploadUrlResponse;
 import com.backoffice.backend.service.DocumentService;
 import jakarta.validation.Valid;
@@ -26,7 +26,7 @@ public class DocumentController {
     }
 
     @PostMapping("/upload-url")
-    public UploadUrlResponse createUploadUrl(@PathVariable UUID customerId, @Valid @RequestBody UploadUrlRequest request) {
+    public UploadUrlResponse createUploadUrl(@PathVariable UUID customerId, @Valid @RequestBody DocumentUploadUrlRequest request) {
         return documentService.createUploadUrl(customerId, request);
     }
 

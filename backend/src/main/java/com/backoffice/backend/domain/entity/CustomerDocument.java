@@ -36,6 +36,12 @@ public class CustomerDocument {
     @Column(nullable = false)
     private LocalDate date;
 
+    @Column(name = "content_type")
+    private String contentType;
+
+    @Column(name = "size_bytes")
+    private Long sizeBytes;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 }
