@@ -171,7 +171,7 @@ export class CustomersService {
   updateCustomer(customerId: string, data: Partial<{
     name: string; age: number; phone: string; instagram: string; facebook: string;
     description: string; source: Customer['source']; program: string; targetWeight: number;
-    status: CustomerStatus;
+    status: CustomerStatus; billingIntervalValue: number; billingIntervalUnit: BillingIntervalUnit;
   }>) {
     return this.http.patch<Customer>(`${API_BASE_URL}/customers/${customerId}`, data)
       .pipe(tap(() => this.refreshCustomers()));
