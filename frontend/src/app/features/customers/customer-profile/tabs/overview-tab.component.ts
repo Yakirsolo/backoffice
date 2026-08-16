@@ -1,8 +1,10 @@
 import { Component, Input, OnChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomersService } from '../../../../core/services/customers.service';
-import { Customer, LEAD_SOURCE_LABELS, LeadSource } from '../../../../core/models/customer.model';
-import { formatDate } from '../../../../shared/status-utils';
+import {
+  BILLING_INTERVAL_UNIT_LABELS, BillingIntervalUnit, Customer, LEAD_SOURCE_LABELS, LeadSource
+} from '../../../../core/models/customer.model';
+import { defaultProgramName, formatDate } from '../../../../shared/status-utils';
 
 type Section = 'personal' | 'business' | 'track';
 
@@ -108,8 +110,20 @@ type Section = 'personal' | 'business' | 'track';
         @if (editingSection() === 'track') {
           <div class="edit-form">
             <div class="field-group">
-              <label class="field-label">מסלול *</label>
-              <input class="input-field" [(ngModel)]="editProgram" />
+              <label class="field-label">תדירות תשלום *</label>
+              <div class="billing-cadence">
+                <span>כל</span>
+                <input class="input-field" type="number" min="1" [(ngModel)]="editBillingIntervalValue" />
+                <select class="input-field" [(ngModel)]="editBillingIntervalUnit">
+                  @for (u of billingUnitOptions; track u) {
+                    <option [value]="u">{{ billingUnitLabels[u] }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">מסלול</label>
+              <input class="input-field" type="text" [value]="editProgramName" disabled />
             </div>
             <div class="field-group">
               <label class="field-label">משקל יעד (ק"ג)</label>
@@ -119,7 +133,7 @@ type Section = 'personal' | 'business' | 'track';
             <div class="detail-row"><span class="detail-label">משקל התחלתי</span><span>{{ customer.startWeight }} ק"ג</span></div>
             <p class="hint">לעדכון משקל/תאריך התחלה, ערכו את המדידה הראשונה בלשונית התקדמות</p>
             <div class="edit-actions">
-              <button class="btn btn-primary" (click)="saveSection('track')" [disabled]="!editProgram.trim() || !editTargetWeight || saving()">
+              <button class="btn btn-primary" (click)="saveSection('track')" [disabled]="!editBillingIntervalValue || !editTargetWeight || saving()">
                 {{ saving() ? 'שומרת...' : '✓ שמירה' }}
               </button>
               <button class="btn btn-secondary" (click)="cancelEdit()">ביטול</button>
@@ -127,6 +141,7 @@ type Section = 'personal' | 'business' | 'track';
           </div>
         } @else {
           <div class="detail-row"><span class="detail-label">מסלול</span><span>{{ customer.program }}</span></div>
+          <div class="detail-row"><span class="detail-label">תדירות תשלום</span><span>כל {{ customer.billingIntervalValue }} {{ billingUnitLabels[customer.billingIntervalUnit] }}</span></div>
           <div class="detail-row"><span class="detail-label">תאריך תחילת תהליך</span><span>{{ formatDate(customer.startDate) }}</span></div>
           <div class="detail-row"><span class="detail-label">משקל התחלתי</span><span>{{ customer.startWeight }} ק"ג</span></div>
           <div class="detail-row"><span class="detail-label">משקל יעד</span><span>{{ customer.targetWeight }} ק"ג</span></div>
@@ -190,6 +205,17 @@ type Section = 'personal' | 'business' | 'track';
       color: var(--color-text-faint);
       margin: 0;
     }
+    .billing-cadence {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .billing-cadence input {
+      width: 70px;
+    }
+    .billing-cadence select {
+      flex: 1;
+    }
     .edit-actions {
       display: flex;
       gap: 10px;
@@ -203,6 +229,8 @@ export class OverviewTabComponent implements OnChanges {
 
   sourceLabels = LEAD_SOURCE_LABELS;
   sourceOptions: LeadSource[] = ['instagram', 'facebook', 'referral', 'website', 'other'];
+  billingUnitLabels = BILLING_INTERVAL_UNIT_LABELS;
+  billingUnitOptions: BillingIntervalUnit[] = ['day', 'week', 'month'];
   formatDate = formatDate;
 
   editingSection = signal<Section | null>(null);
@@ -215,8 +243,14 @@ export class OverviewTabComponent implements OnChanges {
   editFacebook = '';
   editDescription = '';
   editSource: LeadSource = 'other';
-  editProgram = '';
+  editBillingIntervalValue: number | null = null;
+  editBillingIntervalUnit: BillingIntervalUnit = 'month';
   editTargetWeight: number | null = null;
+
+  /** The plan name is derived from its billing cadence - kept consistent with customer-wizard's step 1. */
+  get editProgramName(): string {
+    return defaultProgramName(this.editBillingIntervalValue ?? 0, this.editBillingIntervalUnit);
+  }
 
   ngOnChanges() {
     if (this.editingSection()) this.cancelEdit();
@@ -230,7 +264,8 @@ export class OverviewTabComponent implements OnChanges {
     this.editFacebook = this.customer.facebook ?? '';
     this.editDescription = this.customer.description ?? '';
     this.editSource = this.customer.source;
-    this.editProgram = this.customer.program;
+    this.editBillingIntervalValue = this.customer.billingIntervalValue;
+    this.editBillingIntervalUnit = this.customer.billingIntervalUnit;
     this.editTargetWeight = this.customer.targetWeight;
     this.editingSection.set(section);
   }
@@ -253,7 +288,12 @@ export class OverviewTabComponent implements OnChanges {
           }
         : section === 'business'
           ? { source: this.editSource }
-          : { program: this.editProgram.trim(), targetWeight: this.editTargetWeight ?? undefined };
+          : {
+              program: this.editProgramName,
+              targetWeight: this.editTargetWeight ?? undefined,
+              billingIntervalValue: this.editBillingIntervalValue ?? undefined,
+              billingIntervalUnit: this.editBillingIntervalUnit
+            };
 
     this.customersService.updateCustomer(this.customer.id, data).subscribe({
       next: () => {
