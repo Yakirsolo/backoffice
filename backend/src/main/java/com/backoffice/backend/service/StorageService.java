@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -62,16 +64,39 @@ public class StorageService {
         }
     }
 
-    private S3Presigner buildPresigner() {
-        if (!properties.isConfigured()) {
-            throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE,
-                    "File storage is not configured yet (missing storage endpoint/bucket/credentials)");
+    public void deleteObject(String key) {
+        try (S3Client client = buildClient()) {
+            client.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(properties.bucket())
+                    .key(key)
+                    .build());
         }
+    }
+
+    private S3Presigner buildPresigner() {
+        requireConfigured();
         return S3Presigner.builder()
                 .region(Region.of(properties.region()))
                 .endpointOverride(URI.create(properties.endpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(
                         AwsBasicCredentials.create(properties.accessKey(), properties.secretKey())))
                 .build();
+    }
+
+    private S3Client buildClient() {
+        requireConfigured();
+        return S3Client.builder()
+                .region(Region.of(properties.region()))
+                .endpointOverride(URI.create(properties.endpoint()))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(properties.accessKey(), properties.secretKey())))
+                .build();
+    }
+
+    private void requireConfigured() {
+        if (!properties.isConfigured()) {
+            throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "File storage is not configured yet (missing storage endpoint/bucket/credentials)");
+        }
     }
 }

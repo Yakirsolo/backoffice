@@ -8,6 +8,7 @@ import com.backoffice.backend.service.DocumentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,5 +35,11 @@ public class DocumentController {
     @ResponseStatus(HttpStatus.CREATED)
     public DocumentResponse confirm(@PathVariable UUID customerId, @Valid @RequestBody DocumentConfirmRequest request) {
         return documentService.confirm(customerId, request);
+    }
+
+    @DeleteMapping("/{documentId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID customerId, @PathVariable UUID documentId) {
+        documentService.delete(customerId, documentId);
+        return ResponseEntity.noContent().build();
     }
 }

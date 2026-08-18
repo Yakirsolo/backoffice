@@ -70,6 +70,10 @@ export class CustomersService {
     return this.http.get<CustomerDocument[]>(`${API_BASE_URL}/customers/${customerId}/documents`);
   }
 
+  deleteDocument(customerId: string, documentId: string): Observable<void> {
+    return this.http.delete<void>(`${API_BASE_URL}/customers/${customerId}/documents/${documentId}`);
+  }
+
   timelineFor$(customerId: string): Observable<TimelineEvent[]> {
     return this.http.get<TimelineEvent[]>(`${API_BASE_URL}/customers/${customerId}/timeline`);
   }
