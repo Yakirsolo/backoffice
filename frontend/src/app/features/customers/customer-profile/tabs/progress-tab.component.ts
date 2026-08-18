@@ -12,6 +12,19 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
   imports: [FormsModule, WeightChartComponent],
   template: `
     <div class="progress-layout">
+      @if (beforePhotos().length > 0) {
+        <section class="card photos-section">
+          <h3 class="section-title">תמונות פתיחה</h3>
+          <div class="carousel">
+            @for (p of beforePhotos(); track p.id) {
+              <a class="carousel-photo" [href]="p.viewUrl" target="_blank">
+                <img [src]="p.viewUrl" [alt]="formatDate(p.date)" />
+              </a>
+            }
+          </div>
+        </section>
+      }
+
       <section class="card chart-card">
         <h3 class="section-title">גרף משקל לאורך זמן</h3>
         <app-weight-chart [measurements]="measurements()" />
@@ -327,6 +340,7 @@ export class ProgressTabComponent implements OnChanges {
 
   photos = signal<Photo[]>([]);
   progressPhotosAsc = computed(() => [...this.photos()].filter(p => p.type === 'progress').reverse());
+  beforePhotos = computed(() => [...this.photos()].filter(p => p.type === 'before'));
 
   showUploadPopover = signal(false);
   uploading = signal(false);
