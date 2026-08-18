@@ -9,11 +9,13 @@ import com.backoffice.backend.dto.document.DocumentResponse;
 import com.backoffice.backend.dto.document.DocumentUploadUrlRequest;
 import com.backoffice.backend.dto.storage.UploadUrlResponse;
 import com.backoffice.backend.exception.ApiException;
+import com.backoffice.backend.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -73,6 +75,18 @@ public class DocumentService {
         }
 
         return DocumentResponse.from(document, storageService.createDownloadUrl(document.getStorageKey()));
+    }
+
+    @Transactional
+    public void delete(UUID customerId, UUID documentId) {
+        CustomerDocument document = documentRepository.findById(documentId)
+                .filter(d -> d.getCustomerId().equals(customerId))
+                .orElseThrow(() -> new NotFoundException("Document not found: " + documentId));
+
+        storageService.deleteObject(document.getStorageKey());
+        documentRepository.delete(document);
+
+        timelineService.record(customerId, TimelineEventType.document_deleted, LocalDate.now(), document.getName());
     }
 
     private void validateUpload(String contentType, long sizeBytes) {

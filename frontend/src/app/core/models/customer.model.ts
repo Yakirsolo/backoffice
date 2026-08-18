@@ -130,6 +130,7 @@ export type TimelineEventType =
   | 'photo_upload'
   | 'menu_uploaded'
   | 'document_uploaded'
+  | 'document_deleted'
   | 'meeting_completed'
   | 'payment_received'
   | 'customer_finished'
@@ -144,6 +145,7 @@ export const TIMELINE_EVENT_LABELS: Record<TimelineEventType, string> = {
   photo_upload: 'תמונות הועלו',
   menu_uploaded: 'תפריט חדש הועלה',
   document_uploaded: 'מסמך הועלה',
+  document_deleted: 'מסמך נמחק',
   meeting_completed: 'שיחה התקיימה',
   payment_received: 'תשלום התקבל',
   customer_finished: 'התהליך הסתיים',

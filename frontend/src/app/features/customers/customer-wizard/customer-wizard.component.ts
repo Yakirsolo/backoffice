@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { CustomersService } from '../../../core/services/customers.service';
 import {
   BILLING_INTERVAL_UNIT_LABELS, BillingIntervalUnit, LeadSource, LEAD_SOURCE_LABELS
@@ -20,10 +21,11 @@ interface WizardData {
   startDate: string;
   source: LeadSource;
   weight: number | null;
+  targetWeight: number | null;
   waist: number | null;
   thigh: number | null;
   hip: number | null;
-  beforePhotoFile: File | null;
+  beforePhotoFiles: File[];
   agreementMode: 'upload' | 'generate' | null;
 }
 
@@ -51,13 +53,19 @@ export class CustomerWizardComponent {
     name: '', age: null, phone: '', instagram: '', facebook: '', description: '',
     price: null, billingIntervalValue: 1, billingIntervalUnit: 'month',
     startDate: new Date().toISOString().slice(0, 10), source: 'instagram',
-    weight: null, waist: null, thigh: null, hip: null, beforePhotoFile: null,
+    weight: null, targetWeight: null, waist: null, thigh: null, hip: null, beforePhotoFiles: [],
     agreementMode: null
   };
 
   onBeforePhotoSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    this.data.beforePhotoFile = input.files?.[0] ?? null;
+    const files = Array.from(input.files ?? []);
+    input.value = '';
+    this.data.beforePhotoFiles = [...this.data.beforePhotoFiles, ...files];
+  }
+
+  removeBeforePhoto(index: number) {
+    this.data.beforePhotoFiles = this.data.beforePhotoFiles.filter((_, i) => i !== index);
   }
 
   /** The plan name is derived from its billing cadence - no need to type it separately. */
@@ -110,21 +118,24 @@ export class CustomerWizardComponent {
       startDate: this.data.startDate,
       source: this.data.source,
       startWeight: this.data.weight!,
-      targetWeight: this.data.weight!,
+      targetWeight: this.data.targetWeight ?? this.data.weight!,
       waist: this.data.waist ?? undefined,
       thigh: this.data.thigh ?? undefined,
       hip: this.data.hip ?? undefined
     }).subscribe({
       next: customer => {
-        const photoFile = this.data.beforePhotoFile;
-        if (!photoFile) {
+        const photoFiles = this.data.beforePhotoFiles;
+        if (photoFiles.length === 0) {
           this.router.navigate(['/customers', customer.id]);
           return;
         }
-        this.customersService.uploadPhoto(customer.id, photoFile, 'before', this.data.startDate).subscribe({
+        const uploads = photoFiles.map(file =>
+          this.customersService.uploadPhoto(customer.id, file, 'before', this.data.startDate)
+        );
+        forkJoin(uploads).subscribe({
           next: () => this.router.navigate(['/customers', customer.id]),
           error: () => {
-            alert('הלקוחה נוצרה בהצלחה, אך העלאת התמונה נכשלה. ניתן להעלות תמונה מאוחר יותר מדף הלקוחה.');
+            alert('הלקוחה נוצרה בהצלחה, אך העלאת חלק מהתמונות נכשלה. ניתן להעלות תמונות מאוחר יותר מדף הלקוחה.');
             this.router.navigate(['/customers', customer.id]);
           }
         });

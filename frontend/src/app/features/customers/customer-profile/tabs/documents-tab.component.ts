@@ -67,13 +67,16 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
     } @else {
       <div class="documents-grid">
         @for (doc of documents(); track doc.id) {
-          <a class="card doc-card" [href]="doc.downloadUrl" target="_blank" rel="noopener">
-            <div class="doc-icon">{{ icons[doc.type] }}</div>
-            <div class="doc-info">
-              <div class="doc-name">{{ doc.name }}</div>
-              <div class="doc-meta">{{ typeLabels[doc.type] }} · {{ formatDate(doc.date) }} · {{ formatFileSize(doc.sizeBytes) }}</div>
-            </div>
-          </a>
+          <div class="card doc-card">
+            <a class="doc-link" [href]="doc.downloadUrl" target="_blank" rel="noopener">
+              <div class="doc-icon">{{ icons[doc.type] }}</div>
+              <div class="doc-info">
+                <div class="doc-name">{{ doc.name }}</div>
+                <div class="doc-meta">{{ typeLabels[doc.type] }} · {{ formatDate(doc.date) }} · {{ formatFileSize(doc.sizeBytes) }}</div>
+              </div>
+            </a>
+            <button class="btn btn-ghost btn-small doc-delete" title="מחיקה" (click)="deleteDocument(doc)">🗑</button>
+          </div>
         }
       </div>
     }
@@ -117,7 +120,19 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
       padding: 16px;
       display: flex;
       align-items: center;
+      gap: 8px;
+    }
+    .doc-link {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
       gap: 14px;
+    }
+    .doc-delete {
+      flex-shrink: 0;
+      padding: 6px 8px;
+      font-size: 14px;
     }
     .doc-icon {
       font-size: 22px;
@@ -130,9 +145,15 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
       justify-content: center;
       flex-shrink: 0;
     }
+    .doc-info {
+      min-width: 0;
+    }
     .doc-name {
       font-weight: 600;
       font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .doc-meta {
       color: var(--color-text-muted);
@@ -198,6 +219,14 @@ export class DocumentsTabComponent implements OnChanges {
         this.uploadError.set('העלאת חלק מהקבצים נכשלה, נסי שוב');
         this.loadDocuments();
       }
+    });
+  }
+
+  deleteDocument(doc: CustomerDocument) {
+    if (!confirm(`למחוק את "${doc.name}"?`)) return;
+    this.customersService.deleteDocument(this.customerId, doc.id).subscribe({
+      next: () => this.loadDocuments(),
+      error: () => alert('מחיקת המסמך נכשלה')
     });
   }
 

@@ -12,6 +12,7 @@ const EVENT_ICONS: Record<TimelineEventType, string> = {
   photo_upload: '📷',
   menu_uploaded: '🍽️',
   document_uploaded: '📎',
+  document_deleted: '🗑️',
   meeting_completed: '💬',
   payment_received: '💳',
   customer_finished: '🏁',
