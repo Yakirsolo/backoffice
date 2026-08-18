@@ -10,6 +10,7 @@ const EVENT_ICONS: Record<TimelineEventType, string> = {
   measurement_update: '📏',
   measurement_deleted: '🗑️',
   photo_upload: '📷',
+  photo_deleted: '🗑️',
   menu_uploaded: '🍽️',
   document_uploaded: '📎',
   document_deleted: '🗑️',

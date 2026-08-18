@@ -12,19 +12,6 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
   imports: [FormsModule, WeightChartComponent],
   template: `
     <div class="progress-layout">
-      @if (beforePhotos().length > 0) {
-        <section class="card photos-section">
-          <h3 class="section-title">תמונות פתיחה</h3>
-          <div class="carousel">
-            @for (p of beforePhotos(); track p.id) {
-              <a class="carousel-photo" [href]="p.viewUrl" target="_blank">
-                <img [src]="p.viewUrl" [alt]="formatDate(p.date)" />
-              </a>
-            }
-          </div>
-        </section>
-      }
-
       <section class="card chart-card">
         <h3 class="section-title">גרף משקל לאורך זמן</h3>
         <app-weight-chart [measurements]="measurements()" />
@@ -149,7 +136,7 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
 
       <section class="card photos-section">
         <div class="carousel-header">
-          <h3 class="section-title">תמונות התקדמות</h3>
+          <h3 class="section-title">תמונות</h3>
           <div class="add-wrapper">
             <button class="btn btn-secondary" (click)="showUploadPopover.set(!showUploadPopover())">
               📷 העלאת תמונות
@@ -161,14 +148,14 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
                   <input class="input-field" type="date" [(ngModel)]="uploadDate" />
                 </div>
                 <input
-                  #progressPhotoInput
+                  #photoInput
                   type="file"
                   accept="image/*"
                   multiple
                   hidden
-                  (change)="onProgressFilesSelected($event)"
+                  (change)="onPhotosSelected($event)"
                 />
-                <button class="btn btn-primary" (click)="progressPhotoInput.click()" [disabled]="uploading()">
+                <button class="btn btn-primary" (click)="photoInput.click()" [disabled]="uploading()">
                   {{ uploading() ? 'מעלה...' : '⬆️ בחירת תמונות' }}
                 </button>
               </div>
@@ -176,17 +163,20 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
           </div>
         </div>
 
-        @if (progressPhotosAsc().length === 0) {
-          <div class="card empty-state">עדיין לא הועלו תמונות התקדמות</div>
+        @if (photosAsc().length === 0) {
+          <div class="card empty-state">עדיין לא הועלו תמונות</div>
         } @else {
           <div class="carousel">
-            @for (p of progressPhotosAsc(); track p.id; let i = $index) {
-              @if (i === 0 || progressPhotosAsc()[i - 1].date !== p.date) {
+            @for (p of photosAsc(); track p.id; let i = $index) {
+              @if (i === 0 || photosAsc()[i - 1].date !== p.date) {
                 <div class="carousel-date-divider">{{ formatDate(p.date) }}</div>
               }
-              <a class="carousel-photo" [href]="p.viewUrl" target="_blank">
-                <img [src]="p.viewUrl" [alt]="formatDate(p.date)" />
-              </a>
+              <div class="carousel-photo-wrap">
+                <a class="carousel-photo" [href]="p.viewUrl" target="_blank">
+                  <img [src]="p.viewUrl" [alt]="formatDate(p.date)" />
+                </a>
+                <button class="photo-delete" title="מחיקה" (click)="deletePhoto(p)">🗑</button>
+              </div>
             }
           </div>
         }
@@ -310,8 +300,11 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
       padding: 0 4px;
       border-inline-start: 1px dashed var(--color-border);
     }
-    .carousel-photo {
+    .carousel-photo-wrap {
+      position: relative;
       flex-shrink: 0;
+    }
+    .carousel-photo {
       width: 110px;
       aspect-ratio: 3 / 4;
       border-radius: var(--radius-sm);
@@ -323,6 +316,26 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
       height: 100%;
       object-fit: cover;
       display: block;
+    }
+    .photo-delete {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      font-size: 11px;
+      line-height: 22px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .carousel-photo-wrap:hover .photo-delete {
+      opacity: 1;
     }
     @media (max-width: 720px) {
       .four-col {
@@ -339,8 +352,7 @@ export class ProgressTabComponent implements OnChanges {
   reversedMeasurements = computed(() => [...this.measurements()].reverse());
 
   photos = signal<Photo[]>([]);
-  progressPhotosAsc = computed(() => [...this.photos()].filter(p => p.type === 'progress').reverse());
-  beforePhotos = computed(() => [...this.photos()].filter(p => p.type === 'before'));
+  photosAsc = computed(() => [...this.photos()].reverse());
 
   showUploadPopover = signal(false);
   uploading = signal(false);
@@ -440,7 +452,7 @@ export class ProgressTabComponent implements OnChanges {
     this.customersService.photosFor$(this.customerId).subscribe(list => this.photos.set(list));
   }
 
-  onProgressFilesSelected(event: Event) {
+  onPhotosSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const files = Array.from(input.files ?? []);
     input.value = '';
@@ -459,6 +471,14 @@ export class ProgressTabComponent implements OnChanges {
         alert('העלאת חלק מהתמונות נכשלה, נסי שוב');
         this.loadPhotos();
       }
+    });
+  }
+
+  deletePhoto(photo: Photo) {
+    if (!confirm('למחוק את התמונה?')) return;
+    this.customersService.deletePhoto(this.customerId, photo.id).subscribe({
+      next: () => this.loadPhotos(),
+      error: () => alert('מחיקת התמונה נכשלה')
     });
   }
 }

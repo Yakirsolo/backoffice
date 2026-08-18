@@ -7,6 +7,7 @@ public enum TimelineEventType {
     measurement_update,
     measurement_deleted,
     photo_upload,
+    photo_deleted,
     menu_uploaded,
     document_uploaded,
     document_deleted,
