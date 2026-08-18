@@ -101,6 +101,10 @@ export class CustomersService {
     );
   }
 
+  deletePhoto(customerId: string, photoId: string): Observable<void> {
+    return this.http.delete<void>(`${API_BASE_URL}/customers/${customerId}/photos/${photoId}`);
+  }
+
   uploadDocument(customerId: string, file: File, type: DocumentType, date: string): Observable<CustomerDocument> {
     const contentType = file.type || 'application/octet-stream';
     return this.http.post<{ uploadUrl: string; storageKey: string }>(

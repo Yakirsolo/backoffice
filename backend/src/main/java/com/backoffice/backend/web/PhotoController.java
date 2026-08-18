@@ -8,6 +8,7 @@ import com.backoffice.backend.service.PhotoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,5 +35,11 @@ public class PhotoController {
     @ResponseStatus(HttpStatus.CREATED)
     public PhotoResponse confirm(@PathVariable UUID customerId, @Valid @RequestBody PhotoConfirmRequest request) {
         return photoService.confirm(customerId, request);
+    }
+
+    @DeleteMapping("/{photoId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID customerId, @PathVariable UUID photoId) {
+        photoService.delete(customerId, photoId);
+        return ResponseEntity.noContent().build();
     }
 }

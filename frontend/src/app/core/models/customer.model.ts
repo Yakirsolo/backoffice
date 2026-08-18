@@ -128,6 +128,7 @@ export type TimelineEventType =
   | 'measurement_update'
   | 'measurement_deleted'
   | 'photo_upload'
+  | 'photo_deleted'
   | 'menu_uploaded'
   | 'document_uploaded'
   | 'document_deleted'
@@ -143,6 +144,7 @@ export const TIMELINE_EVENT_LABELS: Record<TimelineEventType, string> = {
   measurement_update: 'מדידות עודכנו',
   measurement_deleted: 'מדידה נמחקה',
   photo_upload: 'תמונות הועלו',
+  photo_deleted: 'תמונה נמחקה',
   menu_uploaded: 'תפריט חדש הועלה',
   document_uploaded: 'מסמך הועלה',
   document_deleted: 'מסמך נמחק',
