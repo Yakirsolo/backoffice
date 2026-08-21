@@ -4,23 +4,84 @@
       <h1 class="page-title">אנליטיקה</h1>
       <p class="page-subtitle">סיכום פעילות העסק</p>
     </div>
+
+    <div class="card month-switcher">
+      <button class="month-nav-btn" (click)="goPrev()" aria-label="חודש קודם">‹</button>
+      <div class="month-switcher-center">
+        <span class="month-label">{{ selectedMonthLabel() }}</span>
+        @if (!isCurrentMonth()) {
+          <button class="current-month-link" (click)="goToCurrentMonth()">לחודש הנוכחי</button>
+        }
+      </div>
+      <button class="month-nav-btn" (click)="goNext()" [disabled]="!canGoNext()" aria-label="חודש הבא">›</button>
+    </div>
   </div>
 
   <div class="stats-grid">
     <div class="card stat-card">
-      <div class="stat-value">{{ activeCount() }}</div>
-      <div class="stat-label">לקוחות פעילות</div>
-    </div>
-    <div class="card stat-card">
-      <div class="stat-value" [class.success-text]="averageWeightLoss() >= 0" [class.danger-text]="averageWeightLoss() < 0">
-        {{ averageWeightLossText() }}
-      </div>
-      <div class="stat-label">ירידה ממוצעת במשקל</div>
-    </div>
-    <div class="card stat-card">
       <div class="stat-value">{{ monthRevenue() }} ₪</div>
-      <div class="stat-label">הכנסות החודש</div>
+      <div class="stat-label">הכנסות</div>
     </div>
+    <div class="card stat-card">
+      <div class="stat-value">{{ newCustomersCount() }}</div>
+      <div class="stat-label">לקוחות חדשות</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-value">{{ paymentsReceivedCount() }}</div>
+      <div class="stat-label">תשלומים שהתקבלו</div>
+    </div>
+  </div>
+
+  <section class="card panel source-panel">
+    <h2 class="panel-title">פילוח לפי מקור הגעה</h2>
+    @if (newCustomersInMonth().length === 0) {
+      <div class="empty-state">אין לקוחות חדשות בחודש זה</div>
+    } @else {
+      <div class="donut-layout">
+        <div class="donut-wrap">
+          <svg viewBox="0 0 140 140" class="donut-chart">
+            <circle cx="70" cy="70" r="60" fill="none" stroke="var(--color-surface)" stroke-width="20" />
+            @for (seg of sourceDonutSegments(); track seg.source) {
+              <circle
+                cx="70" cy="70" r="60" fill="none"
+                stroke-width="20"
+                stroke-linecap="butt"
+                transform="rotate(-90 70 70)"
+                class="donut-segment"
+                [style.stroke]="seg.color"
+                [attr.stroke-dasharray]="seg.dashArray"
+                [attr.stroke-dashoffset]="seg.dashOffset"
+                [class.dimmed]="hoveredSource() !== null && hoveredSource() !== seg.source"
+                (mouseenter)="hoveredSource.set(seg.source)"
+                (mouseleave)="hoveredSource.set(null)"
+              />
+            }
+          </svg>
+          <div class="donut-center">
+            <span class="donut-center-value">{{ newCustomersCount() }}</span>
+            <span class="donut-center-label">לקוחות חדשות</span>
+          </div>
+        </div>
+        <div class="donut-legend">
+          @for (seg of sourceDonutSegments(); track seg.source) {
+            <div
+              class="legend-row"
+              [class.active]="hoveredSource() === seg.source"
+              (mouseenter)="hoveredSource.set(seg.source)"
+              (mouseleave)="hoveredSource.set(null)"
+            >
+              <span class="legend-dot" [style.background]="seg.color"></span>
+              <span class="legend-label">{{ sourceLabels[seg.source] }}</span>
+              <span class="legend-value">{{ seg.count }} · {{ seg.percent }}%</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </section>
+
+  <div class="live-divider">
+    <span class="live-label">מצב נוכחי</span>
   </div>
 
   <div class="columns">
@@ -40,17 +101,18 @@
     </section>
 
     <section class="card panel">
-      <h2 class="panel-title">פילוח לפי מקור הגעה</h2>
-      <div class="bars">
-        @for (item of sourceBreakdown(); track item.source) {
-          <div class="bar-row">
-            <span class="bar-label">{{ item.source }}</span>
-            <div class="bar-track">
-              <div class="bar-fill secondary" [style.width.%]="item.percent"></div>
-            </div>
-            <span class="bar-count">{{ item.count }}</span>
-          </div>
-        }
+      <h2 class="panel-title">נתונים כוללים</h2>
+      <div class="live-stat-row">
+        <span class="live-stat-label">ירידת משקל ממוצעת</span>
+        <span
+          class="live-stat-value"
+          [class.success-text]="averageWeightLoss() >= 0"
+          [class.danger-text]="averageWeightLoss() < 0"
+        >{{ averageWeightLossText() }}</span>
+      </div>
+      <div class="live-stat-row">
+        <span class="live-stat-label">סך ההכנסות</span>
+        <span class="live-stat-value">{{ totalRevenue() }} ₪</span>
       </div>
     </section>
   </div>

@@ -15,8 +15,6 @@ public record CustomerResponse(
         Integer age,
         String description,
         String phone,
-        String instagram,
-        String facebook,
         LeadSource source,
         CustomerStatus status,
         String program,
@@ -33,7 +31,7 @@ public record CustomerResponse(
     public static CustomerResponse from(Customer c, LocalDate nextPaymentDate) {
         return new CustomerResponse(
                 c.getId(), c.getName(), c.getAge(), c.getDescription(), c.getPhone(),
-                c.getInstagram(), c.getFacebook(), c.getSource(), c.getStatus(), c.getProgram(),
+                c.getSource(), c.getStatus(), c.getProgram(),
                 c.getStartDate(), c.getStartWeight(), c.getTargetWeight(), c.getCurrentWeight(),
                 c.getPhotoStorageKey(), c.isNeedsFollowUp(),
                 c.getBillingIntervalValue(), c.getBillingIntervalUnit(), nextPaymentDate

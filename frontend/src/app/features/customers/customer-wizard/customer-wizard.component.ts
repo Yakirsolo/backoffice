@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { CustomersService } from '../../../core/services/customers.service';
+import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import {
   BILLING_INTERVAL_UNIT_LABELS, BillingIntervalUnit, LeadSource, LEAD_SOURCE_LABELS
 } from '../../../core/models/customer.model';
@@ -12,8 +13,6 @@ interface WizardData {
   name: string;
   age: number | null;
   phone: string;
-  instagram: string;
-  facebook: string;
   description: string;
   price: number | null;
   billingIntervalValue: number | null;
@@ -38,6 +37,7 @@ interface WizardData {
 })
 export class CustomerWizardComponent {
   private customersService = inject(CustomersService);
+  private confirmDialog = inject(ConfirmDialogService);
   private router = inject(Router);
 
   steps = ['פרטים אישיים', 'פרטי תהליך', 'מדידות התחלתיות', 'מסמכים'];
@@ -50,7 +50,7 @@ export class CustomerWizardComponent {
   billingUnitLabels = BILLING_INTERVAL_UNIT_LABELS;
 
   data: WizardData = {
-    name: '', age: null, phone: '', instagram: '', facebook: '', description: '',
+    name: '', age: null, phone: '', description: '',
     price: null, billingIntervalValue: 1, billingIntervalUnit: 'month',
     startDate: new Date().toISOString().slice(0, 10), source: 'instagram',
     weight: null, targetWeight: null, waist: null, thigh: null, hip: null, beforePhotoFiles: [],
@@ -108,8 +108,6 @@ export class CustomerWizardComponent {
       name: this.data.name,
       age: this.data.age!,
       phone: this.data.phone,
-      instagram: this.data.instagram || undefined,
-      facebook: this.data.facebook || undefined,
       description: this.data.description,
       program: this.programName,
       price: this.data.price!,
@@ -135,7 +133,10 @@ export class CustomerWizardComponent {
         forkJoin(uploads).subscribe({
           next: () => this.router.navigate(['/customers', customer.id]),
           error: () => {
-            alert('הלקוחה נוצרה בהצלחה, אך העלאת חלק מהתמונות נכשלה. ניתן להעלות תמונות מאוחר יותר מדף הלקוחה.');
+            this.confirmDialog.alert(
+              'הלקוחה נוצרה בהצלחה, אך העלאת חלק מהתמונות נכשלה. ניתן להעלות תמונות מאוחר יותר מדף הלקוחה.',
+              'הצלחה חלקית'
+            );
             this.router.navigate(['/customers', customer.id]);
           }
         });

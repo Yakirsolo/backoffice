@@ -35,16 +35,6 @@
               <input class="input-field" type="tel" [(ngModel)]="data.phone" />
             </div>
           </div>
-          <div class="two-col">
-            <div class="field-group">
-              <label class="field-label">Instagram</label>
-              <input class="input-field" type="text" placeholder="@username" [(ngModel)]="data.instagram" />
-            </div>
-            <div class="field-group">
-              <label class="field-label">Facebook</label>
-              <input class="input-field" type="text" [(ngModel)]="data.facebook" />
-            </div>
-          </div>
           <div class="field-group">
             <label class="field-label">תיאור קצר</label>
             <textarea class="input-field" rows="3" [(ngModel)]="data.description"></textarea>
@@ -138,7 +128,7 @@
       }
       @case (3) {
         <div class="step-form">
-          <p class="field-label">בחרו כיצד להוסיף את ההסכם</p>
+          <p class="field-label">הוספת הסכם</p>
           <div class="agreement-options">
             <button
               class="card agreement-option"
@@ -148,15 +138,6 @@
               <div class="option-icon">⬆️</div>
               <div class="option-title">העלאת הסכם קיים</div>
               <div class="option-desc">כבר יש לכם הסכם חתום? העלו אותו כקובץ</div>
-            </button>
-            <button
-              class="card agreement-option"
-              [class.selected]="data.agreementMode === 'generate'"
-              (click)="data.agreementMode = 'generate'"
-            >
-              <div class="option-icon">📝</div>
-              <div class="option-title">יצירת הסכם במערכת</div>
-              <div class="option-desc">המערכת תכין הסכם מוכן לפי פרטי הלקוחה</div>
             </button>
           </div>
         </div>

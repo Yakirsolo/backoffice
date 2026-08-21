@@ -111,9 +111,11 @@ public class MeasurementService {
                         + describeMeasurement(measurement.getWeight(), measurement.getWaist(), measurement.getThigh(), measurement.getHip()));
     }
 
-    /** Measurements are the sole source of truth for a customer's start/current weight and start date. */
+    /**
+     * Measurements are the sole source of truth for a customer's start/current weight.
+     * Start date is a separately editable customer field (see CustomerService.update) - not derived here.
+     */
     private void syncCustomerFromMeasurements(Customer customer, List<ProgressMeasurement> sortedAsc) {
-        customer.setStartDate(sortedAsc.get(0).getDate());
         customer.setStartWeight(sortedAsc.get(0).getWeight());
         customer.setCurrentWeight(sortedAsc.get(sortedAsc.size() - 1).getWeight());
     }

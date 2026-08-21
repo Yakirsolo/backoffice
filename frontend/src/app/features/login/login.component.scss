@@ -14,19 +14,16 @@
 }
 
 .brand {
-  display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 10px;
   margin-bottom: 6px;
 }
 
+/* Login is a standalone hero screen, unlike the compact sidebar brand — deliberately larger */
 .brand-mark {
   font-size: 26px;
 }
 
 .brand-name {
-  font-weight: 800;
   font-size: 18px;
 }
 

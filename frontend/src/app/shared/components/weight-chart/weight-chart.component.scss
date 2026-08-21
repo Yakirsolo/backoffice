@@ -20,7 +20,7 @@
 }
 
 .axis-label {
-  font-size: 11px;
+  font-size: 12px;
   fill: var(--color-text-muted);
   font-family: inherit;
 }
@@ -74,8 +74,8 @@
 .tooltip {
   position: absolute;
   top: 0;
-  background: #1c1e21;
-  color: #fff;
+  background: var(--color-text);
+  color: var(--color-on-primary);
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 12px;
@@ -91,6 +91,6 @@
 
 .tooltip-date {
   opacity: 0.75;
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 1px;
 }

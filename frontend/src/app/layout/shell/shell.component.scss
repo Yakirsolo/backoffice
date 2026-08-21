@@ -17,19 +17,7 @@
 }
 
 .brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   padding: 8px 10px 24px;
-}
-
-.brand-mark {
-  font-size: 22px;
-}
-
-.brand-name {
-  font-weight: 800;
-  font-size: 16px;
 }
 
 .nav {
@@ -69,14 +57,14 @@
 
 .add-customer {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-on-primary);
   justify-content: center;
   margin-top: 12px;
 }
 
 .add-customer:hover {
   background: var(--color-primary-hover);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 
 .user-row {

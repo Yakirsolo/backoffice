@@ -5,6 +5,7 @@ import { CustomersService } from '../../../../core/services/customers.service';
 import { Photo, ProgressMeasurement } from '../../../../core/models/customer.model';
 import { formatDate, todayIso } from '../../../../shared/status-utils';
 import { WeightChartComponent } from '../../../../shared/components/weight-chart/weight-chart.component';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-progress-tab',
@@ -122,9 +123,9 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
                     <div class="photos-note">📷 הועלו תמונות</div>
                   }
                   <div class="event-actions">
-                    <button class="btn btn-secondary btn-small" (click)="startEdit(m)">✎ עריכה</button>
+                    <button class="btn btn-secondary btn-sm" (click)="startEdit(m)">✎ עריכה</button>
                     @if (measurements().length > 1) {
-                      <button class="btn btn-secondary btn-small" (click)="deleteMeasurement(m)">🗑 מחיקה</button>
+                      <button class="btn btn-secondary btn-sm" (click)="deleteMeasurement(m)">🗑 מחיקה</button>
                     }
                   </div>
                 </div>
@@ -250,10 +251,6 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
       gap: 8px;
       margin-inline-start: auto;
     }
-    .btn-small {
-      padding: 5px 10px;
-      font-size: 13px;
-    }
     .edit-actions {
       display: flex;
       gap: 10px;
@@ -327,7 +324,7 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
       border: none;
       border-radius: 50%;
       background: rgba(0, 0, 0, 0.6);
-      color: #fff;
+      color: var(--color-on-primary);
       font-size: 11px;
       line-height: 22px;
       cursor: pointer;
@@ -347,6 +344,7 @@ import { WeightChartComponent } from '../../../../shared/components/weight-chart
 export class ProgressTabComponent implements OnChanges {
   @Input({ required: true }) customerId!: string;
   private customersService = inject(CustomersService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   measurements = signal<ProgressMeasurement[]>([]);
   reversedMeasurements = computed(() => [...this.measurements()].reverse());
@@ -436,11 +434,17 @@ export class ProgressTabComponent implements OnChanges {
     });
   }
 
-  deleteMeasurement(m: ProgressMeasurement) {
-    if (!confirm(`למחוק את המדידה מתאריך ${this.formatDate(m.date)}?`)) return;
+  async deleteMeasurement(m: ProgressMeasurement) {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'מחיקת מדידה',
+      message: `למחוק את המדידה מתאריך ${this.formatDate(m.date)}?`,
+      confirmLabel: 'מחיקה',
+      danger: true
+    });
+    if (!confirmed) return;
     this.customersService.deleteMeasurement(this.customerId, m.id).subscribe({
       next: () => this.loadMeasurements(),
-      error: () => alert('מחיקת המדידה נכשלה')
+      error: () => this.confirmDialog.alert('מחיקת המדידה נכשלה')
     });
   }
 
@@ -468,17 +472,23 @@ export class ProgressTabComponent implements OnChanges {
       },
       error: () => {
         this.uploading.set(false);
-        alert('העלאת חלק מהתמונות נכשלה, נסי שוב');
+        this.confirmDialog.alert('העלאת חלק מהתמונות נכשלה, נסי שוב');
         this.loadPhotos();
       }
     });
   }
 
-  deletePhoto(photo: Photo) {
-    if (!confirm('למחוק את התמונה?')) return;
+  async deletePhoto(photo: Photo) {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'מחיקת תמונה',
+      message: 'למחוק את התמונה?',
+      confirmLabel: 'מחיקה',
+      danger: true
+    });
+    if (!confirmed) return;
     this.customersService.deletePhoto(this.customerId, photo.id).subscribe({
       next: () => this.loadPhotos(),
-      error: () => alert('מחיקת התמונה נכשלה')
+      error: () => this.confirmDialog.alert('מחיקת התמונה נכשלה')
     });
   }
 }

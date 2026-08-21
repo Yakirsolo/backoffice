@@ -29,8 +29,6 @@ export interface Customer {
   age: number;
   description: string;
   phone: string;
-  instagram?: string;
-  facebook?: string;
   source: LeadSource;
   status: CustomerStatus;
   program: string;

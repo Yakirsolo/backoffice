@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { CustomersService } from '../../../../core/services/customers.service';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { CustomerDocument, DocumentType, DOCUMENT_TYPE_LABELS } from '../../../../core/models/customer.model';
 import { formatDate, formatFileSize, todayIso } from '../../../../shared/status-utils';
 
@@ -75,7 +76,7 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
                 <div class="doc-meta">{{ typeLabels[doc.type] }} · {{ formatDate(doc.date) }} · {{ formatFileSize(doc.sizeBytes) }}</div>
               </div>
             </a>
-            <button class="btn btn-ghost btn-small doc-delete" title="מחיקה" (click)="deleteDocument(doc)">🗑</button>
+            <button class="btn btn-ghost btn-sm doc-delete" title="מחיקה" (click)="deleteDocument(doc)">🗑</button>
           </div>
         }
       </div>
@@ -165,6 +166,7 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
 export class DocumentsTabComponent implements OnChanges {
   @Input({ required: true }) customerId!: string;
   private customersService = inject(CustomersService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   documents = signal<CustomerDocument[]>([]);
   typeLabels = DOCUMENT_TYPE_LABELS;
@@ -222,11 +224,17 @@ export class DocumentsTabComponent implements OnChanges {
     });
   }
 
-  deleteDocument(doc: CustomerDocument) {
-    if (!confirm(`למחוק את "${doc.name}"?`)) return;
+  async deleteDocument(doc: CustomerDocument) {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'מחיקת מסמך',
+      message: `למחוק את "${doc.name}"?`,
+      confirmLabel: 'מחיקה',
+      danger: true
+    });
+    if (!confirmed) return;
     this.customersService.deleteDocument(this.customerId, doc.id).subscribe({
       next: () => this.loadDocuments(),
-      error: () => alert('מחיקת המסמך נכשלה')
+      error: () => this.confirmDialog.alert('מחיקת המסמך נכשלה')
     });
   }
 

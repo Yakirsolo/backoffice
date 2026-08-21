@@ -2,7 +2,18 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">תשלומים</h1>
-      <p class="page-subtitle">הכנסות החודש: {{ totalThisMonth() }} ₪</p>
+      <p class="page-subtitle">הכנסות בחודש שנבחר: {{ totalSelectedMonth() }} ₪</p>
+    </div>
+
+    <div class="card month-switcher">
+      <button class="month-nav-btn" (click)="goPrev()" aria-label="חודש קודם">‹</button>
+      <div class="month-switcher-center">
+        <span class="month-label">{{ selectedMonthLabel() }}</span>
+        @if (!isCurrentMonth()) {
+          <button class="current-month-link" (click)="goToCurrentMonth()">לחודש הנוכחי</button>
+        }
+      </div>
+      <button class="month-nav-btn" (click)="goNext()" [disabled]="!canGoNext()" aria-label="חודש הבא">›</button>
     </div>
   </div>
 
@@ -15,7 +26,7 @@
   </div>
 
   @if (filteredPayments().length === 0) {
-    <div class="card empty-state">אין תשלומים בסטטוס זה</div>
+    <div class="card empty-state">אין תשלומים בחודש זה{{ statusFilter() === 'all' ? '' : ' בסטטוס זה' }}</div>
   } @else {
     <div class="payments-table card">
       <div class="table-row table-header">
@@ -33,7 +44,7 @@
           <span [class]="paymentStatusBadgeClass(p.status)">{{ statusLabels[p.status] }}</span>
           <span class="action-cell">
             @if (p.status !== 'paid') {
-              <button class="btn btn-secondary btn-small" (click)="markPaid(p, $event)">✓ סמן כשולם</button>
+              <button class="btn btn-secondary btn-sm" (click)="markPaid(p, $event)">✓ סמן כשולם</button>
             }
           </span>
         </a>

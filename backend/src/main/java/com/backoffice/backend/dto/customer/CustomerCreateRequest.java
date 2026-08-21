@@ -13,8 +13,6 @@ public record CustomerCreateRequest(
         @NotBlank String name,
         Integer age,
         String phone,
-        String instagram,
-        String facebook,
         String description,
         @NotBlank String program,
         @NotNull @Positive BigDecimal price,

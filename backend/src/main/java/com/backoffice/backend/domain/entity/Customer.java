@@ -30,8 +30,6 @@ public class Customer {
     private String description;
 
     private String phone;
-    private String instagram;
-    private String facebook;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

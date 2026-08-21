@@ -9,7 +9,7 @@ import { API_BASE_URL } from '../config/api-config';
 import { resizeImage } from '../../shared/image-resize';
 
 export interface NewCustomerData {
-  name: string; age: number; phone: string; instagram?: string; facebook?: string; description?: string;
+  name: string; age: number; phone: string; description?: string;
   program: string; price: number; billingIntervalValue: number; billingIntervalUnit: BillingIntervalUnit;
   startDate: string; source: Customer['source'];
   startWeight: number; targetWeight: number; waist?: number; thigh?: number; hip?: number;
@@ -177,8 +177,8 @@ export class CustomersService {
   }
 
   updateCustomer(customerId: string, data: Partial<{
-    name: string; age: number; phone: string; instagram: string; facebook: string;
-    description: string; source: Customer['source']; program: string; targetWeight: number;
+    name: string; age: number; phone: string;
+    description: string; source: Customer['source']; program: string; startDate: string; targetWeight: number;
     status: CustomerStatus; billingIntervalValue: number; billingIntervalUnit: BillingIntervalUnit;
   }>) {
     return this.http.patch<Customer>(`${API_BASE_URL}/customers/${customerId}`, data)
