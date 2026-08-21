@@ -21,7 +21,7 @@
 .filter-chip.active {
   background: var(--color-primary);
   border-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 
 .payments-table {
@@ -64,12 +64,6 @@
 .action-cell {
   display: flex;
   justify-content: flex-end;
-}
-
-.btn-small {
-  padding: 5px 10px;
-  font-size: 12px;
-  white-space: nowrap;
 }
 
 @media (max-width: 700px) {

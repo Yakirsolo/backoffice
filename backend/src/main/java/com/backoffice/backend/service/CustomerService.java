@@ -50,8 +50,6 @@ public class CustomerService {
         customer.setName(request.name());
         customer.setAge(request.age());
         customer.setPhone(request.phone());
-        customer.setInstagram(request.instagram());
-        customer.setFacebook(request.facebook());
         customer.setDescription(request.description());
         customer.setProgram(request.program());
         customer.setStartDate(request.startDate());
@@ -94,8 +92,6 @@ public class CustomerService {
         if (request.age() != null) customer.setAge(request.age());
         if (request.description() != null) customer.setDescription(request.description());
         if (request.phone() != null) customer.setPhone(request.phone());
-        if (request.instagram() != null) customer.setInstagram(request.instagram());
-        if (request.facebook() != null) customer.setFacebook(request.facebook());
         if (request.source() != null) customer.setSource(request.source());
 
         if (request.status() != null && request.status() != customer.getStatus()) {
@@ -112,6 +108,7 @@ public class CustomerService {
         }
 
         if (request.program() != null) customer.setProgram(request.program());
+        if (request.startDate() != null) customer.setStartDate(request.startDate());
         if (request.targetWeight() != null) customer.setTargetWeight(request.targetWeight());
         if (request.needsFollowUp() != null) customer.setNeedsFollowUp(request.needsFollowUp());
         if (request.billingIntervalValue() != null) customer.setBillingIntervalValue(request.billingIntervalValue());

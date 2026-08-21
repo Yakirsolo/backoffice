@@ -106,9 +106,9 @@ import { formatDate, paymentStatusBadgeClass } from '../../../../shared/status-u
                   <span [class]="paymentStatusBadgeClass(p.status)">{{ statusLabels[p.status] }}</span>
                   <div class="payment-actions">
                     @if (p.status !== 'paid') {
-                      <button class="btn btn-secondary btn-small" (click)="markPaid(p)">✓ סמן כשולם</button>
+                      <button class="btn btn-secondary btn-sm" (click)="markPaid(p)">✓ סמן כשולם</button>
                     }
-                    <button class="btn btn-secondary btn-small" (click)="startEdit(p)">✎ עריכה</button>
+                    <button class="btn btn-secondary btn-sm" (click)="startEdit(p)">✎ עריכה</button>
                   </div>
                 </div>
               }
@@ -185,10 +185,6 @@ import { formatDate, paymentStatusBadgeClass } from '../../../../shared/status-u
       display: flex;
       gap: 8px;
       margin-inline-start: auto;
-    }
-    .btn-small {
-      padding: 5px 10px;
-      font-size: 13px;
     }
     .edit-actions {
       display: flex;

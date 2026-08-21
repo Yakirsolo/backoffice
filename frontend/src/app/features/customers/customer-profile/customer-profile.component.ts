@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { CustomersService } from '../../../core/services/customers.service';
+import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { CUSTOMER_STATUS_LABELS, Customer } from '../../../core/models/customer.model';
 import { customerStatusBadgeClass, formatWeightChange } from '../../../shared/status-utils';
 import { OverviewTabComponent } from './tabs/overview-tab.component';
@@ -28,6 +29,7 @@ type TabId = 'overview' | 'progress' | 'history' | 'payments' | 'documents' | 'm
 export class CustomerProfileComponent {
   private route = inject(ActivatedRoute);
   private customersService = inject(CustomersService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   customerId = toSignal(this.route.paramMap.pipe(map(p => p.get('id')!)), { initialValue: '' });
   customer = computed(() => this.customersService.getCustomer(this.customerId()));
@@ -59,12 +61,13 @@ export class CustomerProfileComponent {
     this.activeTab.set(tab);
   }
 
-  toggleStatus(c: Customer) {
+  async toggleStatus(c: Customer) {
     const goingToFinished = c.status === 'active';
     const confirmMessage = goingToFinished
       ? `לסמן את ${c.name} כלקוחה שסיימה את התהליך?`
       : `להחזיר את ${c.name} לסטטוס פעיל?`;
-    if (!confirm(confirmMessage)) return;
+    const confirmed = await this.confirmDialog.confirm({ title: 'שינוי סטטוס', message: confirmMessage });
+    if (!confirmed) return;
 
     this.changingStatus.set(true);
     this.customersService.updateCustomerStatus(c.id, goingToFinished ? 'finished' : 'active').subscribe({

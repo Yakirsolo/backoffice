@@ -6,7 +6,6 @@
 }
 
 .stat-card {
-  padding: 20px;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -28,12 +27,6 @@
 .stat-icon-warning { background: var(--color-warning-soft); }
 .stat-icon-danger { background: var(--color-danger-soft); }
 
-.stat-value {
-  font-size: 24px;
-  font-weight: 800;
-  line-height: 1;
-}
-
 .stat-label {
   color: var(--color-text-muted);
   font-size: 13px;
@@ -45,16 +38,6 @@
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-bottom: 16px;
-}
-
-.panel {
-  padding: 20px;
-}
-
-.panel-title {
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: 14px;
 }
 
 .meeting-list, .payment-list {

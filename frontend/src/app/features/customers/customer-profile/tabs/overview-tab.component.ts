@@ -18,7 +18,7 @@ type Section = 'personal' | 'business' | 'track';
         <div class="section-header">
           <h3 class="section-title">פרטים אישיים</h3>
           @if (editingSection() !== 'personal') {
-            <button class="btn btn-secondary btn-small" (click)="startEdit('personal')">✎ עריכה</button>
+            <button class="btn btn-secondary btn-sm" (click)="startEdit('personal')">✎ עריכה</button>
           }
         </div>
         @if (editingSection() === 'personal') {
@@ -36,14 +36,6 @@ type Section = 'personal' | 'business' | 'track';
               <input class="input-field" [(ngModel)]="editPhone" />
             </div>
             <div class="field-group">
-              <label class="field-label">Instagram</label>
-              <input class="input-field" [(ngModel)]="editInstagram" />
-            </div>
-            <div class="field-group">
-              <label class="field-label">Facebook</label>
-              <input class="input-field" [(ngModel)]="editFacebook" />
-            </div>
-            <div class="field-group">
               <label class="field-label">תיאור קצר</label>
               <textarea class="input-field" rows="3" [(ngModel)]="editDescription"></textarea>
             </div>
@@ -58,12 +50,6 @@ type Section = 'personal' | 'business' | 'track';
           <div class="detail-row"><span class="detail-label">שם</span><span>{{ customer.name }}</span></div>
           <div class="detail-row"><span class="detail-label">גיל</span><span>{{ customer.age }}</span></div>
           <div class="detail-row"><span class="detail-label">טלפון</span><span>{{ customer.phone }}</span></div>
-          @if (customer.instagram) {
-            <div class="detail-row"><span class="detail-label">Instagram</span><span>{{ customer.instagram }}</span></div>
-          }
-          @if (customer.facebook) {
-            <div class="detail-row"><span class="detail-label">Facebook</span><span>{{ customer.facebook }}</span></div>
-          }
           <div class="detail-row description">
             <span class="detail-label">תיאור קצר</span>
             <p>{{ customer.description || '—' }}</p>
@@ -75,7 +61,7 @@ type Section = 'personal' | 'business' | 'track';
         <div class="section-header">
           <h3 class="section-title">פרטי עסק</h3>
           @if (editingSection() !== 'business') {
-            <button class="btn btn-secondary btn-small" (click)="startEdit('business')">✎ עריכה</button>
+            <button class="btn btn-secondary btn-sm" (click)="startEdit('business')">✎ עריכה</button>
           }
         </div>
         @if (editingSection() === 'business') {
@@ -104,7 +90,7 @@ type Section = 'personal' | 'business' | 'track';
         <div class="section-header">
           <h3 class="section-title">מסלול</h3>
           @if (editingSection() !== 'track') {
-            <button class="btn btn-secondary btn-small" (click)="startEdit('track')">✎ עריכה</button>
+            <button class="btn btn-secondary btn-sm" (click)="startEdit('track')">✎ עריכה</button>
           }
         </div>
         @if (editingSection() === 'track') {
@@ -129,11 +115,14 @@ type Section = 'personal' | 'business' | 'track';
               <label class="field-label">משקל יעד (ק"ג)</label>
               <input class="input-field" type="number" step="0.1" [(ngModel)]="editTargetWeight" />
             </div>
-            <div class="detail-row"><span class="detail-label">תאריך תחילת תהליך</span><span>{{ formatDate(customer.startDate) }}</span></div>
+            <div class="field-group">
+              <label class="field-label">תאריך תחילת תהליך</label>
+              <input class="input-field" type="date" [(ngModel)]="editStartDate" />
+            </div>
             <div class="detail-row"><span class="detail-label">משקל התחלתי</span><span>{{ customer.startWeight }} ק"ג</span></div>
-            <p class="hint">לעדכון משקל/תאריך התחלה, ערכו את המדידה הראשונה בלשונית התקדמות</p>
+            <p class="hint">לעדכון משקל התחלתי, ערכו את המדידה הראשונה בלשונית התקדמות</p>
             <div class="edit-actions">
-              <button class="btn btn-primary" (click)="saveSection('track')" [disabled]="!editBillingIntervalValue || !editTargetWeight || saving()">
+              <button class="btn btn-primary" (click)="saveSection('track')" [disabled]="!editBillingIntervalValue || !editTargetWeight || !editStartDate || saving()">
                 {{ saving() ? 'שומרת...' : '✓ שמירה' }}
               </button>
               <button class="btn btn-secondary" (click)="cancelEdit()">ביטול</button>
@@ -167,10 +156,6 @@ type Section = 'personal' | 'business' | 'track';
     .section-title {
       font-size: 14px;
       margin-bottom: 0;
-    }
-    .btn-small {
-      padding: 5px 10px;
-      font-size: 13px;
     }
     .detail-row {
       display: flex;
@@ -239,13 +224,12 @@ export class OverviewTabComponent implements OnChanges {
   editName = '';
   editAge: number | null = null;
   editPhone = '';
-  editInstagram = '';
-  editFacebook = '';
   editDescription = '';
   editSource: LeadSource = 'other';
   editBillingIntervalValue: number | null = null;
   editBillingIntervalUnit: BillingIntervalUnit = 'month';
   editTargetWeight: number | null = null;
+  editStartDate = '';
 
   /** The plan name is derived from its billing cadence - kept consistent with customer-wizard's step 1. */
   get editProgramName(): string {
@@ -260,13 +244,12 @@ export class OverviewTabComponent implements OnChanges {
     this.editName = this.customer.name;
     this.editAge = this.customer.age;
     this.editPhone = this.customer.phone;
-    this.editInstagram = this.customer.instagram ?? '';
-    this.editFacebook = this.customer.facebook ?? '';
     this.editDescription = this.customer.description ?? '';
     this.editSource = this.customer.source;
     this.editBillingIntervalValue = this.customer.billingIntervalValue;
     this.editBillingIntervalUnit = this.customer.billingIntervalUnit;
     this.editTargetWeight = this.customer.targetWeight;
+    this.editStartDate = this.customer.startDate;
     this.editingSection.set(section);
   }
 
@@ -282,8 +265,6 @@ export class OverviewTabComponent implements OnChanges {
             name: this.editName.trim(),
             age: this.editAge ?? undefined,
             phone: this.editPhone,
-            instagram: this.editInstagram,
-            facebook: this.editFacebook,
             description: this.editDescription
           }
         : section === 'business'
@@ -292,7 +273,8 @@ export class OverviewTabComponent implements OnChanges {
               program: this.editProgramName,
               targetWeight: this.editTargetWeight ?? undefined,
               billingIntervalValue: this.editBillingIntervalValue ?? undefined,
-              billingIntervalUnit: this.editBillingIntervalUnit
+              billingIntervalUnit: this.editBillingIntervalUnit,
+              startDate: this.editStartDate
             };
 
     this.customersService.updateCustomer(this.customer.id, data).subscribe({

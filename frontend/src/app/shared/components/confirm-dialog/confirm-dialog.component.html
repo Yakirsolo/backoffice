@@ -1,0 +1,20 @@
+@if (state(); as s) {
+  <div class="modal-overlay" (click)="cancel()" (keydown.escape)="cancel()">
+    <div class="modal-card" role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <h3>{{ s.title }}</h3>
+      <p>{{ s.message }}</p>
+      <div class="modal-actions">
+        <button
+          class="btn btn-md"
+          [class.btn-danger]="s.danger"
+          [class.btn-primary]="!s.danger"
+          (click)="confirm()"
+          autofocus
+        >{{ s.confirmLabel }}</button>
+        @if (s.cancelLabel) {
+          <button class="btn btn-secondary btn-md" (click)="cancel()">{{ s.cancelLabel }}</button>
+        }
+      </div>
+    </div>
+  </div>
+}
