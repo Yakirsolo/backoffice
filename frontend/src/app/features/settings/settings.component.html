@@ -30,27 +30,36 @@
       <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
         {{ saving() ? 'שומרת...' : 'שמירת שינויים' }}
       </button>
-      @if (saveMessage()) {
-        <p class="save-message">{{ saveMessage() }}</p>
-      }
     </section>
 
     <section class="card panel">
       <h2 class="panel-title">התראות</h2>
-      <label class="toggle-row">
+      <div class="toggle-row">
         <div>
           <div class="toggle-title">תזכורות תשלום</div>
           <div class="toggle-desc">קבלי התראה על תשלומים קרובים ובאיחור</div>
         </div>
-        <input type="checkbox" [ngModel]="notifyPaymentReminders()" (ngModelChange)="notifyPaymentReminders.set($event)" />
-      </label>
-      <label class="toggle-row">
+        <button
+          class="toggle"
+          [class.on]="notifyPaymentReminders()"
+          role="switch"
+          [attr.aria-checked]="notifyPaymentReminders()"
+          (click)="notifyPaymentReminders.set(!notifyPaymentReminders())"
+        ></button>
+      </div>
+      <div class="toggle-row">
         <div>
           <div class="toggle-title">לקוחות שדורשות מעקב</div>
           <div class="toggle-desc">קבלי התראה כשלקוחה זקוקה למעקב</div>
         </div>
-        <input type="checkbox" [ngModel]="notifyFollowUp()" (ngModelChange)="notifyFollowUp.set($event)" />
-      </label>
+        <button
+          class="toggle"
+          [class.on]="notifyFollowUp()"
+          role="switch"
+          [attr.aria-checked]="notifyFollowUp()"
+          (click)="notifyFollowUp.set(!notifyFollowUp())"
+        ></button>
+      </div>
     </section>
   </div>
 </div>

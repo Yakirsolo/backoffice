@@ -1,12 +1,14 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { LucideCalendarDays } from '@lucide/angular';
 import { CustomersService } from '../../core/services/customers.service';
 import { formatDate, formatTime, todayIso } from '../../shared/status-utils';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, EmptyStateComponent, LucideCalendarDays],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss'
 })

@@ -1,5 +1,8 @@
 <div class="page">
-  <a class="back-link" routerLink="/customers">→ חזרה ללקוחות</a>
+  <div class="breadcrumb no-print">
+    <svg lucideChevronRight class="icon"></svg>
+    <a routerLink="/customers">חזרה ללקוחות</a>
+  </div>
   <div class="page-header">
     <div>
       <h1 class="page-title">יצירת הסכם</h1>
@@ -32,14 +35,14 @@
         <input class="input-field" type="text" [ngModel]="paymentTerms()" (ngModelChange)="paymentTerms.set($event)" />
       </div>
       <button class="btn btn-primary full-width" [disabled]="!isReady()" (click)="print()">
-        🖨️ הורדה / הדפסת ההסכם
+        <svg lucidePrinter class="icon"></svg> הדפסה / שמירה כ-PDF
       </button>
     </section>
 
     <section class="card agreement-preview">
       <div class="agreement-doc">
         <h2 class="doc-title">הסכם התקשרות</h2>
-        <p class="doc-date">תאריך: {{ today }}</p>
+        <p class="doc-date tabular-nums">תאריך: {{ today }}</p>
 
         <p class="doc-paragraph">
           הסכם זה נחתם בין המאמנת לבין <strong>{{ customerName() || '[שם הלקוחה]' }}</strong>
@@ -47,8 +50,8 @@
         </p>
 
         <div class="doc-terms">
-          <div class="doc-term"><span>משך ההתקשרות</span><span>{{ durationMonths() || '-' }} חודשים</span></div>
-          <div class="doc-term"><span>עלות התהליך</span><span>{{ price() || '-' }} ₪</span></div>
+          <div class="doc-term"><span>משך ההתקשרות</span><span class="tabular-nums">{{ durationMonths() || '-' }} חודשים</span></div>
+          <div class="doc-term"><span>עלות התהליך</span><span class="tabular-nums">{{ price() || '-' }} ₪</span></div>
           <div class="doc-term"><span>תנאי תשלום</span><span>{{ paymentTerms() }}</span></div>
         </div>
 

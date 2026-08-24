@@ -1,13 +1,14 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { LucideChevronRight, LucidePrinter } from '@lucide/angular';
 import { CustomersService } from '../../core/services/customers.service';
 import { formatDate, todayIso } from '../../shared/status-utils';
 
 @Component({
   selector: 'app-agreement-generator',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, LucideChevronRight, LucidePrinter],
   templateUrl: './agreement-generator.component.html',
   styleUrl: './agreement-generator.component.scss'
 })

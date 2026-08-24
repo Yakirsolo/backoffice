@@ -2,7 +2,7 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">תשלומים</h1>
-      <p class="page-subtitle">הכנסות בחודש שנבחר: {{ totalSelectedMonth() }} ₪</p>
+      <p class="page-subtitle">הכנסות בחודש שנבחר: <span class="tabular-nums">{{ totalSelectedMonth() }} ₪</span></p>
     </div>
 
     <div class="card month-switcher">
@@ -17,16 +17,21 @@
     </div>
   </div>
 
-  <div class="filters">
+  <div class="segmented payments-filter">
     @for (status of statusOptions; track status) {
-      <button class="filter-chip" [class.active]="statusFilter() === status" (click)="setStatus(status)">
+      <button [class.active]="statusFilter() === status" (click)="setStatus(status)">
         {{ status === 'all' ? 'הכל' : statusLabels[status] }}
       </button>
     }
   </div>
 
   @if (filteredPayments().length === 0) {
-    <div class="card empty-state">אין תשלומים בחודש זה{{ statusFilter() === 'all' ? '' : ' בסטטוס זה' }}</div>
+    <app-empty-state
+      heading="אין תשלומים בחודש זה"
+      [message]="statusFilter() === 'all' ? '' : 'נסי לשנות את הסינון לפי סטטוס'"
+    >
+      <svg lucideCreditCard class="icon" empty-icon></svg>
+    </app-empty-state>
   } @else {
     <div class="payments-table card">
       <div class="table-row table-header">
@@ -39,12 +44,12 @@
       @for (p of filteredPayments(); track p.id) {
         <a class="table-row" [routerLink]="['/customers', p.customerId]">
           <span class="cell-name">{{ p.customerName }}</span>
-          <span>{{ formatDate(p.date) }}</span>
-          <span class="cell-amount">{{ p.amount }} ₪</span>
+          <span class="tabular-nums">{{ formatDate(p.date) }}</span>
+          <span class="cell-amount tabular-nums">{{ p.amount }} ₪</span>
           <span [class]="paymentStatusBadgeClass(p.status)">{{ statusLabels[p.status] }}</span>
           <span class="action-cell">
             @if (p.status !== 'paid') {
-              <button class="btn btn-secondary btn-sm" (click)="markPaid(p, $event)">✓ סמן כשולם</button>
+              <button class="btn btn-secondary btn-sm" (click)="markPaid(p, $event)"><svg lucideCheck class="icon"></svg> סמן כשולם</button>
             }
           </span>
         </a>

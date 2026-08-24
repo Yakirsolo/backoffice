@@ -1,35 +1,44 @@
 @if (customer(); as c) {
   <div class="page">
-    <a class="back-link" routerLink="/customers">→ חזרה לרשימת הלקוחות</a>
+    <div class="breadcrumb">
+      <svg lucideChevronRight class="icon"></svg>
+      <a routerLink="/customers">לקוחות</a>
+      <span>/</span>
+      <span>{{ c.name }}</span>
+    </div>
 
-    <div class="profile-header card">
-      <div class="avatar-lg">{{ c.name.charAt(0) }}</div>
+    <div class="profile-header card card-elevated">
+      <div class="avatar avatar-lg">{{ c.name.charAt(0) }}</div>
       <div class="profile-info">
         <div class="profile-name-row">
           <h1 class="page-title">{{ c.name }}</h1>
           <span [class]="customerStatusBadgeClass(c.status)">{{ statusLabels[c.status] }}</span>
-          <button class="btn btn-secondary status-toggle-btn" [disabled]="changingStatus()" (click)="toggleStatus(c)">
-            {{ c.status === 'active' ? '🏁 סימון כהסתיים' : '↺ החזרה לפעיל' }}
-          </button>
         </div>
         <p class="page-subtitle">{{ c.program }} · גיל {{ c.age }} · {{ c.phone }}</p>
       </div>
       <div class="profile-stats">
         <div class="profile-stat">
-          <div class="profile-stat-value">{{ c.currentWeight }} ק"ג</div>
+          <div class="profile-stat-value tabular-nums">{{ c.currentWeight }} ק"ג</div>
           <div class="profile-stat-label">משקל נוכחי</div>
         </div>
         <div class="profile-stat">
-          <div class="profile-stat-value" [class.success-text]="weightLoss() >= 0" [class.danger-text]="weightLoss() < 0">
+          <div class="profile-stat-value tabular-nums" [class.success-text]="weightLoss() >= 0" [class.danger-text]="weightLoss() < 0">
             {{ weightChangeText() }}
           </div>
           <div class="profile-stat-label">ירידה במשקל</div>
         </div>
         <div class="profile-stat">
-          <div class="profile-stat-value">{{ c.targetWeight }} ק"ג</div>
+          <div class="profile-stat-value tabular-nums">{{ c.targetWeight }} ק"ג</div>
           <div class="profile-stat-label">משקל יעד</div>
         </div>
       </div>
+      <button class="btn btn-secondary btn-sm status-toggle-btn" [disabled]="changingStatus()" (click)="toggleStatus(c)">
+        @if (c.status === 'active') {
+          <svg lucideFlag class="icon"></svg> סימון כהסתיים
+        } @else {
+          <svg lucideRotateCcw class="icon"></svg> החזרה לפעיל
+        }
+      </button>
     </div>
 
     <div class="tabs-nav">

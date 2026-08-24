@@ -1,78 +1,26 @@
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.search-input {
-  max-width: 320px;
-}
-
-.filters {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.filter-chip {
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg);
-  color: var(--color-text-muted);
-  font-weight: 600;
-  font-size: 13px;
-  transition: all 0.15s ease;
-}
-
-.filter-chip:hover {
-  background: var(--color-surface);
-}
-
-.filter-chip.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-on-primary);
-}
-
 .customers-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
 }
 
 .customer-card {
-  padding: 18px;
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  gap: var(--space-4);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .customer-card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-sm);
 }
 
 .customer-top {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  flex-shrink: 0;
+  gap: var(--space-3);
 }
 
 .customer-name-block {
@@ -81,36 +29,37 @@
 }
 
 .customer-name {
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .customer-program {
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--color-text-muted);
 }
 
+.customer-top .badge {
+  margin-inline-start: auto;
+}
+
 .customer-stats {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   border-top: 1px solid var(--color-border);
-  padding-top: 14px;
+  padding-top: var(--space-3);
+}
+
+.customer-stat {
+  text-align: center;
 }
 
 .customer-stat-value {
   font-weight: 700;
-  font-size: 14px;
-}
-
-.success-text {
-  color: var(--color-success);
-}
-
-.danger-text {
-  color: var(--color-danger);
+  font-size: 13.5px;
 }
 
 .customer-stat-label {
-  font-size: 12px;
-  color: var(--color-text-muted);
-  margin-top: 3px;
+  font-size: 11px;
+  color: var(--color-text-faint);
+  margin-top: 2px;
 }

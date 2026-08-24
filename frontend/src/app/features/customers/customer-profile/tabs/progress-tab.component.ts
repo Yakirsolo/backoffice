@@ -1,33 +1,39 @@
 import { Component, Input, OnChanges, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
+import { LucideCamera, LucideCheck, LucidePencil, LucidePlus, LucideRuler, LucideTrash2, LucideUpload, LucideX } from '@lucide/angular';
 import { CustomersService } from '../../../../core/services/customers.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { Photo, ProgressMeasurement } from '../../../../core/models/customer.model';
 import { formatDate, todayIso } from '../../../../shared/status-utils';
 import { WeightChartComponent } from '../../../../shared/components/weight-chart/weight-chart.component';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-progress-tab',
   standalone: true,
-  imports: [FormsModule, WeightChartComponent],
+  imports: [
+    FormsModule, WeightChartComponent, EmptyStateComponent,
+    LucidePlus, LucideX, LucideCheck, LucidePencil, LucideRuler, LucideTrash2, LucideCamera, LucideUpload
+  ],
   template: `
     <div class="progress-layout">
-      <section class="card chart-card">
-        <h3 class="section-title">גרף משקל לאורך זמן</h3>
+      <section class="card panel">
+        <h3 class="panel-title">גרף משקל לאורך זמן</h3>
         <app-weight-chart [measurements]="measurements()" />
       </section>
 
-      <section class="events">
-        <div class="events-header">
-          <h3 class="section-title">אירועי מדידה</h3>
+      <section>
+        <div class="section-head">
+          <h3 class="panel-title" style="margin-bottom: 0">אירועי מדידה</h3>
           <button class="btn btn-secondary" (click)="showForm.set(!showForm())">
-            {{ showForm() ? '✕ ביטול' : '➕ הוספת מדידה' }}
+            @if (showForm()) { <svg lucideX class="icon"></svg> ביטול } @else { <svg lucidePlus class="icon"></svg> הוספת מדידה }
           </button>
         </div>
 
         @if (showForm()) {
-          <div class="card new-measurement-card">
+          <div class="card inline-form-card">
             <div class="field-group">
               <label class="field-label">תאריך</label>
               <input class="input-field" type="date" [(ngModel)]="newDate" />
@@ -38,31 +44,33 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
                 <input class="input-field" type="number" step="0.1" [(ngModel)]="newWeight" />
               </div>
               <div class="field-group">
-                <label class="field-label">היקף בטן (ס"מ)</label>
+                <label class="field-label">היקף בטן (ס"מ) <span class="optional-hint">(אופציונלי)</span></label>
                 <input class="input-field" type="number" step="0.1" [(ngModel)]="newWaist" />
               </div>
               <div class="field-group">
-                <label class="field-label">היקף ירך (ס"מ)</label>
+                <label class="field-label">היקף ירך (ס"מ) <span class="optional-hint">(אופציונלי)</span></label>
                 <input class="input-field" type="number" step="0.1" [(ngModel)]="newThigh" />
               </div>
               <div class="field-group">
-                <label class="field-label">היקף ישבן (ס"מ)</label>
+                <label class="field-label">היקף ישבן (ס"מ) <span class="optional-hint">(אופציונלי)</span></label>
                 <input class="input-field" type="number" step="0.1" [(ngModel)]="newHip" />
               </div>
             </div>
             <button class="btn btn-primary" (click)="addMeasurement()" [disabled]="!newDate || !newWeight || saving()">
-              {{ saving() ? 'שומרת...' : '✓ שמירת מדידה' }}
+              <svg lucideCheck class="icon"></svg> {{ saving() ? 'שומרת...' : 'שמירת מדידה' }}
             </button>
           </div>
         }
 
         @if (measurements().length === 0) {
-          <div class="card empty-state">עדיין לא נוספו מדידות</div>
+          <app-empty-state heading="עדיין לא נוספו מדידות">
+            <svg lucideRuler class="icon" empty-icon></svg>
+          </app-empty-state>
         } @else {
           <div class="event-list">
             @for (m of reversedMeasurements(); track m.id) {
               @if (editingId() === m.id) {
-                <div class="card new-measurement-card">
+                <div class="card inline-form-card">
                   <div class="field-group">
                     <label class="field-label">תאריך</label>
                     <input class="input-field" type="date" [(ngModel)]="editDate" />
@@ -85,47 +93,47 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
                       <input class="input-field" type="number" step="0.1" [(ngModel)]="editHip" />
                     </div>
                   </div>
-                  <div class="edit-actions">
+                  <div class="form-actions">
                     <button class="btn btn-primary" (click)="saveEdit(m.id)" [disabled]="!editDate || !editWeight || saving()">
-                      {{ saving() ? 'שומרת...' : '✓ שמירה' }}
+                      <svg lucideCheck class="icon"></svg> {{ saving() ? 'שומרת...' : 'שמירה' }}
                     </button>
                     <button class="btn btn-secondary" (click)="cancelEdit()">ביטול</button>
                   </div>
                 </div>
               } @else {
-                <div class="card event-card">
-                  <div class="event-date">{{ formatDate(m.date) }}</div>
+                <div class="card item-card event-card">
+                  <div class="event-date tabular-nums">{{ formatDate(m.date) }}</div>
                   <div class="event-metrics">
                     <div class="metric">
                       <div class="metric-label">משקל</div>
-                      <div class="metric-value">{{ m.weight }} ק"ג</div>
+                      <div class="metric-value tabular-nums">{{ m.weight }} ק"ג</div>
                     </div>
                     @if (m.waist) {
                       <div class="metric">
                         <div class="metric-label">היקף בטן</div>
-                        <div class="metric-value">{{ m.waist }} ס"מ</div>
+                        <div class="metric-value tabular-nums">{{ m.waist }} ס"מ</div>
                       </div>
                     }
                     @if (m.thigh) {
                       <div class="metric">
                         <div class="metric-label">היקף ירך</div>
-                        <div class="metric-value">{{ m.thigh }} ס"מ</div>
+                        <div class="metric-value tabular-nums">{{ m.thigh }} ס"מ</div>
                       </div>
                     }
                     @if (m.hip) {
                       <div class="metric">
                         <div class="metric-label">היקף ישבן</div>
-                        <div class="metric-value">{{ m.hip }} ס"מ</div>
+                        <div class="metric-value tabular-nums">{{ m.hip }} ס"מ</div>
                       </div>
                     }
+                    @if (m.hasPhotos) {
+                      <span class="badge badge-neutral"><svg lucideCamera class="icon" style="width: 12px; height: 12px"></svg> תמונות</span>
+                    }
                   </div>
-                  @if (m.hasPhotos) {
-                    <div class="photos-note">📷 הועלו תמונות</div>
-                  }
                   <div class="event-actions">
-                    <button class="btn btn-secondary btn-sm" (click)="startEdit(m)">✎ עריכה</button>
+                    <button class="btn btn-secondary btn-sm" (click)="startEdit(m)"><svg lucidePencil class="icon"></svg> עריכה</button>
                     @if (measurements().length > 1) {
-                      <button class="btn btn-secondary btn-sm" (click)="deleteMeasurement(m)">🗑 מחיקה</button>
+                      <button class="btn btn-secondary btn-sm" (click)="deleteMeasurement(m)"><svg lucideTrash2 class="icon"></svg> מחיקה</button>
                     }
                   </div>
                 </div>
@@ -135,12 +143,12 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
         }
       </section>
 
-      <section class="card photos-section">
-        <div class="carousel-header">
-          <h3 class="section-title">תמונות</h3>
+      <section class="card panel photos-section">
+        <div class="section-head">
+          <h3 class="panel-title" style="margin-bottom: 0">תמונות</h3>
           <div class="add-wrapper">
             <button class="btn btn-secondary" (click)="showUploadPopover.set(!showUploadPopover())">
-              📷 העלאת תמונות
+              <svg lucideCamera class="icon"></svg> העלאת תמונות
             </button>
             @if (showUploadPopover()) {
               <div class="upload-popover card">
@@ -157,7 +165,7 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
                   (change)="onPhotosSelected($event)"
                 />
                 <button class="btn btn-primary" (click)="photoInput.click()" [disabled]="uploading()">
-                  {{ uploading() ? 'מעלה...' : '⬆️ בחירת תמונות' }}
+                  <svg lucideUpload class="icon"></svg> {{ uploading() ? 'מעלה...' : 'בחירת תמונות' }}
                 </button>
               </div>
             }
@@ -165,7 +173,9 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
         </div>
 
         @if (photosAsc().length === 0) {
-          <div class="card empty-state">עדיין לא הועלו תמונות</div>
+          <app-empty-state heading="עדיין לא הועלו תמונות">
+            <svg lucideCamera class="icon" empty-icon></svg>
+          </app-empty-state>
         } @else {
           <div class="carousel">
             @for (p of photosAsc(); track p.id; let i = $index) {
@@ -176,7 +186,9 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
                 <a class="carousel-photo" [href]="p.viewUrl" target="_blank">
                   <img [src]="p.viewUrl" [alt]="formatDate(p.date)" />
                 </a>
-                <button class="photo-delete" title="מחיקה" (click)="deletePhoto(p)">🗑</button>
+                <button class="photo-delete" title="מחיקה" (click)="deletePhoto(p)">
+                  <svg lucideTrash2 style="width: 12px; height: 12px"></svg>
+                </button>
               </div>
             }
           </div>
@@ -188,40 +200,23 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
     .progress-layout {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: var(--space-6);
     }
-    .section-title {
-      font-size: 14px;
-    }
-    .chart-card, .photos-section {
-      padding: 20px;
-    }
-    .events-header {
+    .inline-form-card {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-    }
-    .new-measurement-card {
-      padding: 18px;
-      margin-bottom: 14px;
-    }
-    .four-col {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
+      flex-direction: column;
+      gap: var(--space-3);
+      align-items: flex-start;
     }
     .event-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 0;
     }
     .event-card {
-      padding: 16px 18px;
-      display: flex;
       align-items: center;
-      gap: 24px;
       flex-wrap: wrap;
+      gap: var(--space-6);
     }
     .event-date {
       font-weight: 700;
@@ -230,7 +225,8 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
     }
     .event-metrics {
       display: flex;
-      gap: 28px;
+      align-items: center;
+      gap: var(--space-6);
       flex: 1;
       flex-wrap: wrap;
     }
@@ -242,25 +238,9 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
       font-weight: 700;
       margin-top: 2px;
     }
-    .photos-note {
-      font-size: 12px;
-      color: var(--color-text-muted);
-    }
     .event-actions {
       display: flex;
-      gap: 8px;
-      margin-inline-start: auto;
-    }
-    .edit-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 14px;
-    }
-    .carousel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
+      gap: var(--space-2);
     }
     .add-wrapper {
       position: relative;
@@ -271,17 +251,18 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
       top: calc(100% + 8px);
       left: 0;
       width: 240px;
-      padding: 16px;
+      padding: var(--space-4);
       z-index: 10;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: var(--space-3);
+      box-shadow: var(--shadow-md);
     }
     .carousel {
       direction: ltr;
       display: flex;
       align-items: stretch;
-      gap: 10px;
+      gap: var(--space-3);
       overflow-x: auto;
       padding-bottom: 6px;
     }
@@ -323,10 +304,11 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
       padding: 0;
       border: none;
       border-radius: 50%;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(36, 37, 34, 0.65);
       color: var(--color-on-primary);
-      font-size: 11px;
-      line-height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
       opacity: 0;
       transition: opacity 0.15s;
@@ -334,17 +316,13 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
     .carousel-photo-wrap:hover .photo-delete {
       opacity: 1;
     }
-    @media (max-width: 720px) {
-      .four-col {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
   `]
 })
 export class ProgressTabComponent implements OnChanges {
   @Input({ required: true }) customerId!: string;
   private customersService = inject(CustomersService);
   private confirmDialog = inject(ConfirmDialogService);
+  private toast = inject(ToastService);
 
   measurements = signal<ProgressMeasurement[]>([]);
   reversedMeasurements = computed(() => [...this.measurements()].reverse());
@@ -397,6 +375,7 @@ export class ProgressTabComponent implements OnChanges {
         this.newThigh = null;
         this.newHip = null;
         this.loadMeasurements();
+        this.toast.success('המדידה נשמרה בהצלחה');
       },
       error: () => this.saving.set(false)
     });
@@ -429,6 +408,7 @@ export class ProgressTabComponent implements OnChanges {
         this.saving.set(false);
         this.editingId.set(null);
         this.loadMeasurements();
+        this.toast.success('המדידה עודכנה בהצלחה');
       },
       error: () => this.saving.set(false)
     });
@@ -469,6 +449,7 @@ export class ProgressTabComponent implements OnChanges {
         this.uploading.set(false);
         this.showUploadPopover.set(false);
         this.loadPhotos();
+        this.toast.success('התמונות הועלו בהצלחה');
       },
       error: () => {
         this.uploading.set(false);

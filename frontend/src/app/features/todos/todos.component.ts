@@ -1,13 +1,15 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { LucidePlus } from '@lucide/angular';
 import { TodosService } from '../../core/services/todos.service';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 
 const ROTATIONS = [-3, 2, -2, 3, -1, 1];
 
 @Component({
   selector: 'app-todos',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, EmptyStateComponent, LucidePlus],
   templateUrl: './todos.component.html',
   styleUrl: './todos.component.scss'
 })

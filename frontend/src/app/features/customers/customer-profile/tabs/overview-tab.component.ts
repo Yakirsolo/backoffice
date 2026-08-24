@@ -1,6 +1,8 @@
 import { Component, Input, OnChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { LucideCheck, LucidePencil } from '@lucide/angular';
 import { CustomersService } from '../../../../core/services/customers.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import {
   BILLING_INTERVAL_UNIT_LABELS, BillingIntervalUnit, Customer, LEAD_SOURCE_LABELS, LeadSource
 } from '../../../../core/models/customer.model';
@@ -11,14 +13,14 @@ type Section = 'personal' | 'business' | 'track';
 @Component({
   selector: 'app-overview-tab',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, LucidePencil, LucideCheck],
   template: `
     <div class="overview-grid">
-      <section class="card section">
-        <div class="section-header">
-          <h3 class="section-title">פרטים אישיים</h3>
+      <section class="card panel">
+        <div class="section-head">
+          <h3 class="panel-title">פרטים אישיים</h3>
           @if (editingSection() !== 'personal') {
-            <button class="btn btn-secondary btn-sm" (click)="startEdit('personal')">✎ עריכה</button>
+            <button class="btn btn-secondary btn-sm" (click)="startEdit('personal')"><svg lucidePencil class="icon"></svg> עריכה</button>
           }
         </div>
         @if (editingSection() === 'personal') {
@@ -36,12 +38,12 @@ type Section = 'personal' | 'business' | 'track';
               <input class="input-field" [(ngModel)]="editPhone" />
             </div>
             <div class="field-group">
-              <label class="field-label">תיאור קצר</label>
+              <label class="field-label">תיאור קצר <span class="optional-hint">(אופציונלי)</span></label>
               <textarea class="input-field" rows="3" [(ngModel)]="editDescription"></textarea>
             </div>
-            <div class="edit-actions">
+            <div class="form-actions">
               <button class="btn btn-primary" (click)="saveSection('personal')" [disabled]="!editName.trim() || saving()">
-                {{ saving() ? 'שומרת...' : '✓ שמירה' }}
+                <svg lucideCheck class="icon"></svg> {{ saving() ? 'שומרת...' : 'שמירה' }}
               </button>
               <button class="btn btn-secondary" (click)="cancelEdit()">ביטול</button>
             </div>
@@ -50,18 +52,18 @@ type Section = 'personal' | 'business' | 'track';
           <div class="detail-row"><span class="detail-label">שם</span><span>{{ customer.name }}</span></div>
           <div class="detail-row"><span class="detail-label">גיל</span><span>{{ customer.age }}</span></div>
           <div class="detail-row"><span class="detail-label">טלפון</span><span>{{ customer.phone }}</span></div>
-          <div class="detail-row description">
+          <div class="detail-row column">
             <span class="detail-label">תיאור קצר</span>
             <p>{{ customer.description || '—' }}</p>
           </div>
         }
       </section>
 
-      <section class="card section">
-        <div class="section-header">
-          <h3 class="section-title">פרטי עסק</h3>
+      <section class="card panel">
+        <div class="section-head">
+          <h3 class="panel-title">פרטי עסק</h3>
           @if (editingSection() !== 'business') {
-            <button class="btn btn-secondary btn-sm" (click)="startEdit('business')">✎ עריכה</button>
+            <button class="btn btn-secondary btn-sm" (click)="startEdit('business')"><svg lucidePencil class="icon"></svg> עריכה</button>
           }
         </div>
         @if (editingSection() === 'business') {
@@ -74,9 +76,9 @@ type Section = 'personal' | 'business' | 'track';
                 }
               </select>
             </div>
-            <div class="edit-actions">
+            <div class="form-actions">
               <button class="btn btn-primary" (click)="saveSection('business')" [disabled]="saving()">
-                {{ saving() ? 'שומרת...' : '✓ שמירה' }}
+                <svg lucideCheck class="icon"></svg> {{ saving() ? 'שומרת...' : 'שמירה' }}
               </button>
               <button class="btn btn-secondary" (click)="cancelEdit()">ביטול</button>
             </div>
@@ -86,11 +88,11 @@ type Section = 'personal' | 'business' | 'track';
         }
       </section>
 
-      <section class="card section">
-        <div class="section-header">
-          <h3 class="section-title">מסלול</h3>
+      <section class="card panel">
+        <div class="section-head">
+          <h3 class="panel-title">מסלול</h3>
           @if (editingSection() !== 'track') {
-            <button class="btn btn-secondary btn-sm" (click)="startEdit('track')">✎ עריכה</button>
+            <button class="btn btn-secondary btn-sm" (click)="startEdit('track')"><svg lucidePencil class="icon"></svg> עריכה</button>
           }
         </div>
         @if (editingSection() === 'track') {
@@ -110,6 +112,7 @@ type Section = 'personal' | 'business' | 'track';
             <div class="field-group">
               <label class="field-label">מסלול</label>
               <input class="input-field" type="text" [value]="editProgramName" disabled />
+              <p class="field-hint">נגזר אוטומטית מתדירות התשלום</p>
             </div>
             <div class="field-group">
               <label class="field-label">משקל יעד (ק"ג)</label>
@@ -120,10 +123,10 @@ type Section = 'personal' | 'business' | 'track';
               <input class="input-field" type="date" [(ngModel)]="editStartDate" />
             </div>
             <div class="detail-row"><span class="detail-label">משקל התחלתי</span><span>{{ customer.startWeight }} ק"ג</span></div>
-            <p class="hint">לעדכון משקל התחלתי, ערכו את המדידה הראשונה בלשונית התקדמות</p>
-            <div class="edit-actions">
+            <p class="field-hint">לעדכון משקל התחלתי, ערכו את המדידה הראשונה בלשונית התקדמות</p>
+            <div class="form-actions">
               <button class="btn btn-primary" (click)="saveSection('track')" [disabled]="!editBillingIntervalValue || !editTargetWeight || !editStartDate || saving()">
-                {{ saving() ? 'שומרת...' : '✓ שמירה' }}
+                <svg lucideCheck class="icon"></svg> {{ saving() ? 'שומרת...' : 'שמירה' }}
               </button>
               <button class="btn btn-secondary" (click)="cancelEdit()">ביטול</button>
             </div>
@@ -131,9 +134,9 @@ type Section = 'personal' | 'business' | 'track';
         } @else {
           <div class="detail-row"><span class="detail-label">מסלול</span><span>{{ customer.program }}</span></div>
           <div class="detail-row"><span class="detail-label">תדירות תשלום</span><span>כל {{ customer.billingIntervalValue }} {{ billingUnitLabels[customer.billingIntervalUnit] }}</span></div>
-          <div class="detail-row"><span class="detail-label">תאריך תחילת תהליך</span><span>{{ formatDate(customer.startDate) }}</span></div>
-          <div class="detail-row"><span class="detail-label">משקל התחלתי</span><span>{{ customer.startWeight }} ק"ג</span></div>
-          <div class="detail-row"><span class="detail-label">משקל יעד</span><span>{{ customer.targetWeight }} ק"ג</span></div>
+          <div class="detail-row"><span class="detail-label">תאריך תחילת תהליך</span><span class="tabular-nums">{{ formatDate(customer.startDate) }}</span></div>
+          <div class="detail-row"><span class="detail-label">משקל התחלתי</span><span class="tabular-nums">{{ customer.startWeight }} ק"ג</span></div>
+          <div class="detail-row"><span class="detail-label">משקל יעד</span><span class="tabular-nums">{{ customer.targetWeight }} ק"ג</span></div>
         }
       </section>
     </div>
@@ -142,58 +145,17 @@ type Section = 'personal' | 'business' | 'track';
     .overview-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-    }
-    .section {
-      padding: 20px;
-    }
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-    }
-    .section-title {
-      font-size: 14px;
-      margin-bottom: 0;
-    }
-    .detail-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 9px 0;
-      border-bottom: 1px solid var(--color-border);
-      font-size: 14px;
-    }
-    .detail-row:last-child {
-      border-bottom: none;
-    }
-    .detail-row.description {
-      flex-direction: column;
-      gap: 6px;
-    }
-    .detail-row.description p {
-      color: var(--color-text-muted);
-    }
-    .detail-label {
-      color: var(--color-text-muted);
-      font-weight: 600;
-      flex-shrink: 0;
+      gap: var(--space-4);
     }
     .edit-form {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-    }
-    .hint {
-      font-size: 12px;
-      color: var(--color-text-faint);
-      margin: 0;
+      gap: var(--space-3);
     }
     .billing-cadence {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: var(--space-2);
     }
     .billing-cadence input {
       width: 70px;
@@ -201,16 +163,12 @@ type Section = 'personal' | 'business' | 'track';
     .billing-cadence select {
       flex: 1;
     }
-    .edit-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 4px;
-    }
   `]
 })
 export class OverviewTabComponent implements OnChanges {
   @Input({ required: true }) customer!: Customer;
   private customersService = inject(CustomersService);
+  private toast = inject(ToastService);
 
   sourceLabels = LEAD_SOURCE_LABELS;
   sourceOptions: LeadSource[] = ['instagram', 'facebook', 'referral', 'website', 'other'];
@@ -281,6 +239,7 @@ export class OverviewTabComponent implements OnChanges {
       next: () => {
         this.saving.set(false);
         this.editingSection.set(null);
+        this.toast.success('הפרטים נשמרו בהצלחה');
       },
       error: () => this.saving.set(false)
     });

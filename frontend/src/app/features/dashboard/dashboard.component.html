@@ -1,43 +1,43 @@
 @if (data(); as d) {
   <div class="page">
-    <div class="page-header">
+    <div class="greeting-row">
       <div>
-        <h1 class="page-title">שלום דורין 👋</h1>
-        <p class="page-subtitle">הנה מה שקורה היום, {{ formatDate(today) }}</p>
+        <h1 class="greeting-title">בוקר טוב{{ currentUser()?.name ? ', ' + currentUser()?.name : '' }}</h1>
+        <p class="greeting-sub">{{ formatLongDate(today) }}</p>
       </div>
       <a class="btn btn-primary" routerLink="/customers/new">
-        <span>➕</span> לקוחה חדשה
+        <svg lucidePlus class="icon"></svg> לקוחה חדשה
       </a>
     </div>
 
-    <div class="stats-grid">
-      <div class="card stat-card">
-        <div class="stat-icon stat-icon-primary">📅</div>
-        <div>
-          <div class="stat-value">{{ d.todaysMeetings.length }}</div>
-          <div class="stat-label">פגישות היום</div>
+    <div class="card stat-strip">
+      <div class="stat">
+        <div class="stat-icon" style="background: var(--color-primary-soft); color: var(--color-primary)">
+          <svg lucideCalendar class="icon"></svg>
         </div>
+        <div class="stat-value tabular-nums">{{ d.todaysMeetings.length }}</div>
+        <div class="stat-label">פגישות היום</div>
       </div>
-      <div class="card stat-card">
-        <div class="stat-icon stat-icon-success">✨</div>
-        <div>
-          <div class="stat-value">{{ d.newCustomersThisMonth }}</div>
-          <div class="stat-label">לקוחות חדשים</div>
+      <div class="stat">
+        <div class="stat-icon" style="background: var(--color-success-soft); color: var(--color-success)">
+          <svg lucideUserPlus class="icon"></svg>
         </div>
+        <div class="stat-value tabular-nums">{{ d.newCustomersThisMonth }}</div>
+        <div class="stat-label">לקוחות חדשות החודש</div>
       </div>
-      <div class="card stat-card">
-        <div class="stat-icon stat-icon-warning">💳</div>
-        <div>
-          <div class="stat-value">{{ d.upcomingPayments.length }}</div>
-          <div class="stat-label">תשלומים קרובים</div>
+      <div class="stat">
+        <div class="stat-icon" style="background: var(--color-warning-soft); color: var(--color-warning)">
+          <svg lucideCreditCard class="icon"></svg>
         </div>
+        <div class="stat-value tabular-nums">{{ d.upcomingPayments.length }}</div>
+        <div class="stat-label">תשלומים קרובים</div>
       </div>
-      <div class="card stat-card">
-        <div class="stat-icon stat-icon-danger">⚑</div>
-        <div>
-          <div class="stat-value">{{ d.followUpCustomers.length }}</div>
-          <div class="stat-label">דורשות מעקב</div>
+      <div class="stat">
+        <div class="stat-icon" style="background: var(--color-danger-soft); color: var(--color-danger)">
+          <svg lucideFlag class="icon"></svg>
         </div>
+        <div class="stat-value tabular-nums">{{ d.followUpCustomers.length }}</div>
+        <div class="stat-label">דורשות מעקב</div>
       </div>
     </div>
 
@@ -45,18 +45,22 @@
       <section class="card panel">
         <h2 class="panel-title">פגישות היום</h2>
         @if (d.todaysMeetings.length === 0) {
-          <div class="empty-state">אין פגישות מתוכננות להיום</div>
+          <app-empty-state heading="אין פגישות מתוכננות להיום">
+            <svg lucideCalendar class="icon" empty-icon></svg>
+          </app-empty-state>
         } @else {
-          <div class="meeting-list">
+          <div>
             @for (meeting of d.todaysMeetings; track meeting.id) {
-              <a class="meeting-row" [routerLink]="['/customers', meeting.customerId]">
-                <div class="meeting-time">{{ formatTime(meeting.time) }}</div>
-                <div class="meeting-info">
-                  <div class="meeting-name">{{ meeting.customerName }}</div>
-                  <div class="meeting-type">{{ meeting.type }}</div>
+              <a class="list-row" [routerLink]="['/customers', meeting.customerId]">
+                <div class="list-row-main">
+                  <span class="row-time tabular-nums">{{ formatTime(meeting.time) }}</span>
+                  <div>
+                    <div class="row-name">{{ meeting.customerName }}</div>
+                    <div class="row-meta">{{ meeting.type }}</div>
+                  </div>
                 </div>
                 @if (meeting.zoomLink) {
-                  <span class="badge badge-primary">Zoom</span>
+                  <span class="badge badge-primary"><svg lucideVideo class="icon" style="width: 12px; height: 12px"></svg>Zoom</span>
                 }
               </a>
             }
@@ -67,18 +71,20 @@
       <section class="card panel">
         <h2 class="panel-title">תזכורות תשלום</h2>
         @if (d.upcomingPayments.length === 0) {
-          <div class="empty-state">אין תשלומים שממתינים</div>
+          <app-empty-state heading="אין תשלומים שממתינים">
+            <svg lucideCreditCard class="icon" empty-icon></svg>
+          </app-empty-state>
         } @else {
-          <div class="payment-list">
+          <div>
             @for (payment of d.upcomingPayments; track payment.id) {
-              <a class="payment-row" [routerLink]="['/customers', payment.customerId]">
+              <a class="list-row" [routerLink]="['/customers', payment.customerId]">
                 <div>
-                  <div class="payment-name">{{ payment.customerName }}</div>
-                  <div class="payment-note" [class.overdue]="payment.status === 'overdue'">
+                  <div class="row-name">{{ payment.customerName }}</div>
+                  <div class="row-meta" [class.danger-text]="payment.status === 'overdue'">
                     {{ paymentNote(payment.date, payment.status) }}
                   </div>
                 </div>
-                <div class="payment-amount">{{ payment.amount }} ₪</div>
+                <div class="row-amount tabular-nums">{{ payment.amount }} ₪</div>
               </a>
             }
           </div>
@@ -86,17 +92,24 @@
       </section>
     </div>
 
-    @if (d.followUpCustomers.length > 0) {
-      <section class="card panel followup-panel">
-        <h2 class="panel-title">לקוחות שדורשות מעקב</h2>
+    <section class="card panel">
+      <h2 class="panel-title">לקוחות שדורשות מעקב</h2>
+      @if (d.followUpCustomers.length === 0) {
+        <app-empty-state heading="אין לקוחות שדורשות מעקב כרגע">
+          <svg lucideUsers class="icon" empty-icon></svg>
+        </app-empty-state>
+      } @else {
         <div class="followup-list">
           @for (customer of d.followUpCustomers; track customer.id) {
-            <a class="followup-chip" [routerLink]="['/customers', customer.id]">
-              <span>{{ customer.name }}</span>
+            <a class="followup-row" [routerLink]="['/customers', customer.id]">
+              <span class="avatar avatar-sm">{{ customer.name.charAt(0) }}</span>
+              <span class="row-name">{{ customer.name }}</span>
+              <span class="row-meta">{{ customer.program }}</span>
+              <span class="badge badge-warning followup-reason">דורשת מעקב</span>
             </a>
           }
         </div>
-      </section>
-    }
+      }
+    </section>
   </div>
 }

@@ -1,36 +1,10 @@
-.back-link {
-  display: inline-block;
-  color: var(--color-text-muted);
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-
-.back-link:hover {
-  color: var(--color-primary);
-}
-
 .profile-header {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 24px;
-  margin-bottom: 20px;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  margin-bottom: var(--space-6);
   flex-wrap: wrap;
-}
-
-.avatar-lg {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 24px;
-  flex-shrink: 0;
 }
 
 .profile-info {
@@ -41,57 +15,50 @@
 .profile-name-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .status-toggle-btn {
-  font-size: 12px;
-  padding: 6px 12px;
+  flex-shrink: 0;
 }
 
 .profile-stats {
   display: flex;
-  gap: 24px;
+  gap: var(--space-6);
 }
 
 .profile-stat-value {
-  font-size: 18px;
-  font-weight: 800;
+  font-size: 17px;
+  font-weight: 700;
   text-align: center;
-}
-
-.success-text {
-  color: var(--color-success);
-}
-
-.danger-text {
-  color: var(--color-danger);
 }
 
 .profile-stat-label {
-  font-size: 12px;
-  color: var(--color-text-muted);
+  font-size: 11px;
+  color: var(--color-text-faint);
   text-align: center;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .tabs-nav {
   display: flex;
-  gap: 4px;
+  gap: var(--space-5);
   border-bottom: 1px solid var(--color-border);
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
   overflow-x: auto;
 }
 
 .tab-btn {
-  padding: 10px 16px;
+  padding: 10px 2px;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
   color: var(--color-text-muted);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13.5px;
   white-space: nowrap;
+  margin-bottom: -1px;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 .tab-btn:hover {
@@ -107,6 +74,10 @@
   .profile-stats {
     width: 100%;
     justify-content: space-between;
-    gap: 8px;
+    gap: var(--space-2);
+  }
+  .status-toggle-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

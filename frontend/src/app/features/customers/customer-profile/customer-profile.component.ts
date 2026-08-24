@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+import { LucideChevronRight, LucideFlag, LucideRotateCcw } from '@lucide/angular';
 import { CustomersService } from '../../../core/services/customers.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { CUSTOMER_STATUS_LABELS, Customer } from '../../../core/models/customer.model';
@@ -21,7 +22,8 @@ type TabId = 'overview' | 'progress' | 'history' | 'payments' | 'documents' | 'm
   imports: [
     RouterLink,
     OverviewTabComponent, ProgressTabComponent, HistoryTabComponent,
-    PaymentsTabComponent, DocumentsTabComponent, MeetingsTabComponent
+    PaymentsTabComponent, DocumentsTabComponent, MeetingsTabComponent,
+    LucideChevronRight, LucideFlag, LucideRotateCcw
   ],
   templateUrl: './customer-profile.component.html',
   styleUrl: './customer-profile.component.scss'

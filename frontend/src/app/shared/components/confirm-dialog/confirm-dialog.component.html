@@ -5,14 +5,14 @@
       <p>{{ s.message }}</p>
       <div class="modal-actions">
         <button
-          class="btn btn-md"
+          class="btn"
           [class.btn-danger]="s.danger"
           [class.btn-primary]="!s.danger"
           (click)="confirm()"
           autofocus
         >{{ s.confirmLabel }}</button>
         @if (s.cancelLabel) {
-          <button class="btn btn-secondary btn-md" (click)="cancel()">{{ s.cancelLabel }}</button>
+          <button class="btn btn-secondary" (click)="cancel()">{{ s.cancelLabel }}</button>
         }
       </div>
     </div>

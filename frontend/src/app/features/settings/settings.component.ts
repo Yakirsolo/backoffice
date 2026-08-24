@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-settings',
@@ -11,6 +12,7 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class SettingsComponent {
   private authService = inject(AuthService);
+  private toast = inject(ToastService);
 
   coachName = signal('');
   businessName = signal('');
@@ -20,7 +22,6 @@ export class SettingsComponent {
   notifyFollowUp = signal(true);
 
   saving = signal(false);
-  saveMessage = signal('');
 
   constructor() {
     this.authService.getMySettings().subscribe(settings => {
@@ -35,7 +36,6 @@ export class SettingsComponent {
 
   save() {
     this.saving.set(true);
-    this.saveMessage.set('');
     this.authService.updateMySettings({
       name: this.coachName(),
       businessName: this.businessName(),
@@ -45,11 +45,11 @@ export class SettingsComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.saveMessage.set('השינויים נשמרו בהצלחה');
+        this.toast.success('השינויים נשמרו בהצלחה');
       },
       error: () => {
         this.saving.set(false);
-        this.saveMessage.set('שמירה נכשלה, נסי שוב');
+        this.toast.error('שמירה נכשלה, נסי שוב');
       }
     });
   }

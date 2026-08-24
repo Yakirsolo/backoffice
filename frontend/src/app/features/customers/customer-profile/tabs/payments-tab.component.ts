@@ -1,30 +1,33 @@
 import { Component, Input, OnChanges, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { LucideCheck, LucidePencil, LucidePlus, LucideX } from '@lucide/angular';
 import { CustomersService } from '../../../../core/services/customers.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import {
   BILLING_INTERVAL_UNIT_LABELS, Customer, PAYMENT_STATUS_LABELS, Payment, PaymentStatus
 } from '../../../../core/models/customer.model';
 import { formatDate, paymentStatusBadgeClass } from '../../../../shared/status-utils';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-payments-tab',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, EmptyStateComponent, LucidePlus, LucideX, LucideCheck, LucidePencil],
   template: `
     <div class="payments-layout">
-      <section class="card subscription-card">
-        <h3 class="section-title">מנוי נוכחי</h3>
+      <section class="card panel subscription-card">
+        <h3 class="panel-title">מנוי נוכחי</h3>
         <div class="detail-row"><span class="detail-label">מסלול</span><span>{{ customer.program }}</span></div>
-        <div class="detail-row"><span class="detail-label">סכום ששולם</span><span>{{ lastAmount() }} ₪</span></div>
+        <div class="detail-row"><span class="detail-label">סכום ששולם</span><span class="tabular-nums">{{ lastAmount() }} ₪</span></div>
         <div class="detail-row">
           <span class="detail-label">תדירות תשלום</span>
           <span>כל {{ customer.billingIntervalValue }} {{ unitLabels[customer.billingIntervalUnit] }}</span>
         </div>
-        <div class="detail-row"><span class="detail-label">תאריך התחלה</span><span>{{ formatDate(customer.startDate) }}</span></div>
+        <div class="detail-row"><span class="detail-label">תאריך התחלה</span><span class="tabular-nums">{{ formatDate(customer.startDate) }}</span></div>
         @if (customer.status === 'active') {
           <div class="detail-row">
             <span class="detail-label">תאריך תשלום הבא</span>
-            <span>{{ customer.nextPaymentDate ? formatDate(customer.nextPaymentDate) : '—' }}</span>
+            <span class="tabular-nums">{{ customer.nextPaymentDate ? formatDate(customer.nextPaymentDate) : '—' }}</span>
           </div>
         }
         <div class="detail-row">
@@ -33,16 +36,16 @@ import { formatDate, paymentStatusBadgeClass } from '../../../../shared/status-u
         </div>
       </section>
 
-      <section class="history">
-        <div class="history-header">
-          <h3 class="section-title">היסטוריית תשלומים</h3>
+      <section>
+        <div class="section-head">
+          <h3 class="panel-title" style="margin-bottom: 0">היסטוריית תשלומים</h3>
           <button class="btn btn-secondary" (click)="showForm.set(!showForm())">
-            {{ showForm() ? '✕ ביטול' : '➕ רישום תשלום' }}
+            @if (showForm()) { <svg lucideX class="icon"></svg> ביטול } @else { <svg lucidePlus class="icon"></svg> רישום תשלום }
           </button>
         </div>
 
         @if (showForm()) {
-          <div class="card new-payment-card">
+          <div class="card inline-form-card">
             <div class="three-col">
               <div class="field-group">
                 <label class="field-label">סכום (₪) *</label>
@@ -62,18 +65,20 @@ import { formatDate, paymentStatusBadgeClass } from '../../../../shared/status-u
               </div>
             </div>
             <button class="btn btn-primary" (click)="addPayment()" [disabled]="!newAmount || !newDate || saving()">
-              {{ saving() ? 'שומרת...' : '✓ שמירת תשלום' }}
+              <svg lucideCheck class="icon"></svg> {{ saving() ? 'שומרת...' : 'שמירת תשלום' }}
             </button>
           </div>
         }
 
         @if (payments().length === 0) {
-          <div class="card empty-state">אין עדיין תשלומים</div>
+          <app-empty-state heading="אין עדיין תשלומים">
+            <svg lucidePlus class="icon" empty-icon></svg>
+          </app-empty-state>
         } @else {
           <div class="payment-list">
             @for (p of payments(); track p.id) {
               @if (editingId() === p.id) {
-                <div class="card new-payment-card">
+                <div class="card inline-form-card">
                   <div class="three-col">
                     <div class="field-group">
                       <label class="field-label">סכום (₪) *</label>
@@ -92,23 +97,23 @@ import { formatDate, paymentStatusBadgeClass } from '../../../../shared/status-u
                       </select>
                     </div>
                   </div>
-                  <div class="edit-actions">
+                  <div class="form-actions">
                     <button class="btn btn-primary" (click)="saveEdit(p.id)" [disabled]="!editAmount || !editDate || saving()">
-                      {{ saving() ? 'שומרת...' : '✓ שמירה' }}
+                      <svg lucideCheck class="icon"></svg> {{ saving() ? 'שומרת...' : 'שמירה' }}
                     </button>
                     <button class="btn btn-secondary" (click)="cancelEdit()">ביטול</button>
                   </div>
                 </div>
               } @else {
-                <div class="card payment-row">
-                  <div class="payment-date">{{ formatDate(p.date) }}</div>
-                  <div class="payment-amount">{{ p.amount }} ₪</div>
+                <div class="card item-card payment-row">
+                  <div class="payment-date tabular-nums">{{ formatDate(p.date) }}</div>
+                  <div class="payment-amount tabular-nums">{{ p.amount }} ₪</div>
                   <span [class]="paymentStatusBadgeClass(p.status)">{{ statusLabels[p.status] }}</span>
                   <div class="payment-actions">
                     @if (p.status !== 'paid') {
-                      <button class="btn btn-secondary btn-sm" (click)="markPaid(p)">✓ סמן כשולם</button>
+                      <button class="btn btn-secondary btn-sm" (click)="markPaid(p)"><svg lucideCheck class="icon"></svg> סמן כשולם</button>
                     }
-                    <button class="btn btn-secondary btn-sm" (click)="startEdit(p)">✎ עריכה</button>
+                    <button class="btn btn-secondary btn-sm" (click)="startEdit(p)"><svg lucidePencil class="icon"></svg> עריכה</button>
                   </div>
                 </div>
               }
@@ -122,56 +127,24 @@ import { formatDate, paymentStatusBadgeClass } from '../../../../shared/status-u
     .payments-layout {
       display: flex;
       flex-direction: column;
-      gap: 24px;
-    }
-    .section-title {
-      font-size: 14px;
-      margin-bottom: 14px;
+      gap: var(--space-6);
     }
     .subscription-card {
-      padding: 20px;
       max-width: 420px;
     }
-    .detail-row {
+    .inline-form-card {
       display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 9px 0;
-      border-bottom: 1px solid var(--color-border);
-      font-size: 14px;
-    }
-    .detail-row:last-child {
-      border-bottom: none;
-    }
-    .detail-label {
-      color: var(--color-text-muted);
-      font-weight: 600;
-    }
-    .history-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-    }
-    .new-payment-card {
-      padding: 18px;
-      margin-bottom: 14px;
-    }
-    .three-col {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
+      flex-direction: column;
+      gap: var(--space-3);
+      align-items: flex-start;
     }
     .payment-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
     }
     .payment-row {
-      padding: 14px 18px;
-      display: flex;
       align-items: center;
-      gap: 20px;
+      gap: var(--space-5);
     }
     .payment-date {
       font-weight: 600;
@@ -183,24 +156,14 @@ import { formatDate, paymentStatusBadgeClass } from '../../../../shared/status-u
     }
     .payment-actions {
       display: flex;
-      gap: 8px;
-      margin-inline-start: auto;
-    }
-    .edit-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 14px;
-    }
-    @media (max-width: 720px) {
-      .three-col {
-        grid-template-columns: 1fr;
-      }
+      gap: var(--space-2);
     }
   `]
 })
 export class PaymentsTabComponent implements OnChanges {
   @Input({ required: true }) customer!: Customer;
   private customersService = inject(CustomersService);
+  private toast = inject(ToastService);
   private idSignal = signal<string>('');
 
   payments = computed(() => this.customersService.paymentsFor(this.idSignal()));
@@ -241,6 +204,7 @@ export class PaymentsTabComponent implements OnChanges {
       next: () => {
         this.saving.set(false);
         this.showForm.set(false);
+        this.toast.success('התשלום נרשם בהצלחה');
       },
       error: () => this.saving.set(false)
     });
@@ -268,6 +232,7 @@ export class PaymentsTabComponent implements OnChanges {
       next: () => {
         this.saving.set(false);
         this.editingId.set(null);
+        this.toast.success('התשלום עודכן בהצלחה');
       },
       error: () => this.saving.set(false)
     });
@@ -278,6 +243,6 @@ export class PaymentsTabComponent implements OnChanges {
       amount: p.amount,
       date: p.date,
       status: 'paid'
-    }).subscribe();
+    }).subscribe(() => this.toast.success('התשלום סומן כשולם'));
   }
 }

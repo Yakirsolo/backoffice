@@ -35,12 +35,14 @@
   <section class="card panel source-panel">
     <h2 class="panel-title">פילוח לפי מקור הגעה</h2>
     @if (newCustomersInMonth().length === 0) {
-      <div class="empty-state">אין לקוחות חדשות בחודש זה</div>
+      <app-empty-state heading="אין לקוחות חדשות בחודש זה">
+        <svg lucideUsers class="icon" empty-icon></svg>
+      </app-empty-state>
     } @else {
       <div class="donut-layout">
         <div class="donut-wrap">
           <svg viewBox="0 0 140 140" class="donut-chart">
-            <circle cx="70" cy="70" r="60" fill="none" stroke="var(--color-surface)" stroke-width="20" />
+            <circle cx="70" cy="70" r="60" fill="none" stroke="var(--color-surface-sunken)" stroke-width="20" />
             @for (seg of sourceDonutSegments(); track seg.source) {
               <circle
                 cx="70" cy="70" r="60" fill="none"

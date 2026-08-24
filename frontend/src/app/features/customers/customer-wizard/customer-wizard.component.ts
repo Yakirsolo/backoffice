@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { LucideCheck, LucideChevronLeft, LucideChevronRight, LucideUpload, LucideX } from '@lucide/angular';
 import { CustomersService } from '../../../core/services/customers.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import {
@@ -31,7 +32,7 @@ interface WizardData {
 @Component({
   selector: 'app-customer-wizard',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, LucideChevronRight, LucideChevronLeft, LucideUpload, LucideX, LucideCheck],
   templateUrl: './customer-wizard.component.html',
   styleUrl: './customer-wizard.component.scss'
 })

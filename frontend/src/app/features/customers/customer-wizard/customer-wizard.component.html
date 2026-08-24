@@ -1,5 +1,8 @@
 <div class="page wizard-page">
-  <a class="back-link" routerLink="/customers">→ ביטול וחזרה לרשימת הלקוחות</a>
+  <div class="breadcrumb">
+    <svg lucideChevronRight class="icon"></svg>
+    <a routerLink="/customers">ביטול וחזרה לרשימת הלקוחות</a>
+  </div>
   <h1 class="page-title">לקוחה חדשה</h1>
 
   <div class="stepper">
@@ -10,10 +13,9 @@
         [class.done]="currentStep() > i"
         (click)="goToStep(i)"
       >
-        <span class="step-index">{{ currentStep() > i ? '✓' : i + 1 }}</span>
+        <span class="step-track"></span>
         <span class="step-label">{{ step }}</span>
       </button>
-      @if (i < steps.length - 1) { <span class="step-line"></span> }
     }
   </div>
 
@@ -36,7 +38,7 @@
             </div>
           </div>
           <div class="field-group">
-            <label class="field-label">תיאור קצר</label>
+            <label class="field-label">תיאור קצר <span class="optional-hint">(אופציונלי)</span></label>
             <textarea class="input-field" rows="3" [(ngModel)]="data.description"></textarea>
           </div>
         </div>
@@ -64,6 +66,7 @@
           <div class="field-group">
             <label class="field-label">מסלול</label>
             <input class="input-field" type="text" [value]="programName" disabled />
+            <p class="field-hint">נגזר אוטומטית מתדירות התשלום</p>
           </div>
           <div class="two-col">
             <div class="field-group">
@@ -71,7 +74,7 @@
               <input class="input-field" type="date" [(ngModel)]="data.startDate" />
             </div>
             <div class="field-group">
-              <label class="field-label">מקור הגעה</label>
+              <label class="field-label">מקור הגעה <span class="optional-hint">(אופציונלי)</span></label>
               <select class="input-field" [(ngModel)]="data.source">
                 @for (s of sourceOptions; track s) {
                   <option [value]="s">{{ sourceLabels[s] }}</option>
@@ -89,36 +92,39 @@
               <input class="input-field" type="number" [(ngModel)]="data.weight" />
             </div>
             <div class="field-group">
-              <label class="field-label">משקל יעד (ק"ג)</label>
+              <label class="field-label">משקל יעד (ק"ג) <span class="optional-hint">(אופציונלי)</span></label>
               <input class="input-field" type="number" step="0.1" placeholder="ברירת מחדל: משקל נוכחי" [(ngModel)]="data.targetWeight" />
             </div>
           </div>
           <div class="three-col">
             <div class="field-group">
-              <label class="field-label">היקף בטן (ס"מ)</label>
+              <label class="field-label">היקף בטן (ס"מ) <span class="optional-hint">(אופציונלי)</span></label>
               <input class="input-field" type="number" [(ngModel)]="data.waist" />
             </div>
             <div class="field-group">
-              <label class="field-label">היקף ירך (ס"מ)</label>
+              <label class="field-label">היקף ירך (ס"מ) <span class="optional-hint">(אופציונלי)</span></label>
               <input class="input-field" type="number" [(ngModel)]="data.thigh" />
             </div>
             <div class="field-group">
-              <label class="field-label">היקף ישבן (ס"מ)</label>
+              <label class="field-label">היקף ישבן (ס"מ) <span class="optional-hint">(אופציונלי)</span></label>
               <input class="input-field" type="number" [(ngModel)]="data.hip" />
             </div>
           </div>
           <div class="field-group">
-            <label class="field-label">תמונות לפני</label>
+            <label class="field-label">תמונות לפני <span class="optional-hint">(אופציונלי)</span></label>
             <input #beforePhotoInput type="file" accept="image/*" multiple hidden (change)="onBeforePhotoSelected($event)" />
             <button class="btn btn-secondary upload-btn" (click)="beforePhotoInput.click()">
-              ⬆️ {{ data.beforePhotoFiles.length > 0 ? 'הוספת תמונות נוספות' : 'העלאת תמונות' }}
+              <svg lucideUpload class="icon"></svg>
+              {{ data.beforePhotoFiles.length > 0 ? 'הוספת תמונות נוספות' : 'העלאת תמונות' }}
             </button>
             @if (data.beforePhotoFiles.length > 0) {
               <div class="selected-photos">
                 @for (file of data.beforePhotoFiles; track file.name + $index; let i = $index) {
                   <span class="photo-chip">
                     {{ file.name }}
-                    <button type="button" class="chip-remove" (click)="removeBeforePhoto(i)">✕</button>
+                    <button type="button" class="chip-remove" (click)="removeBeforePhoto(i)">
+                      <svg lucideX style="width: 10px; height: 10px"></svg>
+                    </button>
                   </span>
                 }
               </div>
@@ -128,14 +134,14 @@
       }
       @case (3) {
         <div class="step-form">
-          <p class="field-label">הוספת הסכם</p>
+          <p class="field-label">הוספת הסכם <span class="optional-hint">(אופציונלי)</span></p>
           <div class="agreement-options">
             <button
               class="card agreement-option"
               [class.selected]="data.agreementMode === 'upload'"
               (click)="data.agreementMode = 'upload'"
             >
-              <div class="option-icon">⬆️</div>
+              <div class="option-icon"><svg lucideUpload class="icon"></svg></div>
               <div class="option-title">העלאת הסכם קיים</div>
               <div class="option-desc">כבר יש לכם הסכם חתום? העלו אותו כקובץ</div>
             </button>
@@ -147,15 +153,15 @@
 
   <div class="wizard-actions">
     <button class="btn btn-secondary" (click)="back()" [disabled]="currentStep() === 0">
-      → הקודם
+      <svg lucideChevronRight class="icon"></svg> הקודם
     </button>
     @if (currentStep() < steps.length - 1) {
       <button class="btn btn-primary" (click)="next()" [disabled]="!canGoNext">
-        הבא ←
+        הבא <svg lucideChevronLeft class="icon"></svg>
       </button>
     } @else {
       <button class="btn btn-primary" (click)="finish()" [disabled]="submitting">
-        {{ submitting ? 'יוצרת...' : '✓ יצירת לקוחה' }}
+        <svg lucideCheck class="icon"></svg> {{ submitting ? 'יוצרת...' : 'יצירת לקוחה' }}
       </button>
     }
   </div>
