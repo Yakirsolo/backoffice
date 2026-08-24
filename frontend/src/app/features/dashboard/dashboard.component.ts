@@ -1,22 +1,38 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import {
+  LucideCalendar,
+  LucideCreditCard,
+  LucideFlag,
+  LucidePlus,
+  LucideUserPlus,
+  LucideUsers,
+  LucideVideo
+} from '@lucide/angular';
+import { AuthService } from '../../core/services/auth.service';
 import { CustomersService } from '../../core/services/customers.service';
 import { DashboardData } from '../../core/models/customer.model';
-import { addDaysIso, formatDate, formatTime, todayIso } from '../../shared/status-utils';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { addDaysIso, formatDate, formatLongDate, formatTime, todayIso } from '../../shared/status-utils';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink],
+  imports: [
+    RouterLink, EmptyStateComponent,
+    LucideCalendar, LucideUserPlus, LucideCreditCard, LucideFlag, LucideVideo, LucidePlus, LucideUsers
+  ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent {
+  private authService = inject(AuthService);
   private customersService = inject(CustomersService);
 
+  currentUser = this.authService.currentUser;
   data = signal<DashboardData | null>(null);
   today = todayIso();
-  formatDate = formatDate;
+  formatLongDate = formatLongDate;
   formatTime = formatTime;
 
   constructor() {

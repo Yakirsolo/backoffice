@@ -40,6 +40,12 @@ export function formatMonthLabel(yearMonth: string): string {
   return new Intl.DateTimeFormat('he-IL', { month: 'long', year: 'numeric' }).format(new Date(Date.UTC(y, m - 1, 1)));
 }
 
+/** Renders an ISO date as a full Hebrew weekday + day + month label, e.g. "יום שישי, 21 באוגוסט". */
+export function formatLongDate(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Intl.DateTimeFormat('he-IL', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(Date.UTC(y, m - 1, d)));
+}
+
 export function todayIso(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;

@@ -5,7 +5,7 @@
       <p class="page-subtitle">פתקים ותזכורות כלליות - לחצי על ה-× כשהמשימה בוצעה</p>
     </div>
     <div class="add-wrapper">
-      <button class="btn btn-primary" (click)="togglePopover()">➕ משימה חדשה</button>
+      <button class="btn btn-primary" (click)="togglePopover()"><svg lucidePlus class="icon"></svg> משימה חדשה</button>
       @if (showPopover()) {
         <div class="add-popover card">
           <textarea
@@ -27,7 +27,9 @@
   </div>
 
   @if (todos().length === 0) {
-    <div class="card empty-state">אין משימות פתוחות</div>
+    <app-empty-state heading="אין משימות פתוחות">
+      <svg lucidePlus class="icon" empty-icon></svg>
+    </app-empty-state>
   } @else {
     <div class="notes-board">
       @for (t of todos(); track t.id; let i = $index) {

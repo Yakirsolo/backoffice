@@ -1,17 +1,20 @@
 import { Component, Input, OnChanges, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { LucideCalendar, LucideVideo } from '@lucide/angular';
 import { CustomersService } from '../../../../core/services/customers.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { formatDate, formatTime } from '../../../../shared/status-utils';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-meetings-tab',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, EmptyStateComponent, LucideCalendar, LucideVideo],
   template: `
     <div class="meetings-layout">
-      <section class="card new-meeting-card">
-        <h3 class="section-title">קביעת פגישה חדשה</h3>
-        <div class="form-row">
+      <section class="card panel inline-form-card">
+        <h3 class="panel-title">קביעת פגישה חדשה</h3>
+        <div class="three-col">
           <div class="field-group">
             <label class="field-label">תאריך</label>
             <input class="input-field" type="date" [(ngModel)]="newDate" />
@@ -26,28 +29,30 @@ import { formatDate, formatTime } from '../../../../shared/status-utils';
           </div>
         </div>
         <div class="field-group">
-          <label class="field-label">קישור Zoom (הדביקו קישור קיים)</label>
+          <label class="field-label">קישור Zoom <span class="optional-hint">(אופציונלי)</span></label>
           <input class="input-field" type="text" placeholder="https://zoom.us/j/..." [(ngModel)]="newZoomLink" />
         </div>
         <label class="reminder-check">
           <input type="checkbox" [(ngModel)]="newReminder" /> שלח תזכורת ללקוחה
         </label>
         <button class="btn btn-primary" (click)="addMeeting()" [disabled]="!newDate() || !newTime() || !newType()">
-          📅 שמירת פגישה
+          <svg lucideCalendar class="icon"></svg> שמירת פגישה
         </button>
       </section>
 
-      <section class="history">
-        <h3 class="section-title">היסטוריית פגישות</h3>
+      <section>
+        <h3 class="panel-title">היסטוריית פגישות</h3>
         @if (meetings().length === 0) {
-          <div class="card empty-state">אין עדיין פגישות</div>
+          <app-empty-state heading="אין עדיין פגישות">
+            <svg lucideCalendar class="icon" empty-icon></svg>
+          </app-empty-state>
         } @else {
           <div class="meeting-list">
             @for (m of meetings(); track m.id) {
-              <div class="card meeting-card">
+              <div class="card item-card meeting-card">
                 <div class="meeting-when">
-                  <div class="meeting-date">{{ formatDate(m.date) }}</div>
-                  <div class="meeting-time">{{ formatTime(m.time) }}</div>
+                  <div class="meeting-date tabular-nums">{{ formatDate(m.date) }}</div>
+                  <div class="meeting-time tabular-nums">{{ formatTime(m.time) }}</div>
                 </div>
                 <div class="meeting-body">
                   <div class="meeting-type-row">
@@ -63,7 +68,9 @@ import { formatDate, formatTime } from '../../../../shared/status-utils';
                     <div class="meeting-notes">{{ m.notes }}</div>
                   }
                   @if (m.zoomLink) {
-                    <a class="meeting-zoom" [href]="m.zoomLink" target="_blank" rel="noopener">🔗 קישור Zoom</a>
+                    <a class="meeting-zoom" [href]="m.zoomLink" target="_blank" rel="noopener">
+                      <svg lucideVideo style="width: 12px; height: 12px"></svg> קישור Zoom
+                    </a>
                   }
                 </div>
               </div>
@@ -77,37 +84,31 @@ import { formatDate, formatTime } from '../../../../shared/status-utils';
     .meetings-layout {
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: var(--space-6);
     }
-    .section-title {
-      font-size: 14px;
-      margin-bottom: 14px;
+    .inline-form-card {
+      align-items: flex-start;
+      margin-bottom: 0;
     }
-    .new-meeting-card {
-      padding: 20px;
-    }
-    .form-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
+    .inline-form-card > .three-col,
+    .inline-form-card > .field-group {
+      width: 100%;
     }
     .reminder-check {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: var(--space-2);
       font-size: 13px;
       color: var(--color-text-muted);
-      margin-bottom: 16px;
+      margin-bottom: var(--space-4);
     }
     .meeting-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
     }
     .meeting-card {
-      padding: 14px 18px;
-      display: flex;
-      gap: 20px;
+      align-items: flex-start;
+      gap: var(--space-5);
     }
     .meeting-when {
       width: 80px;
@@ -129,10 +130,11 @@ import { formatDate, formatTime } from '../../../../shared/status-utils';
     .meeting-type-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: var(--space-3);
     }
     .meeting-type {
       font-weight: 600;
+      font-size: 13.5px;
     }
     .meeting-duration {
       color: var(--color-text-muted);
@@ -144,22 +146,20 @@ import { formatDate, formatTime } from '../../../../shared/status-utils';
       margin-top: 6px;
     }
     .meeting-zoom {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       color: var(--color-primary);
       font-size: 12px;
       margin-top: 6px;
       font-weight: 600;
-    }
-    @media (max-width: 720px) {
-      .form-row {
-        grid-template-columns: 1fr;
-      }
     }
   `]
 })
 export class MeetingsTabComponent implements OnChanges {
   @Input({ required: true }) customerId!: string;
   private customersService = inject(CustomersService);
+  private toast = inject(ToastService);
   private idSignal = signal<string>('');
 
   meetings = computed(() => this.customersService.meetingsFor(this.idSignal()));
@@ -183,6 +183,7 @@ export class MeetingsTabComponent implements OnChanges {
       this.newTime.set('');
       this.newType.set('');
       this.newZoomLink.set('');
+      this.toast.success('הפגישה נקבעה בהצלחה');
     });
   }
 

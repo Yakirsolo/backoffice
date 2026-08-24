@@ -1,20 +1,24 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { LucideCheck, LucideCreditCard } from '@lucide/angular';
 import { CustomersService } from '../../core/services/customers.service';
+import { ToastService } from '../../core/services/toast.service';
 import { Payment, PAYMENT_STATUS_LABELS, PaymentStatus } from '../../core/models/customer.model';
 import { formatDate, formatMonthLabel, paymentStatusBadgeClass, todayIso } from '../../shared/status-utils';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 
 type StatusFilter = PaymentStatus | 'all';
 
 @Component({
   selector: 'app-payments',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, EmptyStateComponent, LucideCheck, LucideCreditCard],
   templateUrl: './payments.component.html',
   styleUrl: './payments.component.scss'
 })
 export class PaymentsComponent {
   private customersService = inject(CustomersService);
+  private toast = inject(ToastService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -70,7 +74,7 @@ export class PaymentsComponent {
       amount: p.amount,
       date: p.date,
       status: 'paid'
-    }).subscribe();
+    }).subscribe(() => this.toast.success('התשלום סומן כשולם'));
   }
 
   goPrev() {

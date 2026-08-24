@@ -1,16 +1,18 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { LucidePlus, LucideSearch, LucideUsers } from '@lucide/angular';
 import { CustomersService } from '../../../core/services/customers.service';
 import { CustomerStatus, CUSTOMER_STATUS_LABELS } from '../../../core/models/customer.model';
 import { customerStatusBadgeClass, formatDate, formatWeightChange } from '../../../shared/status-utils';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 
 type StatusFilter = CustomerStatus | 'all';
 
 @Component({
   selector: 'app-customers-list',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, EmptyStateComponent, LucidePlus, LucideSearch, LucideUsers],
   templateUrl: './customers-list.component.html',
   styleUrl: './customers-list.component.scss'
 })

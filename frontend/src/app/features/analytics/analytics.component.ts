@@ -3,10 +3,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CustomersService } from '../../core/services/customers.service';
 import { CUSTOMER_STATUS_LABELS, CustomerStatus, LeadSource, LEAD_SOURCE_LABELS } from '../../core/models/customer.model';
 import { formatMonthLabel, formatWeightChange, todayIso } from '../../shared/status-utils';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { LucideUsers } from '@lucide/angular';
 
 @Component({
   selector: 'app-analytics',
   standalone: true,
+  imports: [EmptyStateComponent, LucideUsers],
   templateUrl: './analytics.component.html',
   styleUrl: './analytics.component.scss'
 })
@@ -19,13 +22,17 @@ export class AnalyticsComponent {
   sourceLabels = LEAD_SOURCE_LABELS;
   formatMonthLabel = formatMonthLabel;
 
-  /** Fixed per-source, not per-rank, so a given source is always the same color regardless of which others appear that month. */
+  /**
+   * Fixed per-source, not per-rank, so a given source is always the same color regardless of which
+   * others appear that month. Muted, warm-toned hues chosen to harmonize with the app's sage/olive
+   * palette rather than the saturated categorical set a default chart library would produce.
+   */
   sourceColors: Record<LeadSource, string> = {
-    instagram: '#2a78d6',
-    facebook: '#eb6834',
-    referral: '#1baf7a',
-    website: '#eda100',
-    other: '#e87ba4'
+    instagram: '#c77b62',
+    facebook: '#6e90a8',
+    referral: '#6e7d5e',
+    website: '#bc9a46',
+    other: '#8f7a96'
   };
 
   private readonly donutRadius = 60;

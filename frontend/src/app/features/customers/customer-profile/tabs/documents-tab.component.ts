@@ -1,12 +1,13 @@
 import { Component, Input, OnChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
+import { LucideFileText, LucidePaperclip, LucideTrash2, LucideUpload, LucideUtensils } from '@lucide/angular';
 import { CustomersService } from '../../../../core/services/customers.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { CustomerDocument, DocumentType, DOCUMENT_TYPE_LABELS } from '../../../../core/models/customer.model';
 import { formatDate, formatFileSize, todayIso } from '../../../../shared/status-utils';
-
-const TYPE_ICONS: Record<string, string> = { agreement: '📄', menu: '🍽️', other: '📎' };
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 
 const ALLOWED_CONTENT_TYPES = new Set([
   'application/pdf', 'image/jpeg', 'image/png', 'image/webp',
@@ -21,11 +22,11 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
 @Component({
   selector: 'app-documents-tab',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, EmptyStateComponent, LucideUpload, LucideFileText, LucideUtensils, LucidePaperclip, LucideTrash2],
   template: `
     <div class="documents-header">
       <button class="btn btn-secondary" (click)="showUploadPopover.set(!showUploadPopover())">
-        ⬆️ העלאת קובץ
+        <svg lucideUpload class="icon"></svg> העלאת קובץ
       </button>
 
       @if (showUploadPopover()) {
@@ -52,7 +53,7 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
             (change)="onFilesSelected($event)"
           />
           <button class="btn btn-primary" (click)="fileInput.click()" [disabled]="uploading()">
-            {{ uploading() ? 'מעלה...' : '⬆️ בחירת קבצים' }}
+            <svg lucideUpload class="icon"></svg> {{ uploading() ? 'מעלה...' : 'בחירת קבצים' }}
           </button>
           <div class="popover-hint">PDF, Word, Excel או תמונה · עד 20MB לקובץ</div>
 
@@ -64,19 +65,29 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
     </div>
 
     @if (documents().length === 0) {
-      <div class="card empty-state">עדיין לא הועלו מסמכים</div>
+      <app-empty-state heading="עדיין לא הועלו מסמכים">
+        <svg lucidePaperclip class="icon" empty-icon></svg>
+      </app-empty-state>
     } @else {
       <div class="documents-grid">
         @for (doc of documents(); track doc.id) {
           <div class="card doc-card">
             <a class="doc-link" [href]="doc.downloadUrl" target="_blank" rel="noopener">
-              <div class="doc-icon">{{ icons[doc.type] }}</div>
+              <div class="doc-icon">
+                @switch (doc.type) {
+                  @case ('agreement') { <svg lucideFileText class="icon"></svg> }
+                  @case ('menu') { <svg lucideUtensils class="icon"></svg> }
+                  @default { <svg lucidePaperclip class="icon"></svg> }
+                }
+              </div>
               <div class="doc-info">
                 <div class="doc-name">{{ doc.name }}</div>
                 <div class="doc-meta">{{ typeLabels[doc.type] }} · {{ formatDate(doc.date) }} · {{ formatFileSize(doc.sizeBytes) }}</div>
               </div>
             </a>
-            <button class="btn btn-ghost btn-sm doc-delete" title="מחיקה" (click)="deleteDocument(doc)">🗑</button>
+            <button class="btn btn-ghost btn-sm doc-delete" title="מחיקה" (click)="deleteDocument(doc)">
+              <svg lucideTrash2 class="icon"></svg>
+            </button>
           </div>
         }
       </div>
@@ -85,8 +96,8 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
   styles: [`
     .documents-header {
       display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
+      gap: var(--space-2);
+      margin-bottom: var(--space-5);
       position: relative;
     }
     .upload-popover {
@@ -94,11 +105,12 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
       top: calc(100% + 8px);
       right: 0;
       width: 260px;
-      padding: 16px;
+      padding: var(--space-4);
       z-index: 10;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: var(--space-3);
+      box-shadow: var(--shadow-md);
     }
     .popover-hint {
       font-size: 11px;
@@ -115,32 +127,27 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
     .documents-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 14px;
+      gap: var(--space-3);
     }
     .doc-card {
-      padding: 16px;
+      padding: var(--space-4);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: var(--space-2);
     }
     .doc-link {
       flex: 1;
       min-width: 0;
       display: flex;
       align-items: center;
-      gap: 14px;
-    }
-    .doc-delete {
-      flex-shrink: 0;
-      padding: 6px 8px;
-      font-size: 14px;
+      gap: var(--space-4);
     }
     .doc-icon {
-      font-size: 22px;
       width: 40px;
       height: 40px;
       border-radius: var(--radius-sm);
-      background: var(--color-surface);
+      background: var(--color-surface-sunken);
+      color: var(--color-text-muted);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -167,11 +174,11 @@ export class DocumentsTabComponent implements OnChanges {
   @Input({ required: true }) customerId!: string;
   private customersService = inject(CustomersService);
   private confirmDialog = inject(ConfirmDialogService);
+  private toast = inject(ToastService);
 
   documents = signal<CustomerDocument[]>([]);
   typeLabels = DOCUMENT_TYPE_LABELS;
   documentTypes = Object.keys(DOCUMENT_TYPE_LABELS) as DocumentType[];
-  icons = TYPE_ICONS;
   formatDate = formatDate;
   formatFileSize = formatFileSize;
 
@@ -215,6 +222,7 @@ export class DocumentsTabComponent implements OnChanges {
         this.uploading.set(false);
         this.showUploadPopover.set(false);
         this.loadDocuments();
+        this.toast.success('הקבצים הועלו בהצלחה');
       },
       error: () => {
         this.uploading.set(false);

@@ -7,7 +7,9 @@
   </div>
 
   @if (groupedMeetings().length === 0) {
-    <div class="card empty-state">אין פגישות מתוכננות</div>
+    <app-empty-state heading="אין פגישות מתוכננות">
+      <svg lucideCalendarDays class="icon" empty-icon></svg>
+    </app-empty-state>
   } @else {
     <div class="day-groups">
       @for (group of groupedMeetings(); track group.date) {
@@ -19,7 +21,7 @@
           <div class="day-meetings">
             @for (m of group.items; track m.id) {
               <a class="card meeting-row" [routerLink]="['/customers', m.customerId]">
-                <div class="meeting-time">{{ formatTime(m.time) }}</div>
+                <div class="meeting-time tabular-nums">{{ formatTime(m.time) }}</div>
                 <div class="meeting-info">
                   <div class="meeting-name">{{ m.customerName }}</div>
                   <div class="meeting-type">{{ m.type }}</div>

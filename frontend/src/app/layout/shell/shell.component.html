@@ -1,27 +1,40 @@
 <div class="shell">
   <aside class="sidebar">
     <div class="brand">
-      <span class="brand-mark">🥗</span>
+      <span class="brand-mark"><svg lucideScale class="icon"></svg></span>
       <span class="brand-name">המערכת שלי</span>
     </div>
+
+    <a class="btn btn-primary add-customer" routerLink="/customers/new">
+      <svg lucidePlus class="icon"></svg>
+      <span>לקוחה חדשה</span>
+    </a>
 
     <nav class="nav">
       @for (item of navItems; track item.path) {
         <a class="nav-item" [routerLink]="item.path" routerLinkActive="active">
-          <span class="nav-icon">{{ item.icon }}</span>
+          @switch (item.path) {
+            @case ('/dashboard') { <svg lucideHouse class="icon"></svg> }
+            @case ('/customers') { <svg lucideUsers class="icon"></svg> }
+            @case ('/calendar') { <svg lucideCalendar class="icon"></svg> }
+            @case ('/payments') { <svg lucideCreditCard class="icon"></svg> }
+            @case ('/todos') { <svg lucideSquareCheck class="icon"></svg> }
+            @case ('/analytics') { <svg lucideChartColumn class="icon"></svg> }
+            @case ('/settings') { <svg lucideSettings class="icon"></svg> }
+          }
           <span>{{ item.label }}</span>
         </a>
       }
     </nav>
 
-    <a class="nav-item add-customer" routerLink="/customers/new">
-      <span class="nav-icon">➕</span>
-      <span>לקוחה חדשה</span>
-    </a>
-
     <div class="user-row">
-      <span class="user-name">{{ currentUser()?.name }}</span>
-      <button class="logout-btn" (click)="logout()" title="יציאה">🚪</button>
+      <div class="user-id">
+        <span class="avatar avatar-sm">{{ currentUser()?.name?.charAt(0) }}</span>
+        <span class="user-name">{{ currentUser()?.name }}</span>
+      </div>
+      <button class="icon-btn" (click)="logout()" title="יציאה">
+        <svg lucideLogOut class="icon"></svg>
+      </button>
     </div>
   </aside>
 
