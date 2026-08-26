@@ -1,0 +1,65 @@
+<div class="sign-page">
+  @switch (state()) {
+    @case ('loading') {
+      <div class="status-card">
+        <p>טוען הסכם...</p>
+      </div>
+    }
+
+    @case ('not_found') {
+      <div class="status-card">
+        <h1>קישור לא תקין</h1>
+        <p>הקישור שגוי או שאינו קיים יותר. יש לפנות למאמנת לקבלת קישור חדש.</p>
+      </div>
+    }
+
+    @case ('already_signed') {
+      <div class="status-card">
+        <h1>ההסכם כבר נחתם</h1>
+        <p>הקישור הזה כבר נוצל. אם זו טעות, יש לפנות למאמנת לקבלת קישור חדש.</p>
+      </div>
+    }
+
+    @case ('success') {
+      <div class="status-card">
+        <h1>תודה!</h1>
+        <p>ההסכם נחתם ונשלח בהצלחה.</p>
+      </div>
+    }
+
+    @default {
+      @if (agreement(); as a) {
+        <div class="card agreement-card">
+          <app-agreement-document
+            #documentRoot
+            [customerName]="a.customerName"
+            [customerIdNumber]="a.customerIdNumber"
+            [customerAddress]="a.customerAddress"
+            [program]="a.program"
+            [durationMonths]="a.durationMonths"
+            [price]="a.price"
+            [paymentTerms]="a.paymentTerms"
+            [agreementDate]="a.agreementDate"
+          >
+            <div client-signature class="client-signature-area">
+              <canvas #padCanvas class="signature-canvas"></canvas>
+              <img #signatureImage class="signature-image" alt="חתימה" />
+            </div>
+          </app-agreement-document>
+
+          <div class="actions">
+            @if (submitError()) {
+              <p class="error-text">{{ submitError() }}</p>
+            }
+            <div class="actions-row">
+              <button class="btn btn-secondary" [disabled]="state() === 'submitting'" (click)="clear()">ניקוי חתימה</button>
+              <button class="btn btn-primary" [disabled]="!hasSignature() || state() === 'submitting'" (click)="submit()">
+                {{ state() === 'submitting' ? 'שולח...' : 'חתימה ואישור' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  }
+</div>

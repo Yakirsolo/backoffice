@@ -5,66 +5,122 @@
   </div>
   <div class="page-header">
     <div>
-      <h1 class="page-title">יצירת הסכם</h1>
-      <p class="page-subtitle">מלאו את הפרטים ותקבלו הסכם מוכן להדפסה או הורדה</p>
+      <h1 class="page-title">הסכמים</h1>
+      <p class="page-subtitle">יצירת הסכם חדש ושליחתו לחתימה, או שיוך חוזה שנחתם על ידי לקוח פוטנציאלי</p>
     </div>
   </div>
 
-  <div class="generator-layout">
-    <section class="card form-card no-print">
-      <div class="field-group">
-        <label class="field-label">שם הלקוחה</label>
-        <input class="input-field" type="text" [ngModel]="customerName()" (ngModelChange)="customerName.set($event)" />
-      </div>
-      <div class="field-group">
-        <label class="field-label">מסלול</label>
-        <input class="input-field" type="text" [ngModel]="program()" (ngModelChange)="program.set($event)" />
-      </div>
-      <div class="two-col">
-        <div class="field-group">
-          <label class="field-label">משך (חודשים)</label>
-          <input class="input-field" type="number" [ngModel]="durationMonths()" (ngModelChange)="durationMonths.set($event)" />
-        </div>
-        <div class="field-group">
-          <label class="field-label">מחיר (₪)</label>
-          <input class="input-field" type="number" [ngModel]="price()" (ngModelChange)="price.set($event)" />
-        </div>
-      </div>
-      <div class="field-group">
-        <label class="field-label">תנאי תשלום</label>
-        <input class="input-field" type="text" [ngModel]="paymentTerms()" (ngModelChange)="paymentTerms.set($event)" />
-      </div>
-      <button class="btn btn-primary full-width" [disabled]="!isReady()" (click)="print()">
-        <svg lucidePrinter class="icon"></svg> הדפסה / שמירה כ-PDF
+  <div class="tabs-nav no-print">
+    @for (tab of tabs; track tab.id) {
+      <button class="tab-btn" [class.active]="activeTab() === tab.id" (click)="setTab(tab.id)">
+        {{ tab.label }}
+        @if (tab.id === 'unlinked' && unlinkedAgreements().length > 0) {
+          <span class="tab-count">{{ unlinkedAgreements().length }}</span>
+        }
       </button>
-    </section>
+    }
+  </div>
 
-    <section class="card agreement-preview">
-      <div class="agreement-doc">
-        <h2 class="doc-title">הסכם התקשרות</h2>
-        <p class="doc-date tabular-nums">תאריך: {{ today }}</p>
+  <div class="tab-content">
+    @switch (activeTab()) {
+      @case ('create') {
+        <div class="generator-layout">
+          <section class="card form-card no-print">
+            <div class="field-group">
+              <label class="field-label">שם הלקוחה</label>
+              <input class="input-field" type="text" [ngModel]="customerName()" (ngModelChange)="customerName.set($event)" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">ת.ז</label>
+              <input class="input-field" type="text" [ngModel]="customerIdNumber()" (ngModelChange)="customerIdNumber.set($event)" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">כתובת</label>
+              <input class="input-field" type="text" placeholder="לדוגמה: רח' הרצל 10, תל אביב" [ngModel]="customerAddress()" (ngModelChange)="customerAddress.set($event)" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">מסלול</label>
+              <input class="input-field" type="text" [ngModel]="program()" (ngModelChange)="program.set($event)" />
+            </div>
+            <div class="two-col">
+              <div class="field-group">
+                <label class="field-label">משך (חודשים)</label>
+                <input class="input-field" type="number" [ngModel]="durationMonths()" (ngModelChange)="durationMonths.set($event)" />
+              </div>
+              <div class="field-group">
+                <label class="field-label">מחיר (₪)</label>
+                <input class="input-field" type="number" [ngModel]="price()" (ngModelChange)="price.set($event)" />
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">תנאי תשלום</label>
+              <input class="input-field" type="text" [ngModel]="paymentTerms()" (ngModelChange)="paymentTerms.set($event)" />
+            </div>
+            <button class="btn btn-primary full-width" [disabled]="!isReady()" (click)="print()">
+              <svg lucidePrinter class="icon"></svg> הדפסה / שמירה כ-PDF
+            </button>
 
-        <p class="doc-paragraph">
-          הסכם זה נחתם בין המאמנת לבין <strong>{{ customerName() || '[שם הלקוחה]' }}</strong>
-          לצורך ליווי תזונתי במסגרת המסלול <strong>{{ program() || '[מסלול]' }}</strong>.
-        </p>
+            <button class="btn btn-secondary full-width" [disabled]="!canCreateLink() || creatingLink()" (click)="createSigningLink()">
+              {{ creatingLink() ? 'יוצר קישור...' : 'יצירת קישור לחתימה' }}
+            </button>
 
-        <div class="doc-terms">
-          <div class="doc-term"><span>משך ההתקשרות</span><span class="tabular-nums">{{ durationMonths() || '-' }} חודשים</span></div>
-          <div class="doc-term"><span>עלות התהליך</span><span class="tabular-nums">{{ price() || '-' }} ₪</span></div>
-          <div class="doc-term"><span>תנאי תשלום</span><span>{{ paymentTerms() }}</span></div>
+            @if (!canCreateLink()) {
+              <p class="hint-text">יש למלא שם, ת.ז, כתובת, מסלול ומחיר כדי ליצור קישור לחתימה</p>
+            }
+
+            @if (signingLink()) {
+              <div class="field-group signing-link-group">
+                <label class="field-label">קישור לשליחה בוואטסאפ</label>
+                <div class="signing-link-row">
+                  <input class="input-field" type="text" readonly [value]="signingLink()" />
+                  <button class="btn btn-secondary" (click)="copySigningLink()">העתקה</button>
+                </div>
+              </div>
+            }
+          </section>
+
+          <section class="card agreement-preview">
+            <app-agreement-document
+              [customerName]="customerName()"
+              [customerIdNumber]="customerIdNumber()"
+              [customerAddress]="customerAddress()"
+              [program]="program()"
+              [durationMonths]="durationMonths()"
+              [price]="price()"
+              [paymentTerms]="paymentTerms()"
+              [agreementDate]="todayIsoValue"
+            >
+              <span client-signature class="client-signature-placeholder"></span>
+            </app-agreement-document>
+          </section>
         </div>
+      }
 
-        <p class="doc-paragraph">
-          הלקוחה מתחייבת לשתף פעולה עם ההנחיות התזונתיות שיינתנו במסגרת התהליך,
-          ומאשרת כי קראה והבינה את תנאי ההתקשרות.
-        </p>
+      @case ('unlinked') {
+        <section class="card unlinked-card">
+          <p class="unlinked-subtitle">חוזים שנחתמו על ידי לקוחות פוטנציאליים דרך קישור, ועדיין לא משויכים ללקוחה קיימת</p>
 
-        <div class="doc-signatures">
-          <div class="doc-signature"><span>חתימת המאמנת</span></div>
-          <div class="doc-signature"><span>חתימת הלקוחה</span></div>
-        </div>
-      </div>
-    </section>
+          @if (unlinkedAgreements().length === 0) {
+            <p class="empty-hint">אין כרגע חוזים ללא לקוח</p>
+          } @else {
+            <div class="unlinked-list">
+              @for (agreement of unlinkedAgreements(); track agreement.id) {
+                <div class="unlinked-row">
+                  <div class="unlinked-info">
+                    <span class="unlinked-name">{{ agreement.customerName }}</span>
+                    <span class="unlinked-meta">{{ agreement.program }} · {{ agreement.price || '-' }} ₪ · נחתם ב-{{ formatDate(agreement.agreementDate) }}</span>
+                  </div>
+                  @if (agreement.downloadUrl) {
+                    <a class="btn btn-secondary" [href]="agreement.downloadUrl" target="_blank" rel="noopener">הורדה</a>
+                  } @else {
+                    <span class="download-unavailable">אחסון לא מוגדר</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </section>
+      }
+    }
   </div>
 </div>

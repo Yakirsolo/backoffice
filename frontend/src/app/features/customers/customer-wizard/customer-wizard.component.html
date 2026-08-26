@@ -145,7 +145,49 @@
               <div class="option-title">העלאת הסכם קיים</div>
               <div class="option-desc">כבר יש לכם הסכם חתום? העלו אותו כקובץ</div>
             </button>
+
+            <button
+              class="card agreement-option"
+              [class.selected]="data.agreementMode === 'existing'"
+              (click)="data.agreementMode = 'existing'"
+            >
+              <div class="option-icon"><svg lucideFileSignature class="icon"></svg></div>
+              <div class="option-title">שיוך הסכם ממתין</div>
+              <div class="option-desc">הלקוחה כבר חתמה מראש דרך קישור? שייכו את ההסכם החתום</div>
+            </button>
           </div>
+
+          @if (data.agreementMode === 'upload') {
+            <div class="agreement-detail">
+              <input #agreementFileInput type="file" accept="application/pdf,image/*" hidden (change)="onAgreementFileSelected($event)" />
+              <button class="btn btn-secondary upload-btn" (click)="agreementFileInput.click()">
+                <svg lucideUpload class="icon"></svg>
+                {{ data.agreementFile ? data.agreementFile.name : 'בחירת קובץ' }}
+              </button>
+            </div>
+          }
+
+          @if (data.agreementMode === 'existing') {
+            <div class="agreement-detail">
+              @if (unlinkedAgreements().length === 0) {
+                <p class="empty-hint">אין כרגע הסכמים חתומים שממתינים לשיוך</p>
+              } @else {
+                <div class="unlinked-list">
+                  @for (agreement of unlinkedAgreements(); track agreement.id) {
+                    <button
+                      type="button"
+                      class="unlinked-row"
+                      [class.selected]="data.selectedAgreementId === agreement.id"
+                      (click)="data.selectedAgreementId = agreement.id"
+                    >
+                      <span class="unlinked-name">{{ agreement.customerName }}</span>
+                      <span class="unlinked-meta">{{ agreement.program }} · {{ agreement.price || '-' }} ₪</span>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
         </div>
       }
     }
