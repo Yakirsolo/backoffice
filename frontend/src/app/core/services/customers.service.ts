@@ -15,6 +15,17 @@ export interface NewCustomerData {
   startWeight: number; targetWeight: number; waist?: number; thigh?: number; hip?: number;
 }
 
+export interface UnlinkedAgreement {
+  id: string;
+  customerName: string;
+  program: string;
+  durationMonths: number | null;
+  price: number | null;
+  agreementDate: string;
+  signedAt: string;
+  downloadUrl: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CustomersService {
   private http = inject(HttpClient);
@@ -193,5 +204,27 @@ export class CustomersService {
     return this.http.post<{ customerName: string; program: string; price: number | null }>(
       `${API_BASE_URL}/agreements/generate`, { customerId },
     );
+  }
+
+  createSignatureRequest(payload: {
+    customerId: string | null;
+    customerName: string;
+    customerIdNumber: string;
+    customerAddress: string;
+    program: string;
+    durationMonths: number | null;
+    price: number | null;
+    paymentTerms: string;
+    agreementDate: string;
+  }): Observable<{ token: string }> {
+    return this.http.post<{ token: string }>(`${API_BASE_URL}/agreements/signature-requests`, payload);
+  }
+
+  listUnlinkedAgreements(): Observable<UnlinkedAgreement[]> {
+    return this.http.get<UnlinkedAgreement[]>(`${API_BASE_URL}/agreements/unlinked`);
+  }
+
+  attachAgreement(signatureRequestId: string, customerId: string): Observable<void> {
+    return this.http.post<void>(`${API_BASE_URL}/agreements/unlinked/${signatureRequestId}/attach`, { customerId });
   }
 }

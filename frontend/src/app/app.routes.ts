@@ -16,6 +16,10 @@ import { authGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   {
+    path: 'sign/:token',
+    loadComponent: () => import('./features/signing/sign-page.component').then(m => m.SignPageComponent)
+  },
+  {
     path: '',
     component: ShellComponent,
     canActivate: [authGuard],
