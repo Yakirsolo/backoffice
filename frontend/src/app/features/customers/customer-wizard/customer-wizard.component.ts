@@ -1,9 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
-import { LucideCheck, LucideChevronLeft, LucideChevronRight, LucideUpload, LucideX } from '@lucide/angular';
-import { CustomersService } from '../../../core/services/customers.service';
+import { Observable, forkJoin } from 'rxjs';
+import { LucideCheck, LucideChevronLeft, LucideChevronRight, LucideFileSignature, LucideUpload, LucideX } from '@lucide/angular';
+import { CustomersService, UnlinkedAgreement } from '../../../core/services/customers.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import {
   BILLING_INTERVAL_UNIT_LABELS, BillingIntervalUnit, LeadSource, LEAD_SOURCE_LABELS
@@ -26,13 +26,15 @@ interface WizardData {
   thigh: number | null;
   hip: number | null;
   beforePhotoFiles: File[];
-  agreementMode: 'upload' | 'generate' | null;
+  agreementMode: 'upload' | 'existing' | null;
+  agreementFile: File | null;
+  selectedAgreementId: string | null;
 }
 
 @Component({
   selector: 'app-customer-wizard',
   standalone: true,
-  imports: [FormsModule, RouterLink, LucideChevronRight, LucideChevronLeft, LucideUpload, LucideX, LucideCheck],
+  imports: [FormsModule, RouterLink, LucideChevronRight, LucideChevronLeft, LucideUpload, LucideX, LucideCheck, LucideFileSignature],
   templateUrl: './customer-wizard.component.html',
   styleUrl: './customer-wizard.component.scss'
 })
@@ -55,8 +57,19 @@ export class CustomerWizardComponent {
     price: null, billingIntervalValue: 1, billingIntervalUnit: 'month',
     startDate: new Date().toISOString().slice(0, 10), source: 'instagram',
     weight: null, targetWeight: null, waist: null, thigh: null, hip: null, beforePhotoFiles: [],
-    agreementMode: null
+    agreementMode: null, agreementFile: null, selectedAgreementId: null
   };
+
+  unlinkedAgreements = signal<UnlinkedAgreement[]>([]);
+
+  constructor() {
+    this.customersService.listUnlinkedAgreements().subscribe(list => this.unlinkedAgreements.set(list));
+  }
+
+  onAgreementFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.data.agreementFile = input.files?.[0] ?? null;
+  }
 
   onBeforePhotoSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -123,19 +136,25 @@ export class CustomerWizardComponent {
       hip: this.data.hip ?? undefined
     }).subscribe({
       next: customer => {
-        const photoFiles = this.data.beforePhotoFiles;
-        if (photoFiles.length === 0) {
+        const tasks: Observable<unknown>[] = this.data.beforePhotoFiles.map(file =>
+          this.customersService.uploadPhoto(customer.id, file, 'before', this.data.startDate)
+        );
+
+        if (this.data.agreementMode === 'upload' && this.data.agreementFile) {
+          tasks.push(this.customersService.uploadDocument(customer.id, this.data.agreementFile, 'agreement', this.data.startDate));
+        } else if (this.data.agreementMode === 'existing' && this.data.selectedAgreementId) {
+          tasks.push(this.customersService.attachAgreement(this.data.selectedAgreementId, customer.id));
+        }
+
+        if (tasks.length === 0) {
           this.router.navigate(['/customers', customer.id]);
           return;
         }
-        const uploads = photoFiles.map(file =>
-          this.customersService.uploadPhoto(customer.id, file, 'before', this.data.startDate)
-        );
-        forkJoin(uploads).subscribe({
+        forkJoin(tasks).subscribe({
           next: () => this.router.navigate(['/customers', customer.id]),
           error: () => {
             this.confirmDialog.alert(
-              'הלקוחה נוצרה בהצלחה, אך העלאת חלק מהתמונות נכשלה. ניתן להעלות תמונות מאוחר יותר מדף הלקוחה.',
+              'הלקוחה נוצרה בהצלחה, אך חלק מהקבצים לא נשמרו. ניתן להוסיף אותם מאוחר יותר מדף הלקוחה.',
               'הצלחה חלקית'
             );
             this.router.navigate(['/customers', customer.id]);

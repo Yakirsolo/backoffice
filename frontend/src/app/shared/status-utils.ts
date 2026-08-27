@@ -46,6 +46,17 @@ export function formatLongDate(iso: string): string {
   return new Intl.DateTimeFormat('he-IL', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(Date.UTC(y, m - 1, d)));
 }
 
+const HEBREW_GREGORIAN_MONTHS = [
+  'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
+  'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'
+];
+
+/** Renders an ISO date in the legal-document phrasing used by signed agreements, e.g. "26 בחודש אוגוסט בשנת 2026". */
+export function formatLegalDate(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  return `${d} בחודש ${HEBREW_GREGORIAN_MONTHS[m - 1]} בשנת ${y}`;
+}
+
 export function todayIso(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;

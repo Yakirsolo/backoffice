@@ -1,0 +1,113 @@
+.agreement-doc {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.doc-title {
+  font-size: 22px;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.doc-subtitle {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  margin-bottom: var(--space-6);
+}
+
+.doc-signed-line {
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: var(--space-6);
+}
+
+.doc-parties {
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-8);
+
+  p {
+    margin: 2px 0;
+    font-size: 14px;
+  }
+}
+
+.party-heading {
+  font-weight: 700;
+  margin-top: var(--space-3) !important;
+}
+
+.party-side {
+  text-decoration: underline;
+  margin-bottom: var(--space-2) !important;
+}
+
+.section-title {
+  font-size: 15px;
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-2);
+  text-decoration: underline;
+}
+
+.doc-paragraph {
+  line-height: 1.8;
+  margin-bottom: var(--space-3);
+  font-size: 13.5px;
+}
+
+.doc-list {
+  margin: 0 0 var(--space-3);
+  padding-inline-start: var(--space-5);
+
+  li {
+    line-height: 1.8;
+    font-size: 13.5px;
+    margin-bottom: var(--space-2);
+  }
+}
+
+.doc-plan {
+  font-weight: 600;
+}
+
+.doc-witness {
+  font-weight: 600;
+  margin-top: var(--space-8);
+  text-align: center;
+}
+
+.doc-signatures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  margin-top: var(--space-4);
+}
+
+.doc-signature-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  border-top: 1px solid var(--color-text);
+  padding-top: var(--space-2);
+  min-height: 90px;
+}
+
+.signature-date {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.signature-cursive {
+  font-family: 'Dancing Script', cursive;
+  font-size: 26px;
+  color: var(--color-text);
+}
+
+.doc-signature-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: auto;
+}
