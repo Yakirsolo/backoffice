@@ -91,7 +91,7 @@
     </li>
     <li class="doc-plan">
       מסלול {{ program || '[מסלול]' }}: ליווי מקיף למשך {{ durationMonths || '-' }} חודשים בעלות של
-      {{ price || '-' }} ש"ח סה"כ לכל תקופת התכנית. תנאי תשלום: {{ paymentTerms || '-' }}.
+      {{ price || '-' }} ש"ח סה"כ לכל תקופת התכנית.
     </li>
   </ul>
 
@@ -140,21 +140,31 @@
     <li>
       שליחת הודעת WhatsApp ברורה מאת המקבלת בנוסח הבא: "אני מאשרת את תנאי הסכם
       הליווי של {{ coachName }} במלואם" (תקף למשתתפות מעל גיל 18 בלבד. למשתתפות מתחת לגיל
-      18 נדרשת חתימת הורה או אפוטרופוס בנוסף לחתימתן).
+      18 נדרשת חתימת הורה או אפוטרופוס בנוסף לחתימתו).
     </li>
   </ul>
+
+  <p class="doc-paragraph doc-witness">ולראיה באו הצדדים על החתום:</p>
+  <div class="doc-party-labels">
+    <span>נותנת השירות ({{ coachName }})</span>
+    <span>מקבלת השירות (הלקוחה)</span>
+  </div>
 
   <p class="doc-paragraph doc-witness">ולראיה באו הצדדים על החתום:</p>
 
   <div class="doc-signatures">
     <div class="doc-signature-block">
-      <span class="signature-date">{{ shortDateLabel }}</span>
-      <span class="signature-cursive">{{ coachName === 'דורין כרכוכלי' ? 'Dorin Caracucli' : coachName }}</span>
+      <div class="signature-mark">
+        <span class="signature-date">{{ shortDateLabel }}</span>
+        <span class="signature-cursive">{{ coachName === 'דורין כרכוכלי' ? 'Dorin Caracucli' : coachName }}</span>
+      </div>
       <span class="doc-signature-label">נותנת השירות</span>
     </div>
 
     <div class="doc-signature-block">
-      <ng-content select="[client-signature]"></ng-content>
+      <div class="signature-mark">
+        <ng-content select="[client-signature]"></ng-content>
+      </div>
       <span class="doc-signature-label">מקבלת השירות</span>
     </div>
   </div>
