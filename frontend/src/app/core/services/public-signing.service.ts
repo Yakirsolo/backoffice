@@ -26,12 +26,10 @@ export class PublicSigningService {
     return this.http.post<{ uploadUrl: string; storageKey: string }>(
       `${API_BASE_URL}/public/sign/${token}/upload-url`, {}
     ).pipe(
-      switchMap(({ uploadUrl, storageKey }) =>
+      switchMap(({ uploadUrl }) =>
         this.http.put(uploadUrl, pdfBlob, { headers: { 'Content-Type': 'application/pdf' } }).pipe(
           switchMap(() =>
-            this.http.post<void>(`${API_BASE_URL}/public/sign/${token}/complete`, {
-              storageKey, contentType: 'application/pdf', sizeBytes: pdfBlob.size
-            })
+            this.http.post<void>(`${API_BASE_URL}/public/sign/${token}/complete`, {})
           )
         )
       )
