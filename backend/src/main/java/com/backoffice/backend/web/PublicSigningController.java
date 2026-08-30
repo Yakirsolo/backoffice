@@ -1,10 +1,8 @@
 package com.backoffice.backend.web;
 
-import com.backoffice.backend.dto.signature.CompleteSignatureRequest;
 import com.backoffice.backend.dto.signature.SignatureRequestPublicResponse;
 import com.backoffice.backend.dto.storage.UploadUrlResponse;
 import com.backoffice.backend.service.SignatureRequestService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +26,7 @@ public class PublicSigningController {
 
     @PostMapping("/{token}/complete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void complete(@PathVariable String token, @Valid @RequestBody CompleteSignatureRequest request) {
-        signatureRequestService.complete(token, request);
+    public void complete(@PathVariable String token) {
+        signatureRequestService.complete(token);
     }
 }

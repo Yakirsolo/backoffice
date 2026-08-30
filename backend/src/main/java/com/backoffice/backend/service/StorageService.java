@@ -11,6 +11,8 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
@@ -61,6 +63,18 @@ public class StorageService {
                     .getObjectRequest(getRequest)
                     .build();
             return presigner.presignGetObject(presignRequest).url().toString();
+        }
+    }
+
+    /** Confirms an object was actually uploaded to this key and returns its real size - never trust a client's claimed size. */
+    public long getObjectSize(String key) {
+        try (S3Client client = buildClient()) {
+            return client.headObject(HeadObjectRequest.builder()
+                    .bucket(properties.bucket())
+                    .key(key)
+                    .build()).contentLength();
+        } catch (NoSuchKeyException e) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "No file was found at the expected upload location");
         }
     }
 
