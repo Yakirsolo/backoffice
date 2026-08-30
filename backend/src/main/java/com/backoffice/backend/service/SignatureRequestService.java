@@ -6,7 +6,6 @@ import com.backoffice.backend.domain.entity.SignatureRequestStatus;
 import com.backoffice.backend.domain.repository.SignatureRequestRepository;
 import com.backoffice.backend.dto.document.DocumentConfirmRequest;
 import com.backoffice.backend.dto.document.DocumentResponse;
-import com.backoffice.backend.dto.signature.CompleteSignatureRequest;
 import com.backoffice.backend.dto.signature.CreateSignatureRequestRequest;
 import com.backoffice.backend.dto.signature.SignatureRequestCreatedResponse;
 import com.backoffice.backend.dto.signature.SignatureRequestPublicResponse;
@@ -75,35 +74,46 @@ public class SignatureRequestService {
         );
     }
 
+    @Transactional
     public UploadUrlResponse createUploadUrl(String token) {
         SignatureRequest signatureRequest = requirePending(token);
         String key = signatureRequest.getCustomerId() != null
                 ? storageService.buildKey(signatureRequest.getCustomerId(), "agreements", SIGNED_PDF_FILE_NAME)
                 : "leads/%s/agreements/%s-%s".formatted(signatureRequest.getId(), UUID.randomUUID(), SIGNED_PDF_FILE_NAME);
         String url = storageService.createUploadUrl(key, SIGNED_PDF_CONTENT_TYPE);
+
+        // Persisted immediately so `complete()` never has to trust a client-supplied key/type/size.
+        signatureRequest.setStorageKey(key);
+        signatureRequestRepository.save(signatureRequest);
+
         return new UploadUrlResponse(url, key);
     }
 
     @Transactional
-    public void complete(String token, CompleteSignatureRequest request) {
+    public void complete(String token) {
         SignatureRequest signatureRequest = requirePending(token);
+        if (signatureRequest.getStorageKey() == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Upload was not initiated for this signing link");
+        }
+
+        // Confirms the PDF actually landed at the server-issued key and reads its real size - never trust the client for either.
+        long sizeBytes = storageService.getObjectSize(signatureRequest.getStorageKey());
 
         if (signatureRequest.getCustomerId() != null) {
             DocumentConfirmRequest documentConfirmRequest = new DocumentConfirmRequest(
-                    request.storageKey(),
+                    signatureRequest.getStorageKey(),
                     DocumentType.agreement,
                     "הסכם חתום",
                     LocalDate.now(),
-                    request.contentType(),
-                    request.sizeBytes()
+                    SIGNED_PDF_CONTENT_TYPE,
+                    sizeBytes
             );
             DocumentResponse document = documentService.confirm(signatureRequest.getCustomerId(), documentConfirmRequest);
             signatureRequest.setDocumentId(document.id());
         }
 
-        signatureRequest.setStorageKey(request.storageKey());
-        signatureRequest.setContentType(request.contentType());
-        signatureRequest.setSizeBytes(request.sizeBytes());
+        signatureRequest.setContentType(SIGNED_PDF_CONTENT_TYPE);
+        signatureRequest.setSizeBytes(sizeBytes);
         signatureRequest.setStatus(SignatureRequestStatus.signed);
         signatureRequest.setSignedAt(Instant.now());
     }
