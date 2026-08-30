@@ -32,7 +32,11 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
         }
         <div class="detail-row">
           <span class="detail-label">סטטוס תשלום אחרון</span>
-          <span [class]="paymentStatusBadgeClass(latestStatus())">{{ statusLabels[latestStatus()] }}</span>
+          @if (latestStatus(); as status) {
+            <span [class]="paymentStatusBadgeClass(status)">{{ statusLabels[status] }}</span>
+          } @else {
+            <span class="no-payments-hint">טרם נרשם תשלום</span>
+          }
         </div>
       </section>
 
@@ -129,6 +133,10 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
       flex-direction: column;
       gap: var(--space-6);
     }
+    .no-payments-hint {
+      color: var(--color-text-muted);
+      font-size: 13px;
+    }
     .subscription-card {
       max-width: 420px;
     }
@@ -174,7 +182,7 @@ export class PaymentsTabComponent implements OnChanges {
   paymentStatusBadgeClass = paymentStatusBadgeClass;
 
   lastAmount = computed(() => this.payments()[0]?.amount ?? 0);
-  latestStatus = computed(() => this.payments()[0]?.status ?? 'pending');
+  latestStatus = computed(() => this.payments()[0]?.status ?? null);
 
   showForm = signal(false);
   saving = signal(false);
