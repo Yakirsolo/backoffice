@@ -144,7 +144,7 @@
 }
 
 @media print {
-  .no-print, app-shell .sidebar, .page-header {
+  .no-print, .page-header {
     display: none !important;
   }
   .agreement-preview {

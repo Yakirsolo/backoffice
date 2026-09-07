@@ -817,3 +817,9 @@ input, select, textarea {
     animation: none;
   }
 }
+
+@media print {
+  app-shell .sidebar {
+    display: none !important;
+  }
+}
