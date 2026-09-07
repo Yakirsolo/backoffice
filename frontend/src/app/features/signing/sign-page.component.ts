@@ -42,12 +42,27 @@ export class SignPageComponent {
     effect(() => {
       const canvasRef = this.padCanvas();
       if (canvasRef && !this.signaturePad) {
-        this.signaturePad = new SignaturePad(canvasRef.nativeElement);
+        const canvas = canvasRef.nativeElement;
+        this.resizeCanvas(canvas);
+        this.signaturePad = new SignaturePad(canvas);
         this.signaturePad.addEventListener('endStroke', () => {
           this.hasSignature.set(!this.signaturePad!.isEmpty());
         });
+        window.addEventListener('resize', () => {
+          this.resizeCanvas(canvas);
+          this.signaturePad?.clear();
+          this.hasSignature.set(false);
+        });
       }
     });
+  }
+
+  private resizeCanvas(canvas: HTMLCanvasElement) {
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * ratio;
+    canvas.height = rect.height * ratio;
+    canvas.getContext('2d')!.scale(ratio, ratio);
   }
 
   clear() {
