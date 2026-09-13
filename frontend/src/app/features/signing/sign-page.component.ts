@@ -77,9 +77,11 @@ export class SignPageComponent {
 
     const canvas = this.padCanvas()!.nativeElement;
     const img = this.signatureImage()!.nativeElement;
-    img.src = this.signaturePad.toDataURL('image/png');
+    const signatureDataUrl = this.signaturePad.toDataURL('image/png');
+    img.src = signatureDataUrl;
     img.style.display = 'block';
     canvas.style.display = 'none';
+    this.signaturePad.clear();
 
     try {
       const html2pdf = (await import('html2pdf.js')).default;
@@ -100,6 +102,7 @@ export class SignPageComponent {
       this.state.set('ready');
       img.style.display = 'none';
       canvas.style.display = 'block';
+      await this.signaturePad.fromDataURL(signatureDataUrl);
     }
   }
 }

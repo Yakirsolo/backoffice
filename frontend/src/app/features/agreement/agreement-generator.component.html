@@ -110,11 +110,16 @@
                     <span class="unlinked-name">{{ agreement.customerName }}</span>
                     <span class="unlinked-meta">{{ agreement.program }} · {{ agreement.price || '-' }} ₪ · נחתם ב-{{ formatDate(agreement.agreementDate) }}</span>
                   </div>
-                  @if (agreement.downloadUrl) {
-                    <a class="btn btn-secondary" [href]="agreement.downloadUrl" target="_blank" rel="noopener">הורדה</a>
-                  } @else {
-                    <span class="download-unavailable">אחסון לא מוגדר</span>
-                  }
+                  <div class="unlinked-actions">
+                    @if (agreement.downloadUrl) {
+                      <a class="btn btn-secondary" [href]="agreement.downloadUrl" target="_blank" rel="noopener">הורדה</a>
+                    } @else {
+                      <span class="download-unavailable">אחסון לא מוגדר</span>
+                    }
+                    <button class="btn btn-ghost btn-sm unlinked-delete" title="מחיקה" (click)="deleteAgreement(agreement)">
+                      <svg lucideTrash2 class="icon"></svg>
+                    </button>
+                  </div>
                 </div>
               }
             </div>

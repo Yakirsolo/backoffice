@@ -132,6 +132,12 @@
   color: var(--color-text-muted);
 }
 
+.unlinked-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .download-unavailable {
   font-size: 12px;
   color: var(--color-text-faint);
