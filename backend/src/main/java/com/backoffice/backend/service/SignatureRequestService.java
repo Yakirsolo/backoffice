@@ -164,6 +164,19 @@ public class SignatureRequestService {
         signatureRequest.setDocumentId(document.id());
     }
 
+    @Transactional
+    public void deleteUnlinked(UUID id) {
+        SignatureRequest signatureRequest = signatureRequestRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Agreement not found: " + id));
+        if (signatureRequest.getCustomerId() != null) {
+            throw new ApiException(HttpStatus.CONFLICT, "This agreement is already attached to a customer");
+        }
+        if (signatureRequest.getStorageKey() != null) {
+            storageService.deleteObject(signatureRequest.getStorageKey());
+        }
+        signatureRequestRepository.delete(signatureRequest);
+    }
+
     private SignatureRequest requirePending(String token) {
         SignatureRequest signatureRequest = signatureRequestRepository.findByTokenHash(hash(token))
                 .orElseThrow(() -> new NotFoundException("Signing link not found"));

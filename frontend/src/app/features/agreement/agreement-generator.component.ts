@@ -1,7 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { LucideChevronRight, LucidePrinter } from '@lucide/angular';
+import { LucideChevronRight, LucidePrinter, LucideTrash2 } from '@lucide/angular';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { CustomersService, UnlinkedAgreement } from '../../core/services/customers.service';
 import { AgreementDocumentComponent } from '../../shared/components/agreement-document/agreement-document.component';
 import { formatDate, todayIso } from '../../shared/status-utils';
@@ -11,13 +12,14 @@ type AgreementTab = 'create' | 'unlinked';
 @Component({
   selector: 'app-agreement-generator',
   standalone: true,
-  imports: [FormsModule, RouterLink, LucideChevronRight, LucidePrinter, AgreementDocumentComponent],
+  imports: [FormsModule, RouterLink, LucideChevronRight, LucidePrinter, LucideTrash2, AgreementDocumentComponent],
   templateUrl: './agreement-generator.component.html',
   styleUrl: './agreement-generator.component.scss'
 })
 export class AgreementGeneratorComponent {
   private route = inject(ActivatedRoute);
   private customersService = inject(CustomersService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   customerId = signal<string | null>(null);
   customerName = signal('');
@@ -57,6 +59,10 @@ export class AgreementGeneratorComponent {
       });
     }
 
+    this.loadUnlinkedAgreements();
+  }
+
+  private loadUnlinkedAgreements() {
     this.customersService.listUnlinkedAgreements().subscribe(list => this.unlinkedAgreements.set(list));
   }
 
@@ -96,5 +102,19 @@ export class AgreementGeneratorComponent {
     if (link) {
       await navigator.clipboard.writeText(link);
     }
+  }
+
+  async deleteAgreement(agreement: UnlinkedAgreement) {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'מחיקת חוזה',
+      message: `למחוק את החוזה של "${agreement.customerName}"?`,
+      confirmLabel: 'מחיקה',
+      danger: true
+    });
+    if (!confirmed) return;
+    this.customersService.deleteUnlinkedAgreement(agreement.id).subscribe({
+      next: () => this.loadUnlinkedAgreements(),
+      error: () => this.confirmDialog.alert('מחיקת החוזה נכשלה')
+    });
   }
 }

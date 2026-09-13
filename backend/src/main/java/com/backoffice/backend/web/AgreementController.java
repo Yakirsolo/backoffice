@@ -13,6 +13,7 @@ import com.backoffice.backend.service.SignatureRequestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,5 +71,11 @@ public class AgreementController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void attach(@PathVariable UUID id, @Valid @RequestBody AttachAgreementRequest request) {
         signatureRequestService.attachToCustomer(id, request.customerId());
+    }
+
+    @DeleteMapping("/unlinked/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUnlinked(@PathVariable UUID id) {
+        signatureRequestService.deleteUnlinked(id);
     }
 }

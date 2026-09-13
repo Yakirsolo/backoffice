@@ -149,7 +149,10 @@ export class CustomersService {
       .pipe(tap(() => this.refreshCustomers()));
   }
 
-  addMeeting(customerId: string, data: { date: string; time: string; type: string; zoomLink?: string }) {
+  addMeeting(
+    customerId: string,
+    data: { date: string; time: string; type: string; durationMinutes?: number; zoomLink?: string; reminderEnabled?: boolean }
+  ) {
     return this.http.post<Meeting>(`${API_BASE_URL}/customers/${customerId}/meetings`, data)
       .pipe(tap(() => this.refreshMeetings()));
   }
@@ -226,5 +229,9 @@ export class CustomersService {
 
   attachAgreement(signatureRequestId: string, customerId: string): Observable<void> {
     return this.http.post<void>(`${API_BASE_URL}/agreements/unlinked/${signatureRequestId}/attach`, { customerId });
+  }
+
+  deleteUnlinkedAgreement(signatureRequestId: string): Observable<void> {
+    return this.http.delete<void>(`${API_BASE_URL}/agreements/unlinked/${signatureRequestId}`);
   }
 }
