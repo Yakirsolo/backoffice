@@ -81,7 +81,8 @@ export class SignPageComponent {
     img.src = signatureDataUrl;
     img.style.display = 'block';
     canvas.style.display = 'none';
-    this.signaturePad.clear();
+    canvas.width = 1;
+    canvas.height = 1;
 
     try {
       const html2pdf = (await import('html2pdf.js')).default;
@@ -102,6 +103,7 @@ export class SignPageComponent {
       this.state.set('ready');
       img.style.display = 'none';
       canvas.style.display = 'block';
+      this.resizeCanvas(canvas);
       await this.signaturePad.fromDataURL(signatureDataUrl);
     }
   }
