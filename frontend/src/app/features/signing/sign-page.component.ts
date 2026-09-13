@@ -81,11 +81,6 @@ export class SignPageComponent {
     img.src = signatureDataUrl;
     img.style.display = 'block';
     canvas.style.display = 'none';
-    // html2pdf.js clones the DOM before rasterizing it, and its clone step always
-    // re-renders any <canvas> element's current pixels into a new, always-visible
-    // <img> regardless of display:none. Left alone, that produces a second, unstyled
-    // copy of the signature next to the real <img> above. Clearing the canvas here
-    // makes that phantom clone blank instead.
     this.signaturePad.clear();
 
     try {
