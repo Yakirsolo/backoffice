@@ -135,7 +135,16 @@ export class SignPageComponent {
     try {
       const html2pdf = (await import('html2pdf.js')).default;
       const pdfBlob: Blob = await html2pdf()
-        .set({ margin: 10, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } })
+        .set({
+          margin: 10,
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          // jsPDF's page-slicing crops the rendered document at fixed pixel-height
+          // intervals with no regard for content - it can (and does) cut straight
+          // through the middle of a line of text, which renders as corrupted,
+          // overlapping glyphs. avoid-all pushes any element that would straddle
+          // a page boundary onto the next page as a whole instead.
+          pagebreak: { mode: ['avoid-all'] }
+        } as Record<string, unknown>)
         .from(this.documentRoot()!.nativeElement)
         .outputPdf('blob');
 
