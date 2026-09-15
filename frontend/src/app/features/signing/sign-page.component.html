@@ -45,6 +45,10 @@
               <canvas #padCanvas class="signature-canvas"></canvas>
               <img #signatureImage class="signature-image" alt="חתימה" />
             </div>
+            <div parent-signature class="client-signature-area">
+              <canvas #padCanvasParent class="signature-canvas"></canvas>
+              <img #signatureImageParent class="signature-image" alt="חתימת הורה" />
+            </div>
           </app-agreement-document>
 
           <div class="actions">
@@ -56,6 +60,9 @@
               <button class="btn btn-primary" [disabled]="!hasSignature() || state() === 'submitting'" (click)="submit()">
                 {{ state() === 'submitting' ? 'שולח...' : 'חתימה ואישור' }}
               </button>
+            </div>
+            <div class="actions-row">
+              <button class="btn btn-secondary" [disabled]="state() === 'submitting'" (click)="clearParent()">ניקוי חתימת הורה</button>
             </div>
           </div>
         </div>
