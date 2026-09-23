@@ -1,7 +1,10 @@
 package com.backoffice.backend.service;
 
 import com.backoffice.backend.domain.repository.MeetingRepository;
+import com.backoffice.backend.domain.entity.Customer;
+import com.backoffice.backend.domain.entity.CustomerStatus;
 import com.backoffice.backend.domain.entity.Meeting;
+import com.backoffice.backend.domain.repository.CustomerRepository;
 import com.backoffice.backend.dto.meeting.MeetingUpdateRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +19,9 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,15 +29,18 @@ class MeetingServiceTest {
 
     @Mock private MeetingRepository meetingRepository;
     @Mock private TimelineService timelineService;
+    @Mock private CustomerRepository customerRepository;
+    @Mock private MeetingSchedulingService meetingSchedulingService;
 
     private MeetingService service;
     private UUID customerId;
     private UUID meetingId;
     private Meeting meeting;
+    private Customer customer;
 
     @BeforeEach
     void setUp() {
-        service = new MeetingService(meetingRepository, timelineService);
+        service = new MeetingService(meetingRepository, timelineService, customerRepository, meetingSchedulingService);
         customerId = UUID.randomUUID();
         meetingId = UUID.randomUUID();
 
@@ -43,6 +51,10 @@ class MeetingServiceTest {
         meeting.setTime(LocalTime.of(9, 0));
         meeting.setType("פגישה");
         meeting.setCompleted(false);
+
+        customer = new Customer();
+        customer.setId(customerId);
+        customer.setStatus(CustomerStatus.active);
 
         when(meetingRepository.findById(meetingId)).thenReturn(Optional.of(meeting));
     }
@@ -74,5 +86,38 @@ class MeetingServiceTest {
         service.delete(customerId, meetingId);
 
         verify(meetingRepository).delete(meeting);
+        verifyNoInteractions(meetingSchedulingService);
+    }
+
+    @Test
+    void completingAMeeting_schedulesTheNextOne() {
+        when(meetingRepository.save(any(Meeting.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(customerRepository.findById(customerId)).thenReturn(Optional.of(customer));
+
+        service.update(customerId, meetingId, new MeetingUpdateRequest(null, null, null, null, true, null, null));
+
+        verify(meetingSchedulingService).scheduleNextMeeting(customer, meeting);
+    }
+
+    @Test
+    void reschedulingAnAlreadyCompletedMeeting_doesNotTriggerScheduling() {
+        meeting.setCompleted(true);
+        when(meetingRepository.save(any(Meeting.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        service.update(customerId, meetingId, new MeetingUpdateRequest(LocalDate.of(2026, 6, 1), null, null, null, true, null, null));
+
+        verifyNoInteractions(meetingSchedulingService);
+        verifyNoInteractions(customerRepository);
+    }
+
+    @Test
+    void schedulingFailure_doesNotPreventCompletionFromSaving() {
+        when(meetingRepository.save(any(Meeting.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(customerRepository.findById(customerId)).thenReturn(Optional.of(customer));
+        doThrow(new RuntimeException("boom")).when(meetingSchedulingService).scheduleNextMeeting(any(), any());
+
+        var response = service.update(customerId, meetingId, new MeetingUpdateRequest(null, null, null, null, true, null, null));
+
+        assertThat(response.completed()).isTrue();
     }
 }

@@ -2,12 +2,14 @@ package com.backoffice.backend.service;
 
 import com.backoffice.backend.domain.entity.Meeting;
 import com.backoffice.backend.domain.entity.TimelineEventType;
+import com.backoffice.backend.domain.repository.CustomerRepository;
 import com.backoffice.backend.domain.repository.MeetingRepository;
 import com.backoffice.backend.dto.meeting.MeetingCreateRequest;
 import com.backoffice.backend.dto.meeting.MeetingResponse;
 import com.backoffice.backend.dto.meeting.MeetingUpdateRequest;
 import com.backoffice.backend.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +19,13 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MeetingService {
 
     private final MeetingRepository meetingRepository;
     private final TimelineService timelineService;
+    private final CustomerRepository customerRepository;
+    private final MeetingSchedulingService meetingSchedulingService;
 
     public List<MeetingResponse> listForCustomer(UUID customerId) {
         return meetingRepository.findByCustomerIdOrderByDateDescTimeDesc(customerId).stream()
@@ -62,6 +67,13 @@ public class MeetingService {
 
         if (justCompleted) {
             timelineService.record(customerId, TimelineEventType.meeting_completed, LocalDate.now(), meeting.getType());
+            Meeting completedMeeting = meeting;
+            try {
+                customerRepository.findById(customerId)
+                        .ifPresent(customer -> meetingSchedulingService.scheduleNextMeeting(customer, completedMeeting));
+            } catch (RuntimeException e) {
+                log.warn("Failed to schedule next meeting for customer {}", customerId, e);
+            }
         }
 
         return MeetingResponse.from(meeting);
