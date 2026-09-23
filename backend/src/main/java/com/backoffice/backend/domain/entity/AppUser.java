@@ -40,6 +40,13 @@ public class AppUser {
     @Column(name = "zoom_personal_link", length = 500)
     private String zoomPersonalLink;
 
+    @Column(name = "meeting_cadence_value", nullable = false)
+    private int meetingCadenceValue = 1;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "meeting_cadence_unit", nullable = false)
+    private BillingIntervalUnit meetingCadenceUnit = BillingIntervalUnit.month;
+
     @Column(name = "notify_payment_reminders", nullable = false)
     private boolean notifyPaymentReminders = true;
 
