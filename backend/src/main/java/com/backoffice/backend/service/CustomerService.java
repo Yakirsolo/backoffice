@@ -10,6 +10,7 @@ import com.backoffice.backend.dto.customer.CustomerResponse;
 import com.backoffice.backend.dto.customer.CustomerUpdateRequest;
 import com.backoffice.backend.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
@@ -27,6 +29,7 @@ public class CustomerService {
     private final PaymentRepository paymentRepository;
     private final PaymentService paymentService;
     private final TimelineService timelineService;
+    private final MeetingSchedulingService meetingSchedulingService;
 
     public List<CustomerResponse> search(CustomerStatus status, String search) {
         var spec = CustomerSpecifications.matching(status, search);
@@ -62,6 +65,12 @@ public class CustomerService {
         customer.setBillingIntervalValue(request.billingIntervalValue());
         customer.setBillingIntervalUnit(request.billingIntervalUnit());
         customer = customerRepository.save(customer);
+
+        try {
+            meetingSchedulingService.scheduleFirstMeeting(customer);
+        } catch (RuntimeException e) {
+            log.warn("Failed to schedule first meeting for customer {}", customer.getId(), e);
+        }
 
         ProgressMeasurement measurement = new ProgressMeasurement();
         measurement.setCustomerId(customer.getId());
