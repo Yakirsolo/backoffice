@@ -51,6 +51,10 @@ public class MeetingService {
 
         boolean justCompleted = request.completed() != null && request.completed() && !meeting.isCompleted();
 
+        if (request.date() != null) meeting.setDate(request.date());
+        if (request.time() != null) meeting.setTime(request.time());
+        if (request.durationMinutes() != null) meeting.setDurationMinutes(request.durationMinutes());
+        if (request.type() != null) meeting.setType(request.type());
         if (request.completed() != null) meeting.setCompleted(request.completed());
         if (request.notes() != null) meeting.setNotes(request.notes());
         if (request.zoomLink() != null) meeting.setZoomLink(request.zoomLink());
@@ -69,5 +73,13 @@ public class MeetingService {
 
     public List<Meeting> all() {
         return meetingRepository.findAllByOrderByDateAscTimeAsc();
+    }
+
+    @Transactional
+    public void delete(UUID customerId, UUID meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .filter(m -> m.getCustomerId().equals(customerId))
+                .orElseThrow(() -> new NotFoundException("Meeting not found: " + meetingId));
+        meetingRepository.delete(meeting);
     }
 }
