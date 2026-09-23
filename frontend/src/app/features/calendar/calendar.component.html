@@ -4,11 +4,17 @@
       <h1 class="page-title">יומן</h1>
       <p class="page-subtitle">כל הפגישות שלכם, לפי תאריך</p>
     </div>
+    <button class="btn btn-primary" (click)="dialogOpen.set(true)">
+      <svg lucidePlus class="icon"></svg> פגישה חדשה
+    </button>
   </div>
 
   @if (groupedMeetings().length === 0) {
-    <app-empty-state heading="אין פגישות מתוכננות">
+    <app-empty-state heading="אין פגישות מתוכננות" message="כל פגישה שתקבעו תופיע כאן, מסודרת לפי יום">
       <svg lucideCalendarDays class="icon" empty-icon></svg>
+      <button empty-action class="btn btn-primary empty-cta" (click)="dialogOpen.set(true)">
+        <svg lucidePlus class="icon"></svg> קביעת פגישה
+      </button>
     </app-empty-state>
   } @else {
     <div class="day-groups">
@@ -37,3 +43,7 @@
     </div>
   }
 </div>
+
+@if (dialogOpen()) {
+  <app-meeting-dialog (closed)="dialogOpen.set(false)" />
+}

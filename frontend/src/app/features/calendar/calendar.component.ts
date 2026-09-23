@@ -1,14 +1,15 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { LucideCalendarDays } from '@lucide/angular';
+import { LucideCalendarDays, LucidePlus } from '@lucide/angular';
 import { CustomersService } from '../../core/services/customers.service';
 import { formatDate, formatTime, todayIso } from '../../shared/status-utils';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { MeetingDialogComponent } from '../../shared/components/meeting-dialog/meeting-dialog.component';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [RouterLink, EmptyStateComponent, LucideCalendarDays],
+  imports: [RouterLink, EmptyStateComponent, MeetingDialogComponent, LucideCalendarDays, LucidePlus],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss'
 })
@@ -17,6 +18,7 @@ export class CalendarComponent {
   formatDate = formatDate;
   formatTime = formatTime;
   today = todayIso();
+  dialogOpen = signal(false);
 
   groupedMeetings = computed(() => {
     const meetings = this.customersService.meetings()

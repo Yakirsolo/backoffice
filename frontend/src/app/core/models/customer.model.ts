@@ -99,6 +99,8 @@ export interface Payment {
   amount: number;
   date: string;
   status: PaymentStatus;
+  /** ISO-8601 instant of when the payment was recorded, as opposed to `date` which is the billing date. */
+  createdAt: string;
 }
 
 export interface Todo {

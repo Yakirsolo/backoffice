@@ -18,6 +18,7 @@ export class SettingsComponent {
   businessName = signal('');
   email = signal('');
   phone = signal('');
+  zoomPersonalLink = signal('');
   notifyPaymentReminders = signal(true);
   notifyFollowUp = signal(true);
 
@@ -29,6 +30,7 @@ export class SettingsComponent {
       this.businessName.set(settings.businessName ?? '');
       this.email.set(settings.email);
       this.phone.set(settings.phone ?? '');
+      this.zoomPersonalLink.set(settings.zoomPersonalLink ?? '');
       this.notifyPaymentReminders.set(settings.notifyPaymentReminders);
       this.notifyFollowUp.set(settings.notifyFollowUp);
     });
@@ -40,6 +42,7 @@ export class SettingsComponent {
       name: this.coachName(),
       businessName: this.businessName(),
       phone: this.phone(),
+      zoomPersonalLink: this.zoomPersonalLink().trim(),
       notifyPaymentReminders: this.notifyPaymentReminders(),
       notifyFollowUp: this.notifyFollowUp()
     }).subscribe({

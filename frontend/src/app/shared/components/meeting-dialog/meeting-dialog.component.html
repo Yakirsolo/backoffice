@@ -1,0 +1,111 @@
+<div class="modal-overlay" (click)="close()" (keydown.escape)="close()">
+  <div class="modal-card meeting-modal" role="dialog" aria-modal="true" aria-labelledby="meeting-dialog-title" (click)="$event.stopPropagation()">
+    <div class="meeting-modal-head">
+      <h3 id="meeting-dialog-title">פגישה חדשה</h3>
+      <button type="button" class="btn btn-ghost btn-sm icon-only" aria-label="סגירה" (click)="close()">
+        <svg lucideX class="icon"></svg>
+      </button>
+    </div>
+
+    <div class="meeting-modal-body">
+      @if (!customerId) {
+        <div class="field-group customer-picker">
+          <label class="field-label" for="meeting-customer">לקוחה</label>
+          <div class="search-field">
+            <svg lucideSearch class="icon"></svg>
+            <input
+              id="meeting-customer"
+              class="input-field"
+              type="text"
+              autocomplete="off"
+              placeholder="חיפוש לפי שם או טלפון"
+              [value]="customerQuery()"
+              (input)="onQueryInput($any($event.target).value)"
+              (focus)="listOpen.set(true)"
+            />
+            @if (customerQuery()) {
+              <button type="button" class="clear-btn" aria-label="ניקוי" (click)="clearCustomer()">
+                <svg lucideX class="icon"></svg>
+              </button>
+            }
+          </div>
+
+          @if (listOpen() && !pickedCustomerId()) {
+            <div class="customer-results">
+              @for (c of matches(); track c.id) {
+                <button type="button" class="customer-option" (click)="selectCustomer(c.id, c.name)">
+                  <span class="avatar avatar-sm">{{ c.name.charAt(0) }}</span>
+                  <span class="customer-option-name">{{ c.name }}</span>
+                  <span class="customer-option-meta tabular-nums">{{ c.phone }}</span>
+                </button>
+              } @empty {
+                <p class="customer-empty">לא נמצאה לקוחה פעילה בשם הזה</p>
+              }
+              @if (hiddenMatchCount() > 0) {
+                <p class="customer-more">ועוד {{ hiddenMatchCount() }} — הקלידו כדי לצמצם</p>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <div class="two-col">
+        <div class="field-group">
+          <label class="field-label" for="meeting-date">תאריך</label>
+          <input id="meeting-date" class="input-field" type="date" [(ngModel)]="date" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="meeting-time">שעה</label>
+          <input id="meeting-time" class="input-field" type="time" [(ngModel)]="time" />
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="meeting-description">תיאור קצר <span class="optional-hint">(אופציונלי)</span></label>
+        <input
+          id="meeting-description"
+          class="input-field"
+          type="text"
+          maxlength="60"
+          placeholder="מעקב שבועי, שיחת פתיחה, מדידה..."
+          [(ngModel)]="description"
+        />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">משך <span class="optional-hint">(אופציונלי)</span></label>
+        <div class="chip-row">
+          @for (minutes of durationPresets; track minutes) {
+            <button
+              type="button"
+              class="chip tabular-nums"
+              [class.selected]="durationMinutes() === minutes"
+              (click)="pickDuration(minutes)"
+            >{{ minutes }} דק'</button>
+          }
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="meeting-zoom">קישור Zoom <span class="optional-hint">(אופציונלי)</span></label>
+        <input id="meeting-zoom" class="input-field" type="url" dir="ltr" placeholder="https://zoom.us/j/..." [(ngModel)]="zoomLink" />
+        <div class="chip-row zoom-actions">
+          @if (savedZoomRoom()) {
+            <button type="button" class="chip" (click)="useSavedZoomRoom()">החדר הקבוע שלי</button>
+          }
+          <button type="button" class="chip" (click)="openZoomScheduler()">פתחו את Zoom ↗</button>
+        </div>
+        @if (!savedZoomRoom()) {
+          <p class="field-hint">שמרו חדר קבוע ב<a routerLink="/settings" class="hint-link">הגדרות</a> כדי למלא אותו בלחיצה אחת.</p>
+        }
+      </div>
+    </div>
+
+    <div class="modal-actions meeting-modal-actions">
+      <button type="button" class="btn btn-primary" [disabled]="!canSave()" (click)="save()">
+        {{ saving() ? 'שומר...' : 'שמירת פגישה' }}
+      </button>
+      <button type="button" class="btn btn-secondary" [disabled]="saving()" (click)="close()">ביטול</button>
+    </div>
+  </div>
+</div>

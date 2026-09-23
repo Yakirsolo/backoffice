@@ -5,6 +5,7 @@ public record UserSettingsUpdateRequest(
         String name,
         String businessName,
         String phone,
+        String zoomPersonalLink,
         Boolean notifyPaymentReminders,
         Boolean notifyFollowUp
 ) {
