@@ -229,7 +229,7 @@ git commit -m "Add global meeting cadence setting"
 - Test: `backend/src/test/java/com/backoffice/backend/service/MeetingServiceTest.java`
 
 **Interfaces:**
-- Produces: `MeetingUpdateRequest(LocalDate date, LocalTime time, Integer durationMinutes, Boolean completed, String notes, String zoomLink)` — Task 9 (frontend) sends this shape.
+- Produces: `MeetingUpdateRequest(LocalDate date, LocalTime time, Integer durationMinutes, String type, Boolean completed, String notes, String zoomLink)` — Task 9 (frontend) sends this shape, including `type` for the description field the reused dialog lets you edit.
 - Produces: `MeetingRepository.existsByCustomerIdAndCompletedFalseAndDateGreaterThanEqual(UUID, LocalDate): boolean` — consumed by `MeetingSchedulingService` in Task 3.
 - Produces: `MeetingService.delete(UUID customerId, UUID meetingId): void`.
 - Produces: `DELETE /api/v1/customers/{customerId}/meetings/{meetingId}` → 204.
@@ -249,6 +249,7 @@ public record MeetingUpdateRequest(
         LocalDate date,
         LocalTime time,
         Integer durationMinutes,
+        String type,
         Boolean completed,
         String notes,
         String zoomLink
@@ -321,13 +322,22 @@ class MeetingServiceTest {
 
     @Test
     void reschedule_updatesDateTimeAndDuration() {
-        var request = new MeetingUpdateRequest(LocalDate.of(2026, 6, 10), LocalTime.of(14, 30), 30, null, null, null);
+        var request = new MeetingUpdateRequest(LocalDate.of(2026, 6, 10), LocalTime.of(14, 30), 30, null, null, null, null);
 
         var response = service.update(customerId, meetingId, request);
 
         assertThat(response.date()).isEqualTo(LocalDate.of(2026, 6, 10));
         assertThat(response.time()).isEqualTo(LocalTime.of(14, 30));
         assertThat(response.durationMinutes()).isEqualTo(30);
+    }
+
+    @Test
+    void reschedule_updatesTheDescription() {
+        var request = new MeetingUpdateRequest(null, null, null, "שיחת מעקב מעודכנת", null, null, null);
+
+        var response = service.update(customerId, meetingId, request);
+
+        assertThat(response.type()).isEqualTo("שיחת מעקב מעודכנת");
     }
 
     @Test
@@ -352,6 +362,7 @@ In `backend/src/main/java/com/backoffice/backend/service/MeetingService.java`, i
         if (request.date() != null) meeting.setDate(request.date());
         if (request.time() != null) meeting.setTime(request.time());
         if (request.durationMinutes() != null) meeting.setDurationMinutes(request.durationMinutes());
+        if (request.type() != null) meeting.setType(request.type());
 ```
 
 so the full field-assignment block reads:
@@ -360,6 +371,7 @@ so the full field-assignment block reads:
         if (request.date() != null) meeting.setDate(request.date());
         if (request.time() != null) meeting.setTime(request.time());
         if (request.durationMinutes() != null) meeting.setDurationMinutes(request.durationMinutes());
+        if (request.type() != null) meeting.setType(request.type());
         if (request.completed() != null) meeting.setCompleted(request.completed());
         if (request.notes() != null) meeting.setNotes(request.notes());
         if (request.zoomLink() != null) meeting.setZoomLink(request.zoomLink());
@@ -395,7 +407,7 @@ In `backend/src/main/java/com/backoffice/backend/web/MeetingController.java`, ad
 - [ ] **Step 7: Run the tests and verify they pass**
 
 Run: `./mvnw test -Dtest=MeetingServiceTest -pl . -q` (from `backend/`)
-Expected: both tests PASS.
+Expected: all 3 tests PASS.
 
 - [ ] **Step 8: Commit**
 
@@ -833,7 +845,7 @@ Then add these test methods:
     void completingAMeeting_schedulesTheNextOne() {
         when(customerRepository.findById(customerId)).thenReturn(Optional.of(customer));
 
-        service.update(customerId, meetingId, new MeetingUpdateRequest(null, null, null, true, null, null));
+        service.update(customerId, meetingId, new MeetingUpdateRequest(null, null, null, null, true, null, null));
 
         verify(meetingSchedulingService).scheduleNextMeeting(customer, meeting);
     }
@@ -842,7 +854,7 @@ Then add these test methods:
     void reschedulingAnAlreadyCompletedMeeting_doesNotTriggerScheduling() {
         meeting.setCompleted(true);
 
-        service.update(customerId, meetingId, new MeetingUpdateRequest(LocalDate.of(2026, 6, 1), null, null, true, null, null));
+        service.update(customerId, meetingId, new MeetingUpdateRequest(LocalDate.of(2026, 6, 1), null, null, null, true, null, null));
 
         verifyNoInteractions(meetingSchedulingService);
         verifyNoInteractions(customerRepository);
@@ -853,7 +865,7 @@ Then add these test methods:
         when(customerRepository.findById(customerId)).thenReturn(Optional.of(customer));
         doThrow(new RuntimeException("boom")).when(meetingSchedulingService).scheduleNextMeeting(any(), any());
 
-        var response = service.update(customerId, meetingId, new MeetingUpdateRequest(null, null, null, true, null, null));
+        var response = service.update(customerId, meetingId, new MeetingUpdateRequest(null, null, null, null, true, null, null));
 
         assertThat(response.completed()).isTrue();
     }
@@ -1278,7 +1290,7 @@ In `frontend/src/app/core/services/customers.service.ts`, right after the existi
   updateMeeting(
     customerId: string,
     meetingId: string,
-    data: { date?: string; time?: string; durationMinutes?: number; completed?: boolean; notes?: string; zoomLink?: string }
+    data: { date?: string; time?: string; durationMinutes?: number; type?: string; completed?: boolean; notes?: string; zoomLink?: string }
   ) {
     return this.http.patch<Meeting>(`${API_BASE_URL}/customers/${customerId}/meetings/${meetingId}`, data)
       .pipe(tap(() => this.refreshMeetings()));
