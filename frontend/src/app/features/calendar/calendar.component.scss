@@ -56,3 +56,11 @@
   font-size: 12.5px;
   color: var(--color-text-muted);
 }
+
+/* Projected into <app-empty-state>, so the empty-state icon rule needs undoing here. */
+.empty-cta .icon {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  color: inherit;
+}

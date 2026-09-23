@@ -7,13 +7,14 @@ public record UserSettingsResponse(
         String businessName,
         String email,
         String phone,
+        String zoomPersonalLink,
         boolean notifyPaymentReminders,
         boolean notifyFollowUp
 ) {
     public static UserSettingsResponse from(AppUser user) {
         return new UserSettingsResponse(
                 user.getName(), user.getBusinessName(), user.getEmail(), user.getPhone(),
-                user.isNotifyPaymentReminders(), user.isNotifyFollowUp()
+                user.getZoomPersonalLink(), user.isNotifyPaymentReminders(), user.isNotifyFollowUp()
         );
     }
 }

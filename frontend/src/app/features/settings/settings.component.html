@@ -33,6 +33,25 @@
     </section>
 
     <section class="card panel">
+      <h2 class="panel-title">Zoom</h2>
+      <div class="field-group">
+        <label class="field-label">קישור החדר הקבוע שלך</label>
+        <input
+          class="input-field"
+          type="url"
+          dir="ltr"
+          placeholder="https://zoom.us/j/1234567890"
+          [ngModel]="zoomPersonalLink()"
+          (ngModelChange)="zoomPersonalLink.set($event)"
+        />
+        <p class="field-hint">הקישור הזה יוצע בלחיצה אחת בכל פגישה חדשה. מצאי אותו ב-Zoom תחת Personal Room.</p>
+      </div>
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+        {{ saving() ? 'שומרת...' : 'שמירת שינויים' }}
+      </button>
+    </section>
+
+    <section class="card panel">
       <h2 class="panel-title">התראות</h2>
       <div class="toggle-row">
         <div>

@@ -4,6 +4,7 @@ import com.backoffice.backend.domain.entity.Payment;
 import com.backoffice.backend.domain.entity.PaymentStatus;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -12,9 +13,10 @@ public record PaymentResponse(
         UUID customerId,
         BigDecimal amount,
         LocalDate date,
-        PaymentStatus status
+        PaymentStatus status,
+        Instant createdAt
 ) {
     public static PaymentResponse from(Payment p) {
-        return new PaymentResponse(p.getId(), p.getCustomerId(), p.getAmount(), p.getDate(), p.getStatus());
+        return new PaymentResponse(p.getId(), p.getCustomerId(), p.getAmount(), p.getDate(), p.getStatus(), p.getCreatedAt());
     }
 }

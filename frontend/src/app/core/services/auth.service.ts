@@ -15,6 +15,7 @@ export interface UserSettings {
   businessName: string | null;
   email: string;
   phone: string | null;
+  zoomPersonalLink: string | null;
   notifyPaymentReminders: boolean;
   notifyFollowUp: boolean;
 }
@@ -23,6 +24,7 @@ export interface UserSettingsUpdate {
   name?: string;
   businessName?: string;
   phone?: string;
+  zoomPersonalLink?: string;
   notifyPaymentReminders?: boolean;
   notifyFollowUp?: boolean;
 }

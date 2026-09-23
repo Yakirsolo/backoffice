@@ -37,6 +37,9 @@ public class AppUser {
     @Column(nullable = false)
     private UserRole role = UserRole.ADMIN;
 
+    @Column(name = "zoom_personal_link", length = 500)
+    private String zoomPersonalLink;
+
     @Column(name = "notify_payment_reminders", nullable = false)
     private boolean notifyPaymentReminders = true;
 

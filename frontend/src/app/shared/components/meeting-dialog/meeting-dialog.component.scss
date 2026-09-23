@@ -1,0 +1,187 @@
+:host {
+  direction: rtl;
+}
+
+.meeting-modal {
+  max-width: 460px;
+  max-height: calc(100vh - var(--space-12));
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.meeting-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.meeting-modal-head h3 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.icon-only {
+  padding: 6px;
+  color: var(--color-text-faint);
+}
+
+.meeting-modal-body {
+  padding: var(--space-5) var(--space-6) var(--space-2);
+  overflow-y: auto;
+}
+
+.meeting-modal-body .field-group:last-of-type {
+  margin-bottom: var(--space-4);
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.chip {
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.chip:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.chip.selected {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Customer search: the global .search-field sizing is meant for page toolbars. */
+.customer-picker {
+  position: relative;
+}
+
+.customer-picker .search-field {
+  max-width: none;
+  min-width: 0;
+}
+
+.customer-picker .search-field .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.customer-picker .input-field {
+  padding-inline-end: 36px;
+}
+
+.clear-btn {
+  position: absolute;
+  inset-inline-end: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  padding: 4px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-faint);
+  border-radius: var(--radius-sm);
+}
+
+.clear-btn:hover {
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+}
+
+.clear-btn .icon {
+  position: static;
+  transform: none;
+  width: 14px;
+  height: 14px;
+}
+
+.customer-results {
+  margin-top: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  max-height: 232px;
+  overflow-y: auto;
+}
+
+.customer-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  background: transparent;
+  text-align: start;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.customer-option:last-child {
+  border-bottom: none;
+}
+
+.customer-option:hover,
+.customer-option:focus-visible {
+  background: var(--color-primary-soft);
+}
+
+.customer-option-name {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.customer-option-meta {
+  margin-inline-start: auto;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.customer-empty,
+.customer-more {
+  padding: var(--space-3);
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+}
+
+.zoom-actions {
+  margin-top: var(--space-2);
+  margin-bottom: 0;
+}
+
+.hint-link {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.meeting-modal-actions {
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 640px) {
+  .meeting-modal-head,
+  .meeting-modal-actions {
+    padding-inline: var(--space-5);
+  }
+  .meeting-modal-body {
+    padding-inline: var(--space-5);
+  }
+}

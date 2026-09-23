@@ -1,107 +1,68 @@
 import { Component, Input, OnChanges, computed, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { LucideCalendar, LucideVideo } from '@lucide/angular';
+import { LucideCalendar, LucidePlus, LucideVideo } from '@lucide/angular';
 import { CustomersService } from '../../../../core/services/customers.service';
-import { ToastService } from '../../../../core/services/toast.service';
 import { formatDate, formatTime } from '../../../../shared/status-utils';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { MeetingDialogComponent } from '../../../../shared/components/meeting-dialog/meeting-dialog.component';
 
 @Component({
   selector: 'app-meetings-tab',
   standalone: true,
-  imports: [FormsModule, EmptyStateComponent, LucideCalendar, LucideVideo],
+  imports: [EmptyStateComponent, MeetingDialogComponent, LucideCalendar, LucidePlus, LucideVideo],
   template: `
-    <div class="meetings-layout">
-      <section class="card panel inline-form-card">
-        <h3 class="panel-title">קביעת פגישה חדשה</h3>
-        <div class="three-col">
-          <div class="field-group">
-            <label class="field-label">תאריך</label>
-            <input class="input-field" type="date" [(ngModel)]="newDate" />
-          </div>
-          <div class="field-group">
-            <label class="field-label">שעה</label>
-            <input class="input-field" type="time" [(ngModel)]="newTime" />
-          </div>
-          <div class="field-group">
-            <label class="field-label">סוג פגישה</label>
-            <input class="input-field" type="text" placeholder="שיחת זום, מעקב שבועי..." [(ngModel)]="newType" />
-          </div>
-        </div>
-        <div class="field-group">
-          <label class="field-label">קישור Zoom <span class="optional-hint">(אופציונלי)</span></label>
-          <input class="input-field" type="text" placeholder="https://zoom.us/j/..." [(ngModel)]="newZoomLink" />
-        </div>
-        <label class="reminder-check">
-          <input type="checkbox" [(ngModel)]="newReminder" /> שלח תזכורת ללקוחה
-        </label>
-        <button class="btn btn-primary" (click)="addMeeting()" [disabled]="!newDate() || !newTime() || !newType()">
-          <svg lucideCalendar class="icon"></svg> שמירת פגישה
+    <section>
+      <div class="section-head">
+        <h3 class="panel-title">פגישות</h3>
+        <button class="btn btn-primary btn-sm" (click)="dialogOpen.set(true)">
+          <svg lucidePlus class="icon"></svg> פגישה חדשה
         </button>
-      </section>
+      </div>
 
-      <section>
-        <h3 class="panel-title">היסטוריית פגישות</h3>
-        @if (meetings().length === 0) {
-          <app-empty-state heading="אין עדיין פגישות">
-            <svg lucideCalendar class="icon" empty-icon></svg>
-          </app-empty-state>
-        } @else {
-          <div class="meeting-list">
-            @for (m of meetings(); track m.id) {
-              <div class="card item-card meeting-card">
-                <div class="meeting-when">
-                  <div class="meeting-date tabular-nums">{{ formatDate(m.date) }}</div>
-                  <div class="meeting-time tabular-nums">{{ formatTime(m.time) }}</div>
-                </div>
-                <div class="meeting-body">
-                  <div class="meeting-type-row">
-                    <span class="meeting-type">{{ m.type }}</span>
-                    @if (m.durationMinutes) {
-                      <span class="meeting-duration">{{ m.durationMinutes }} דקות</span>
-                    }
-                    <span class="badge" [class.badge-success]="m.completed" [class.badge-primary]="!m.completed">
-                      {{ m.completed ? 'התקיימה' : 'מתוכננת' }}
-                    </span>
-                  </div>
-                  @if (m.notes) {
-                    <div class="meeting-notes">{{ m.notes }}</div>
-                  }
-                  @if (m.zoomLink) {
-                    <a class="meeting-zoom" [href]="m.zoomLink" target="_blank" rel="noopener">
-                      <svg lucideVideo style="width: 12px; height: 12px"></svg> קישור Zoom
-                    </a>
-                  }
-                </div>
+      @if (meetings().length === 0) {
+        <app-empty-state heading="אין עדיין פגישות" message="קבעו פגישה כדי להתחיל לעקוב אחרי המפגשים">
+          <svg lucideCalendar class="icon" empty-icon></svg>
+          <button empty-action class="btn btn-primary empty-cta" (click)="dialogOpen.set(true)">
+            <svg lucidePlus class="icon"></svg> קביעת פגישה
+          </button>
+        </app-empty-state>
+      } @else {
+        <div class="meeting-list">
+          @for (m of meetings(); track m.id) {
+            <div class="card item-card meeting-card">
+              <div class="meeting-when">
+                <div class="meeting-date tabular-nums">{{ formatDate(m.date) }}</div>
+                <div class="meeting-time tabular-nums">{{ formatTime(m.time) }}</div>
               </div>
-            }
-          </div>
-        }
-      </section>
-    </div>
+              <div class="meeting-body">
+                <div class="meeting-type-row">
+                  <span class="meeting-type">{{ m.type }}</span>
+                  @if (m.durationMinutes) {
+                    <span class="meeting-duration">{{ m.durationMinutes }} דקות</span>
+                  }
+                  <span class="badge" [class.badge-success]="m.completed" [class.badge-primary]="!m.completed">
+                    {{ m.completed ? 'התקיימה' : 'מתוכננת' }}
+                  </span>
+                </div>
+                @if (m.notes) {
+                  <div class="meeting-notes">{{ m.notes }}</div>
+                }
+                @if (m.zoomLink) {
+                  <a class="meeting-zoom" [href]="m.zoomLink" target="_blank" rel="noopener">
+                    <svg lucideVideo style="width: 12px; height: 12px"></svg> קישור Zoom
+                  </a>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    @if (dialogOpen()) {
+      <app-meeting-dialog [customerId]="customerId" (closed)="dialogOpen.set(false)" />
+    }
   `,
   styles: [`
-    .meetings-layout {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-6);
-    }
-    .inline-form-card {
-      align-items: flex-start;
-      margin-bottom: 0;
-    }
-    .inline-form-card > .three-col,
-    .inline-form-card > .field-group {
-      width: 100%;
-    }
-    .reminder-check {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      font-size: 13px;
-      color: var(--color-text-muted);
-      margin-bottom: var(--space-4);
-    }
     .meeting-list {
       display: flex;
       flex-direction: column;
@@ -154,38 +115,24 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
       margin-top: 6px;
       font-weight: 600;
     }
+    /* Projected into <app-empty-state>, so the empty-state icon rule needs undoing here. */
+    .empty-cta .icon {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      color: inherit;
+    }
   `]
 })
 export class MeetingsTabComponent implements OnChanges {
   @Input({ required: true }) customerId!: string;
   private customersService = inject(CustomersService);
-  private toast = inject(ToastService);
   private idSignal = signal<string>('');
 
   meetings = computed(() => this.customersService.meetingsFor(this.idSignal()));
   formatDate = formatDate;
   formatTime = formatTime;
-
-  newDate = signal('');
-  newTime = signal('');
-  newType = signal('');
-  newZoomLink = signal('');
-  newReminder = signal(true);
-
-  addMeeting() {
-    this.customersService.addMeeting(this.customerId, {
-      date: this.newDate(),
-      time: this.newTime(),
-      type: this.newType(),
-      zoomLink: this.newZoomLink() || undefined
-    }).subscribe(() => {
-      this.newDate.set('');
-      this.newTime.set('');
-      this.newType.set('');
-      this.newZoomLink.set('');
-      this.toast.success('הפגישה נקבעה בהצלחה');
-    });
-  }
+  dialogOpen = signal(false);
 
   ngOnChanges() {
     this.idSignal.set(this.customerId);

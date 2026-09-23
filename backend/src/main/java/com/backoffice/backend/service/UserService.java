@@ -28,6 +28,7 @@ public class UserService {
         if (request.name() != null) user.setName(request.name());
         if (request.businessName() != null) user.setBusinessName(request.businessName());
         if (request.phone() != null) user.setPhone(request.phone());
+        if (request.zoomPersonalLink() != null) user.setZoomPersonalLink(request.zoomPersonalLink());
         if (request.notifyPaymentReminders() != null) user.setNotifyPaymentReminders(request.notifyPaymentReminders());
         if (request.notifyFollowUp() != null) user.setNotifyFollowUp(request.notifyFollowUp());
 
