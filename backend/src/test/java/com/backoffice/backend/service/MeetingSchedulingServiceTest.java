@@ -68,6 +68,41 @@ class MeetingSchedulingServiceTest {
         assertThat(saved.getDate()).isEqualTo(LocalDate.of(2026, 2, 1));
         assertThat(saved.getZoomLink()).isEqualTo("https://zoom.us/j/123");
         assertThat(saved.isCompleted()).isFalse();
+        assertThat(saved.getTime()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(saved.getType()).isEqualTo("פגישה");
+        assertThat(saved.getDurationMinutes()).isEqualTo(45);
+    }
+
+    @Test
+    void firstMeeting_dayCadence_addsDaysToStartDate() {
+        admin.setMeetingCadenceUnit(BillingIntervalUnit.day);
+        admin.setMeetingCadenceValue(10);
+        when(userRepository.findAll()).thenReturn(List.of(admin));
+        Customer customer = activeCustomer();
+        when(meetingRepository.existsByCustomerIdAndCompletedFalseAndDateGreaterThanEqual(eq(customer.getId()), any()))
+                .thenReturn(false);
+
+        service.scheduleFirstMeeting(customer);
+
+        ArgumentCaptor<Meeting> captor = ArgumentCaptor.forClass(Meeting.class);
+        verify(meetingRepository).save(captor.capture());
+        assertThat(captor.getValue().getDate()).isEqualTo(LocalDate.of(2026, 1, 11));
+    }
+
+    @Test
+    void firstMeeting_weekCadence_addsWeeksToStartDate() {
+        admin.setMeetingCadenceUnit(BillingIntervalUnit.week);
+        admin.setMeetingCadenceValue(2);
+        when(userRepository.findAll()).thenReturn(List.of(admin));
+        Customer customer = activeCustomer();
+        when(meetingRepository.existsByCustomerIdAndCompletedFalseAndDateGreaterThanEqual(eq(customer.getId()), any()))
+                .thenReturn(false);
+
+        service.scheduleFirstMeeting(customer);
+
+        ArgumentCaptor<Meeting> captor = ArgumentCaptor.forClass(Meeting.class);
+        verify(meetingRepository).save(captor.capture());
+        assertThat(captor.getValue().getDate()).isEqualTo(LocalDate.of(2026, 1, 15));
     }
 
     @Test
