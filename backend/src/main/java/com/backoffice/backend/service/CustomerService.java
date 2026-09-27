@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -66,10 +68,18 @@ public class CustomerService {
         customer.setBillingIntervalUnit(request.billingIntervalUnit());
         customer = customerRepository.save(customer);
 
-        try {
-            meetingSchedulingService.scheduleFirstMeeting(customer);
-        } catch (RuntimeException e) {
-            log.warn("Failed to schedule first meeting for customer {}", customer.getId(), e);
+        // Scheduling runs after commit so a DB error inside it can't mark this transaction
+        // rollback-only (catching the exception alone wouldn't save the customer creation).
+        Customer created = customer;
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    scheduleFirstMeetingSafely(created);
+                }
+            });
+        } else {
+            scheduleFirstMeetingSafely(created);
         }
 
         ProgressMeasurement measurement = new ProgressMeasurement();
@@ -91,6 +101,14 @@ public class CustomerService {
         timelineService.record(customer.getId(), TimelineEventType.customer_created, request.startDate(), null);
 
         return toResponse(customer);
+    }
+
+    private void scheduleFirstMeetingSafely(Customer customer) {
+        try {
+            meetingSchedulingService.scheduleFirstMeeting(customer);
+        } catch (RuntimeException e) {
+            log.warn("Failed to schedule first meeting for customer {}", customer.getId(), e);
+        }
     }
 
     @Transactional
