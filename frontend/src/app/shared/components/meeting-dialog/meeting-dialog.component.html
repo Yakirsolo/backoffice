@@ -1,7 +1,7 @@
 <div class="modal-overlay" (click)="close()" (keydown.escape)="close()">
   <div class="modal-card meeting-modal" role="dialog" aria-modal="true" aria-labelledby="meeting-dialog-title" (click)="$event.stopPropagation()">
     <div class="meeting-modal-head">
-      <h3 id="meeting-dialog-title">פגישה חדשה</h3>
+      <h3 id="meeting-dialog-title">{{ isEdit() ? 'עריכת פגישה' : 'פגישה חדשה' }}</h3>
       <button type="button" class="btn btn-ghost btn-sm icon-only" aria-label="סגירה" (click)="close()">
         <svg lucideX class="icon"></svg>
       </button>
@@ -103,7 +103,7 @@
 
     <div class="modal-actions meeting-modal-actions">
       <button type="button" class="btn btn-primary" [disabled]="!canSave()" (click)="save()">
-        {{ saving() ? 'שומר...' : 'שמירת פגישה' }}
+        {{ saving() ? 'שומר...' : (isEdit() ? 'עדכון פגישה' : 'שמירת פגישה') }}
       </button>
       <button type="button" class="btn btn-secondary" [disabled]="saving()" (click)="close()">ביטול</button>
     </div>
