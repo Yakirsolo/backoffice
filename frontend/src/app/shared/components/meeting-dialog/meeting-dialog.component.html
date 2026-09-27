@@ -99,6 +99,19 @@
           <p class="field-hint">שמרו חדר קבוע ב<a routerLink="/settings" class="hint-link">הגדרות</a> כדי למלא אותו בלחיצה אחת.</p>
         }
       </div>
+
+      @if (isEdit()) {
+        <div class="field-group">
+          <label class="field-label" for="meeting-notes">סיכום פגישה <span class="optional-hint">(אופציונלי)</span></label>
+          <textarea
+            id="meeting-notes"
+            class="input-field"
+            rows="3"
+            placeholder="מה עבר בפגישה, החלטות, משימות להמשך..."
+            [(ngModel)]="notes"
+          ></textarea>
+        </div>
+      }
     </div>
 
     <div class="modal-actions meeting-modal-actions">
