@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.UUID;
 
 public record DashboardResponse(
-        List<TodayMeeting> todaysMeetings,
+        List<UpcomingMeeting> upcomingMeetings,
         List<UpcomingPayment> upcomingPayments,
         List<CustomerResponse> followUpCustomers,
         int newCustomersThisMonth
 ) {
-    public record TodayMeeting(
+    public record UpcomingMeeting(
             UUID id, UUID customerId, String customerName,
-            LocalTime time, String type, String zoomLink
+            LocalDate date, LocalTime time, String type, String zoomLink
     ) {
     }
 

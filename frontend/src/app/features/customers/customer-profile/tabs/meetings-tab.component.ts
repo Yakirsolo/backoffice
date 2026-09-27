@@ -54,19 +54,21 @@ import { MeetingDialogComponent } from '../../../../shared/components/meeting-di
                     <svg lucideVideo style="width: 12px; height: 12px"></svg> קישור Zoom
                   </a>
                 }
-                @if (!m.completed) {
-                  <div class="meeting-actions">
+                <div class="meeting-actions">
+                  @if (!m.completed) {
                     <button type="button" class="btn btn-secondary btn-sm" (click)="markCompleted(m)">
                       <svg lucideCheck class="icon"></svg> סימון כהתקיימה
                     </button>
-                    <button type="button" class="btn btn-ghost btn-sm icon-only" title="עריכה" (click)="openEdit(m)">
-                      <svg lucidePencil class="icon"></svg>
-                    </button>
+                  }
+                  <button type="button" class="btn btn-ghost btn-sm icon-only" title="עריכה" (click)="openEdit(m)">
+                    <svg lucidePencil class="icon"></svg>
+                  </button>
+                  @if (!m.completed) {
                     <button type="button" class="btn btn-ghost btn-sm icon-only" title="מחיקה" (click)="deleteMeeting(m)">
                       <svg lucideTrash2 class="icon"></svg>
                     </button>
-                  </div>
-                }
+                  }
+                </div>
               </div>
             </div>
           }

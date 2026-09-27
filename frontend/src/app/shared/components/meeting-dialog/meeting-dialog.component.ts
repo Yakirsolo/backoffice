@@ -56,6 +56,7 @@ export class MeetingDialogComponent implements OnInit {
   description = signal('');
   durationMinutes = signal<number | null>(45);
   zoomLink = signal('');
+  notes = signal('');
   savedZoomRoom = signal('');
   saving = signal(false);
 
@@ -68,6 +69,7 @@ export class MeetingDialogComponent implements OnInit {
       this.description.set(this.meeting.type);
       this.durationMinutes.set(this.meeting.durationMinutes ?? null);
       this.zoomLink.set(this.meeting.zoomLink ?? '');
+      this.notes.set(this.meeting.notes ?? '');
     }
   }
 
@@ -122,7 +124,8 @@ export class MeetingDialogComponent implements OnInit {
       // The API requires a label; the description doubles as it, with a neutral fallback.
       type: this.description().trim() || 'פגישה',
       durationMinutes: this.durationMinutes() ?? undefined,
-      zoomLink: this.zoomLink().trim() || undefined
+      zoomLink: this.zoomLink().trim() || undefined,
+      notes: this.notes().trim() || undefined
     };
 
     const request = this.meeting

@@ -231,6 +231,12 @@ input, select, textarea {
   background: #ecd0ca;
 }
 
+/* Square icon-only button (close, edit, delete); pair with .btn .btn-ghost .btn-sm */
+.icon-only {
+  padding: 6px;
+  color: var(--color-text-faint);
+}
+
 .icon {
   width: 18px;
   height: 18px;

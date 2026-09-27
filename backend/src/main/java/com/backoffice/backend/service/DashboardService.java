@@ -27,7 +27,7 @@ public class DashboardService {
     public DashboardResponse getDashboard() {
         LocalDate today = LocalDate.now();
 
-        List<Meeting> todaysMeetings = meetingService.onDate(today);
+        List<Meeting> upcomingMeetings = meetingService.between(today, today.plusDays(6));
         List<Payment> upcomingPayments = paymentService.upcoming();
         List<Customer> followUp = customerService.needingFollowUp();
 
@@ -36,12 +36,12 @@ public class DashboardService {
                 .startedBetween(thisMonth.atDay(1), thisMonth.atEndOfMonth())
                 .size();
 
-        Map<UUID, String> customerNames = resolveCustomerNames(todaysMeetings, upcomingPayments);
+        Map<UUID, String> customerNames = resolveCustomerNames(upcomingMeetings, upcomingPayments);
 
-        List<DashboardResponse.TodayMeeting> meetingSummaries = todaysMeetings.stream()
-                .map(m -> new DashboardResponse.TodayMeeting(
+        List<DashboardResponse.UpcomingMeeting> meetingSummaries = upcomingMeetings.stream()
+                .map(m -> new DashboardResponse.UpcomingMeeting(
                         m.getId(), m.getCustomerId(), customerNames.getOrDefault(m.getCustomerId(), ""),
-                        m.getTime(), m.getType(), m.getZoomLink()))
+                        m.getDate(), m.getTime(), m.getType(), m.getZoomLink()))
                 .toList();
 
         List<DashboardResponse.UpcomingPayment> paymentSummaries = upcomingPayments.stream()

@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -68,19 +70,34 @@ public class MeetingService {
         if (justCompleted) {
             timelineService.record(customerId, TimelineEventType.meeting_completed, LocalDate.now(), meeting.getType());
             Meeting completedMeeting = meeting;
-            try {
-                customerRepository.findById(customerId)
-                        .ifPresent(customer -> meetingSchedulingService.scheduleNextMeeting(customer, completedMeeting));
-            } catch (RuntimeException e) {
-                log.warn("Failed to schedule next meeting for customer {}", customerId, e);
+            // Scheduling runs after commit so a DB error inside it can't mark this transaction
+            // rollback-only (catching the exception alone wouldn't save the completion).
+            if (TransactionSynchronizationManager.isSynchronizationActive()) {
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        scheduleNextMeetingSafely(customerId, completedMeeting);
+                    }
+                });
+            } else {
+                scheduleNextMeetingSafely(customerId, completedMeeting);
             }
         }
 
         return MeetingResponse.from(meeting);
     }
 
-    public List<Meeting> onDate(LocalDate date) {
-        return meetingRepository.findByDateAndCompletedFalseOrderByTime(date);
+    private void scheduleNextMeetingSafely(UUID customerId, Meeting completedMeeting) {
+        try {
+            customerRepository.findById(customerId)
+                    .ifPresent(customer -> meetingSchedulingService.scheduleNextMeeting(customer, completedMeeting));
+        } catch (RuntimeException e) {
+            log.warn("Failed to schedule next meeting for customer {}", customerId, e);
+        }
+    }
+
+    public List<Meeting> between(LocalDate from, LocalDate to) {
+        return meetingRepository.findByDateBetweenAndCompletedFalseOrderByDateAscTimeAsc(from, to);
     }
 
     public List<Meeting> all() {

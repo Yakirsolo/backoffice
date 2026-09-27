@@ -1,10 +1,13 @@
 package com.backoffice.backend.config;
 
+import com.backoffice.backend.domain.entity.AppUser;
+import com.backoffice.backend.domain.entity.BillingIntervalUnit;
 import com.backoffice.backend.domain.entity.Customer;
 import com.backoffice.backend.domain.entity.CustomerStatus;
 import com.backoffice.backend.domain.entity.Meeting;
 import com.backoffice.backend.domain.repository.CustomerRepository;
 import com.backoffice.backend.domain.repository.MeetingRepository;
+import com.backoffice.backend.domain.repository.UserRepository;
 import com.backoffice.backend.service.MeetingSchedulingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,9 +16,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -103,5 +112,57 @@ class MeetingBackfillRunnerTest {
         runner.run(null);
 
         verify(meetingSchedulingService).scheduleFirstMeeting(healthy);
+    }
+
+    /**
+     * Regression test for "safe to run on every boot": uses the real MeetingSchedulingService over an
+     * in-memory meeting list, with a customer whose last meeting is long past. The first boot must
+     * create exactly one meeting, and it must be dated today-or-later so the second boot sees it as
+     * covering the customer and creates nothing.
+     */
+    @Test
+    void runningTwice_withALongPastLastMeeting_createsExactlyOneFutureMeeting() throws Exception {
+        UserRepository userRepository = org.mockito.Mockito.mock(UserRepository.class);
+        AppUser admin = new AppUser();
+        admin.setMeetingCadenceValue(1);
+        admin.setMeetingCadenceUnit(BillingIntervalUnit.month);
+        when(userRepository.findAll()).thenReturn(List.of(admin));
+        MeetingSchedulingService realScheduling = new MeetingSchedulingService(meetingRepository, userRepository);
+        MeetingBackfillRunner realRunner = new MeetingBackfillRunner(customerRepository, meetingRepository, realScheduling);
+
+        Customer customer = new Customer();
+        customer.setId(UUID.randomUUID());
+        customer.setStatus(CustomerStatus.active);
+
+        Meeting oldMeeting = new Meeting();
+        oldMeeting.setCustomerId(customer.getId());
+        oldMeeting.setDate(LocalDate.now().minusMonths(6));
+        oldMeeting.setTime(LocalTime.of(10, 0));
+        oldMeeting.setCompleted(true);
+
+        List<Meeting> stored = new ArrayList<>(List.of(oldMeeting));
+        when(customerRepository.findByStatus(CustomerStatus.active)).thenReturn(List.of(customer));
+        when(meetingRepository.findByCustomerIdOrderByDateDescTimeDesc(customer.getId()))
+                .thenAnswer(inv -> stored.stream()
+                        .sorted(Comparator.comparing(Meeting::getDate).reversed())
+                        .toList());
+        when(meetingRepository.existsByCustomerIdAndCompletedFalseAndDateGreaterThanEqual(eq(customer.getId()), any()))
+                .thenAnswer(inv -> {
+                    LocalDate from = inv.getArgument(1);
+                    return stored.stream().anyMatch(m -> !m.isCompleted() && !m.getDate().isBefore(from));
+                });
+        when(meetingRepository.save(any(Meeting.class))).thenAnswer(inv -> {
+            Meeting m = inv.getArgument(0);
+            stored.add(m);
+            return m;
+        });
+
+        realRunner.run(null);
+        realRunner.run(null);
+
+        assertThat(stored).hasSize(2);
+        Meeting created = stored.get(1);
+        assertThat(created.getDate()).isAfterOrEqualTo(LocalDate.now());
+        verify(meetingRepository, org.mockito.Mockito.times(1)).save(any(Meeting.class));
     }
 }

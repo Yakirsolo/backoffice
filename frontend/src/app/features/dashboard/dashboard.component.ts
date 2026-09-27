@@ -13,7 +13,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { CustomersService } from '../../core/services/customers.service';
 import { DashboardData } from '../../core/models/customer.model';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
-import { addDaysIso, formatDate, formatLongDate, formatTime, todayIso } from '../../shared/status-utils';
+import { addDaysIso, formatDate, formatDateShort, formatLongDate, formatTime, todayIso } from '../../shared/status-utils';
 
 @Component({
   selector: 'app-dashboard',
@@ -34,6 +34,7 @@ export class DashboardComponent {
   today = todayIso();
   formatLongDate = formatLongDate;
   formatTime = formatTime;
+  formatDateShort = formatDateShort;
 
   constructor() {
     this.customersService.dashboard().subscribe(data => this.data.set(data));

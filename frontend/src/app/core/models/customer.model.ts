@@ -163,9 +163,9 @@ export interface TimelineEvent {
 }
 
 export interface DashboardData {
-  todaysMeetings: {
+  upcomingMeetings: {
     id: string; customerId: string; customerName: string;
-    time: string; type: string; zoomLink?: string;
+    date: string; time: string; type: string; zoomLink?: string;
   }[];
   upcomingPayments: {
     id: string; customerId: string; customerName: string;

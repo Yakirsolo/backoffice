@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface MeetingRepository extends JpaRepository<Meeting, UUID> {
     List<Meeting> findByCustomerIdOrderByDateDescTimeDesc(UUID customerId);
-    List<Meeting> findByDateAndCompletedFalseOrderByTime(LocalDate date);
+    List<Meeting> findByDateBetweenAndCompletedFalseOrderByDateAscTimeAsc(LocalDate from, LocalDate to);
     List<Meeting> findAllByOrderByDateAscTimeAsc();
     boolean existsByCustomerIdAndCompletedFalseAndDateGreaterThanEqual(UUID customerId, LocalDate date);
 }
