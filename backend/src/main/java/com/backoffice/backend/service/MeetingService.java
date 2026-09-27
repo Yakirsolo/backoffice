@@ -96,8 +96,8 @@ public class MeetingService {
         }
     }
 
-    public List<Meeting> onDate(LocalDate date) {
-        return meetingRepository.findByDateAndCompletedFalseOrderByTime(date);
+    public List<Meeting> between(LocalDate from, LocalDate to) {
+        return meetingRepository.findByDateBetweenAndCompletedFalseOrderByDateAscTimeAsc(from, to);
     }
 
     public List<Meeting> all() {
