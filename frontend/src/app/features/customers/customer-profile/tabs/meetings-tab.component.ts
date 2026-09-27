@@ -1,6 +1,9 @@
 import { Component, Input, OnChanges, computed, inject, signal } from '@angular/core';
-import { LucideCalendar, LucidePlus, LucideVideo } from '@lucide/angular';
+import { LucideCalendar, LucideCheck, LucidePencil, LucidePlus, LucideTrash2, LucideVideo } from '@lucide/angular';
 import { CustomersService } from '../../../../core/services/customers.service';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
+import { ToastService } from '../../../../core/services/toast.service';
+import { Meeting } from '../../../../core/models/customer.model';
 import { formatDate, formatTime } from '../../../../shared/status-utils';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { MeetingDialogComponent } from '../../../../shared/components/meeting-dialog/meeting-dialog.component';
@@ -8,12 +11,12 @@ import { MeetingDialogComponent } from '../../../../shared/components/meeting-di
 @Component({
   selector: 'app-meetings-tab',
   standalone: true,
-  imports: [EmptyStateComponent, MeetingDialogComponent, LucideCalendar, LucidePlus, LucideVideo],
+  imports: [EmptyStateComponent, MeetingDialogComponent, LucideCalendar, LucidePlus, LucideVideo, LucidePencil, LucideTrash2, LucideCheck],
   template: `
     <section>
       <div class="section-head">
         <h3 class="panel-title">פגישות</h3>
-        <button class="btn btn-primary btn-sm" (click)="dialogOpen.set(true)">
+        <button class="btn btn-primary btn-sm" (click)="openCreate()">
           <svg lucidePlus class="icon"></svg> פגישה חדשה
         </button>
       </div>
@@ -21,7 +24,7 @@ import { MeetingDialogComponent } from '../../../../shared/components/meeting-di
       @if (meetings().length === 0) {
         <app-empty-state heading="אין עדיין פגישות" message="קבעו פגישה כדי להתחיל לעקוב אחרי המפגשים">
           <svg lucideCalendar class="icon" empty-icon></svg>
-          <button empty-action class="btn btn-primary empty-cta" (click)="dialogOpen.set(true)">
+          <button empty-action class="btn btn-primary empty-cta" (click)="openCreate()">
             <svg lucidePlus class="icon"></svg> קביעת פגישה
           </button>
         </app-empty-state>
@@ -51,6 +54,19 @@ import { MeetingDialogComponent } from '../../../../shared/components/meeting-di
                     <svg lucideVideo style="width: 12px; height: 12px"></svg> קישור Zoom
                   </a>
                 }
+                @if (!m.completed) {
+                  <div class="meeting-actions">
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="markCompleted(m)">
+                      <svg lucideCheck class="icon"></svg> סימון כהתקיימה
+                    </button>
+                    <button type="button" class="btn btn-ghost btn-sm icon-only" title="עריכה" (click)="openEdit(m)">
+                      <svg lucidePencil class="icon"></svg>
+                    </button>
+                    <button type="button" class="btn btn-ghost btn-sm icon-only" title="מחיקה" (click)="deleteMeeting(m)">
+                      <svg lucideTrash2 class="icon"></svg>
+                    </button>
+                  </div>
+                }
               </div>
             </div>
           }
@@ -59,7 +75,7 @@ import { MeetingDialogComponent } from '../../../../shared/components/meeting-di
     </section>
 
     @if (dialogOpen()) {
-      <app-meeting-dialog [customerId]="customerId" (closed)="dialogOpen.set(false)" />
+      <app-meeting-dialog [customerId]="customerId" [meeting]="editingMeeting()" (closed)="dialogOpen.set(false)" />
     }
   `,
   styles: [`
@@ -115,6 +131,12 @@ import { MeetingDialogComponent } from '../../../../shared/components/meeting-di
       margin-top: 6px;
       font-weight: 600;
     }
+    .meeting-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-top: var(--space-3);
+    }
     /* Projected into <app-empty-state>, so the empty-state icon rule needs undoing here. */
     .empty-cta .icon {
       width: 18px;
@@ -127,14 +149,46 @@ import { MeetingDialogComponent } from '../../../../shared/components/meeting-di
 export class MeetingsTabComponent implements OnChanges {
   @Input({ required: true }) customerId!: string;
   private customersService = inject(CustomersService);
+  private toast = inject(ToastService);
+  private confirmDialog = inject(ConfirmDialogService);
   private idSignal = signal<string>('');
 
   meetings = computed(() => this.customersService.meetingsFor(this.idSignal()));
   formatDate = formatDate;
   formatTime = formatTime;
   dialogOpen = signal(false);
+  editingMeeting = signal<Meeting | null>(null);
 
   ngOnChanges() {
     this.idSignal.set(this.customerId);
+  }
+
+  openCreate() {
+    this.editingMeeting.set(null);
+    this.dialogOpen.set(true);
+  }
+
+  openEdit(m: Meeting) {
+    this.editingMeeting.set(m);
+    this.dialogOpen.set(true);
+  }
+
+  markCompleted(m: Meeting) {
+    this.customersService.updateMeeting(this.customerId, m.id, { completed: true }).subscribe({
+      error: () => this.toast.error('העדכון נכשל')
+    });
+  }
+
+  async deleteMeeting(m: Meeting) {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'מחיקת פגישה',
+      message: `למחוק את הפגישה מתאריך ${this.formatDate(m.date)}?`,
+      confirmLabel: 'מחיקה',
+      danger: true
+    });
+    if (!confirmed) return;
+    this.customersService.deleteMeeting(this.customerId, m.id).subscribe({
+      error: () => this.toast.error('מחיקת הפגישה נכשלה')
+    });
   }
 }
