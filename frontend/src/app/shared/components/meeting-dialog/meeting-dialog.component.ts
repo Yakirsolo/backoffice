@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, Output, computed, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { LucideSearch, LucideX } from '@lucide/angular';
+import { Meeting } from '../../../core/models/customer.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { CustomersService } from '../../../core/services/customers.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -16,9 +17,10 @@ const DURATION_PRESETS = [30, 45, 60];
   templateUrl: './meeting-dialog.component.html',
   styleUrl: './meeting-dialog.component.scss'
 })
-export class MeetingDialogComponent {
+export class MeetingDialogComponent implements OnInit {
   /** Fixed customer (profile tab). Leave empty to let the coach search for one (calendar page). */
   @Input() customerId = '';
+  @Input() meeting: Meeting | null = null;
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
 
@@ -56,6 +58,18 @@ export class MeetingDialogComponent {
   zoomLink = signal('');
   savedZoomRoom = signal('');
   saving = signal(false);
+
+  isEdit = computed(() => !!this.meeting);
+
+  ngOnInit() {
+    if (this.meeting) {
+      this.date.set(this.meeting.date);
+      this.time.set(this.meeting.time);
+      this.description.set(this.meeting.type);
+      this.durationMinutes.set(this.meeting.durationMinutes ?? null);
+      this.zoomLink.set(this.meeting.zoomLink ?? '');
+    }
+  }
 
   constructor() {
     this.authService.getMySettings().subscribe(settings => {
@@ -102,16 +116,22 @@ export class MeetingDialogComponent {
   save() {
     if (!this.canSave()) return;
     this.saving.set(true);
-    this.customersService.addMeeting(this.targetCustomerId(), {
+    const payload = {
       date: this.date(),
       time: this.time(),
       // The API requires a label; the description doubles as it, with a neutral fallback.
       type: this.description().trim() || 'פגישה',
       durationMinutes: this.durationMinutes() ?? undefined,
       zoomLink: this.zoomLink().trim() || undefined
-    }).subscribe({
+    };
+
+    const request = this.meeting
+      ? this.customersService.updateMeeting(this.targetCustomerId(), this.meeting.id, payload)
+      : this.customersService.addMeeting(this.targetCustomerId(), payload);
+
+    request.subscribe({
       next: () => {
-        this.toast.success('הפגישה נקבעה');
+        this.toast.success(this.meeting ? 'הפגישה עודכנה' : 'הפגישה נקבעה');
         this.saved.emit();
         this.closed.emit();
       },

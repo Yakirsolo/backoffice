@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { BILLING_INTERVAL_UNIT_LABELS, BillingIntervalUnit } from '../../core/models/customer.model';
 
 @Component({
   selector: 'app-settings',
@@ -19,6 +20,10 @@ export class SettingsComponent {
   email = signal('');
   phone = signal('');
   zoomPersonalLink = signal('');
+  meetingCadenceValue = signal(1);
+  meetingCadenceUnit = signal<BillingIntervalUnit>('month');
+  cadenceUnitOptions: BillingIntervalUnit[] = ['day', 'week', 'month'];
+  cadenceUnitLabels = BILLING_INTERVAL_UNIT_LABELS;
   notifyPaymentReminders = signal(true);
   notifyFollowUp = signal(true);
 
@@ -31,6 +36,8 @@ export class SettingsComponent {
       this.email.set(settings.email);
       this.phone.set(settings.phone ?? '');
       this.zoomPersonalLink.set(settings.zoomPersonalLink ?? '');
+      this.meetingCadenceValue.set(settings.meetingCadenceValue);
+      this.meetingCadenceUnit.set(settings.meetingCadenceUnit);
       this.notifyPaymentReminders.set(settings.notifyPaymentReminders);
       this.notifyFollowUp.set(settings.notifyFollowUp);
     });
@@ -43,6 +50,8 @@ export class SettingsComponent {
       businessName: this.businessName(),
       phone: this.phone(),
       zoomPersonalLink: this.zoomPersonalLink().trim(),
+      meetingCadenceValue: this.meetingCadenceValue(),
+      meetingCadenceUnit: this.meetingCadenceUnit(),
       notifyPaymentReminders: this.notifyPaymentReminders(),
       notifyFollowUp: this.notifyFollowUp()
     }).subscribe({

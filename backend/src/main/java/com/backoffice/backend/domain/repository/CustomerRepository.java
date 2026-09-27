@@ -1,6 +1,7 @@
 package com.backoffice.backend.domain.repository;
 
 import com.backoffice.backend.domain.entity.Customer;
+import com.backoffice.backend.domain.entity.CustomerStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
@@ -13,4 +14,6 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID>, JpaSp
     List<Customer> findByNeedsFollowUpTrue();
 
     List<Customer> findByStartDateBetween(LocalDate from, LocalDate to);
+
+    List<Customer> findByStatus(CustomerStatus status);
 }

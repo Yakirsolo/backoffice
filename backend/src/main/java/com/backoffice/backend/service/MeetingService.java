@@ -2,12 +2,14 @@ package com.backoffice.backend.service;
 
 import com.backoffice.backend.domain.entity.Meeting;
 import com.backoffice.backend.domain.entity.TimelineEventType;
+import com.backoffice.backend.domain.repository.CustomerRepository;
 import com.backoffice.backend.domain.repository.MeetingRepository;
 import com.backoffice.backend.dto.meeting.MeetingCreateRequest;
 import com.backoffice.backend.dto.meeting.MeetingResponse;
 import com.backoffice.backend.dto.meeting.MeetingUpdateRequest;
 import com.backoffice.backend.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +19,13 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MeetingService {
 
     private final MeetingRepository meetingRepository;
     private final TimelineService timelineService;
+    private final CustomerRepository customerRepository;
+    private final MeetingSchedulingService meetingSchedulingService;
 
     public List<MeetingResponse> listForCustomer(UUID customerId) {
         return meetingRepository.findByCustomerIdOrderByDateDescTimeDesc(customerId).stream()
@@ -51,6 +56,10 @@ public class MeetingService {
 
         boolean justCompleted = request.completed() != null && request.completed() && !meeting.isCompleted();
 
+        if (request.date() != null) meeting.setDate(request.date());
+        if (request.time() != null) meeting.setTime(request.time());
+        if (request.durationMinutes() != null) meeting.setDurationMinutes(request.durationMinutes());
+        if (request.type() != null) meeting.setType(request.type());
         if (request.completed() != null) meeting.setCompleted(request.completed());
         if (request.notes() != null) meeting.setNotes(request.notes());
         if (request.zoomLink() != null) meeting.setZoomLink(request.zoomLink());
@@ -58,6 +67,13 @@ public class MeetingService {
 
         if (justCompleted) {
             timelineService.record(customerId, TimelineEventType.meeting_completed, LocalDate.now(), meeting.getType());
+            Meeting completedMeeting = meeting;
+            try {
+                customerRepository.findById(customerId)
+                        .ifPresent(customer -> meetingSchedulingService.scheduleNextMeeting(customer, completedMeeting));
+            } catch (RuntimeException e) {
+                log.warn("Failed to schedule next meeting for customer {}", customerId, e);
+            }
         }
 
         return MeetingResponse.from(meeting);
@@ -69,5 +85,13 @@ public class MeetingService {
 
     public List<Meeting> all() {
         return meetingRepository.findAllByOrderByDateAscTimeAsc();
+    }
+
+    @Transactional
+    public void delete(UUID customerId, UUID meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .filter(m -> m.getCustomerId().equals(customerId))
+                .orElseThrow(() -> new NotFoundException("Meeting not found: " + meetingId));
+        meetingRepository.delete(meeting);
     }
 }

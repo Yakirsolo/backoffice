@@ -157,6 +157,20 @@ export class CustomersService {
       .pipe(tap(() => this.refreshMeetings()));
   }
 
+  updateMeeting(
+    customerId: string,
+    meetingId: string,
+    data: { date?: string; time?: string; durationMinutes?: number; type?: string; completed?: boolean; notes?: string; zoomLink?: string }
+  ) {
+    return this.http.patch<Meeting>(`${API_BASE_URL}/customers/${customerId}/meetings/${meetingId}`, data)
+      .pipe(tap(() => this.refreshMeetings()));
+  }
+
+  deleteMeeting(customerId: string, meetingId: string) {
+    return this.http.delete<void>(`${API_BASE_URL}/customers/${customerId}/meetings/${meetingId}`)
+      .pipe(tap(() => this.refreshMeetings()));
+  }
+
   addPayment(customerId: string, data: { amount: number; date: string; status: PaymentStatus }) {
     return this.http.post<Payment>(`${API_BASE_URL}/customers/${customerId}/payments`, data)
       .pipe(tap(() => {

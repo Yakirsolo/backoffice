@@ -29,6 +29,13 @@
   margin-top: 2px;
 }
 
+.meeting-cadence {
+  display: grid;
+  grid-template-columns: auto 90px 1fr;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 @media (max-width: 860px) {
   .settings-grid {
     grid-template-columns: 1fr;

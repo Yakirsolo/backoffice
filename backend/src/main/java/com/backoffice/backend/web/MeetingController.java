@@ -38,4 +38,10 @@ public class MeetingController {
     ) {
         return meetingService.update(customerId, meetingId, request);
     }
+
+    @DeleteMapping("/{meetingId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID customerId, @PathVariable UUID meetingId) {
+        meetingService.delete(customerId, meetingId);
+    }
 }
