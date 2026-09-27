@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, catchError, map, of, tap } from 'rxjs';
 import { API_BASE_URL } from '../config/api-config';
+import { BillingIntervalUnit } from '../models/customer.model';
 
 export interface AuthUser {
   id: string;
@@ -16,6 +17,8 @@ export interface UserSettings {
   email: string;
   phone: string | null;
   zoomPersonalLink: string | null;
+  meetingCadenceValue: number;
+  meetingCadenceUnit: BillingIntervalUnit;
   notifyPaymentReminders: boolean;
   notifyFollowUp: boolean;
 }
@@ -25,6 +28,8 @@ export interface UserSettingsUpdate {
   businessName?: string;
   phone?: string;
   zoomPersonalLink?: string;
+  meetingCadenceValue?: number;
+  meetingCadenceUnit?: BillingIntervalUnit;
   notifyPaymentReminders?: boolean;
   notifyFollowUp?: boolean;
 }

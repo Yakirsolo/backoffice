@@ -52,6 +52,36 @@
     </section>
 
     <section class="card panel">
+      <h2 class="panel-title">פגישות אוטומטיות</h2>
+      <div class="field-group">
+        <label class="field-label">תדירות</label>
+        <div class="meeting-cadence">
+          <span>כל</span>
+          <input
+            class="input-field"
+            type="number"
+            min="1"
+            [ngModel]="meetingCadenceValue()"
+            (ngModelChange)="meetingCadenceValue.set($event)"
+          />
+          <select
+            class="input-field"
+            [ngModel]="meetingCadenceUnit()"
+            (ngModelChange)="meetingCadenceUnit.set($event)"
+          >
+            @for (u of cadenceUnitOptions; track u) {
+              <option [value]="u">{{ cadenceUnitLabels[u] }}</option>
+            }
+          </select>
+        </div>
+        <p class="field-hint">הפגישה הבאה של כל לקוחה תיקבע אוטומטית בתדירות הזו לאחר שהפגישה הקודמת שלה מסומנת כהתקיימה.</p>
+      </div>
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+        {{ saving() ? 'שומרת...' : 'שמירת שינויים' }}
+      </button>
+    </section>
+
+    <section class="card panel">
       <h2 class="panel-title">התראות</h2>
       <div class="toggle-row">
         <div>
