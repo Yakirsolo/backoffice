@@ -1,82 +1,257 @@
-.day-groups {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
+.cal-layout {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: var(--space-5);
+  align-items: start;
 }
 
-.day-header {
+/* ---------- Month calendar ---------- */
+.cal-panel {
+  padding: var(--space-4);
+}
+
+.cal-head {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  font-weight: 700;
-  font-size: 14px;
-  margin-bottom: var(--space-3);
-  color: var(--color-text-muted);
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
 }
 
-.day-header.today {
+.cal-month {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cal-nav .navbtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  cursor: pointer;
+  color: var(--color-text-muted);
+}
+.cal-nav .navbtn:hover {
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+}
+.cal-nav .navbtn .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.cal-nav .today-btn {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cal-nav .today-btn:hover {
+  background: var(--color-surface-sunken);
   color: var(--color-text);
 }
 
-.day-meetings {
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cal-dow {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-faint);
+  padding-bottom: var(--space-2);
+}
+
+.cal-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: transparent;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-}
-
-.meeting-row {
-  padding: var(--space-3) var(--space-4);
-  display: flex;
   align-items: center;
-  gap: var(--space-4);
-  transition: border-color 0.15s ease;
+  justify-content: flex-start;
+  gap: 5px;
+  padding-top: 9px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.cal-cell:hover {
+  background: var(--color-surface-sunken);
 }
 
-.meeting-row:hover {
-  border-color: var(--color-border-strong);
+.cal-cell .dn {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1;
 }
 
-.meeting-row-link {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  flex: 1;
-  min-width: 0;
-  color: inherit;
-  text-decoration: none;
+.cal-cell.muted .dn {
+  color: var(--color-text-faint);
+  opacity: 0.55;
 }
 
-.meeting-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
+/* Meeting markers sit directly under the day number */
+.cell-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-primary);
 }
-
-.meeting-time {
+.cell-count {
+  font-size: 10px;
   font-weight: 700;
   color: var(--color-primary);
-  width: 46px;
-  flex-shrink: 0;
+  background: var(--color-primary-soft);
+  min-width: 16px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  line-height: 16px;
 }
 
-.meeting-info {
-  flex: 1;
+.cal-cell.today {
+  background: var(--color-primary-soft);
+}
+.cal-cell.today .dn {
+  color: var(--color-primary-hover);
+  font-weight: 800;
 }
 
-.meeting-name {
-  font-weight: 600;
-  font-size: 13.5px;
+.cal-cell.selected {
+  border-color: var(--color-primary);
 }
 
-.meeting-type {
+/* ---------- Selected-day panel ---------- */
+.day-panel {
+  padding: var(--space-4) var(--space-5);
+  position: sticky;
+  top: var(--space-4);
+}
+
+.dp-head {
+  margin-bottom: var(--space-3);
+}
+.dp-title {
+  font-size: 15px;
+  font-weight: 800;
+}
+.dp-sub {
   font-size: 12.5px;
   color: var(--color-text-muted);
+  margin-top: 2px;
 }
 
-/* Projected into <app-empty-state>, so the empty-state icon rule needs undoing here. */
-.empty-cta .icon {
-  width: 18px;
-  height: 18px;
-  margin: 0;
+.dp-meeting {
+  padding: var(--space-3) 0;
+}
+.dp-meeting + .dp-meeting {
+  border-top: 1px solid var(--color-border);
+}
+
+.dp-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.dp-time {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+.dp-name {
+  font-size: 14px;
+  font-weight: 700;
   color: inherit;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dp-name:hover {
+  color: var(--color-primary);
+}
+.dp-zoom {
+  display: inline-flex;
+  color: var(--color-primary);
+}
+.dp-zoom .icon {
+  width: 15px;
+  height: 15px;
+}
+.dp-done {
+  margin-inline-start: auto;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-success);
+}
+.dp-meeting.done .dp-name {
+  color: var(--color-text-faint);
+}
+
+.dp-meta {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin: 4px 0 var(--space-3);
+}
+.dp-notes {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.dp-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dp-empty {
+  padding: var(--space-5) 0;
+  text-align: center;
+}
+
+/* Projected into buttons; keep icons sized inside .btn contexts */
+.dp-actions .icon,
+.dp-empty .icon,
+.page-header .icon {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 760px) {
+  .cal-layout {
+    grid-template-columns: 1fr;
+  }
+  .day-panel {
+    position: static;
+  }
+  .cal-cell {
+    padding-top: 5px;
+  }
+  .cal-cell .dn {
+    font-size: 12px;
+  }
 }

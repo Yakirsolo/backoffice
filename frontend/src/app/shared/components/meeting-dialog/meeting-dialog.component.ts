@@ -21,6 +21,8 @@ export class MeetingDialogComponent implements OnInit {
   /** Fixed customer (profile tab). Leave empty to let the coach search for one (calendar page). */
   @Input() customerId = '';
   @Input() meeting: Meeting | null = null;
+  /** Prefills the date field when creating (e.g. the day selected on the calendar). Ignored when editing. */
+  @Input() initialDate = '';
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
 
@@ -70,6 +72,8 @@ export class MeetingDialogComponent implements OnInit {
       this.durationMinutes.set(this.meeting.durationMinutes ?? null);
       this.zoomLink.set(this.meeting.zoomLink ?? '');
       this.notes.set(this.meeting.notes ?? '');
+    } else if (this.initialDate) {
+      this.date.set(this.initialDate);
     }
   }
 
