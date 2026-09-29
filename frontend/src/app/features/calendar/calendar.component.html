@@ -2,65 +2,117 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">יומן</h1>
-      <p class="page-subtitle">כל הפגישות שלכם, לפי תאריך</p>
+      <p class="page-subtitle">בחרו יום כדי לראות את הפגישות שלו</p>
     </div>
     <button class="btn btn-primary" (click)="openCreate()">
       <svg lucidePlus class="icon"></svg> פגישה חדשה
     </button>
   </div>
 
-  @if (groupedMeetings().length === 0) {
-    <app-empty-state heading="אין פגישות מתוכננות" message="כל פגישה שתקבעו תופיע כאן, מסודרת לפי יום">
-      <svg lucideCalendarDays class="icon" empty-icon></svg>
-      <button empty-action class="btn btn-primary empty-cta" (click)="openCreate()">
-        <svg lucidePlus class="icon"></svg> קביעת פגישה
-      </button>
-    </app-empty-state>
-  } @else {
-    <div class="day-groups">
-      @for (group of groupedMeetings(); track group.date) {
-        <section class="day-group">
-          <div class="day-header" [class.today]="group.date === today">
-            {{ formatDate(group.date) }}
-            @if (group.date === today) { <span class="badge badge-primary">היום</span> }
-          </div>
-          <div class="day-meetings">
-            @for (m of group.items; track m.id) {
-              <div class="card meeting-row">
-                <a class="meeting-row-link" [routerLink]="['/customers', m.customerId]">
-                  <div class="meeting-time tabular-nums">{{ formatTime(m.time) }}</div>
-                  <div class="meeting-info">
-                    <div class="meeting-name">{{ m.customerName }}</div>
-                    <div class="meeting-type">{{ m.type }}</div>
-                  </div>
+  <div class="cal-layout">
+    <section class="card cal-panel">
+      <div class="cal-head">
+        <div class="cal-month">{{ monthLabel() }}</div>
+        <div class="cal-nav">
+          <button type="button" class="today-btn" (click)="goToday()">היום</button>
+          <button type="button" class="navbtn" title="החודש הקודם" (click)="prevMonth()">
+            <svg lucideChevronRight class="icon"></svg>
+          </button>
+          <button type="button" class="navbtn" title="החודש הבא" (click)="nextMonth()">
+            <svg lucideChevronLeft class="icon"></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="cal-grid">
+        @for (dow of weekdayLabels; track dow) {
+          <div class="cal-dow">{{ dow }}</div>
+        }
+        @for (week of weeks(); track $index) {
+          @for (cell of week; track cell.date) {
+            <button
+              type="button"
+              class="cal-cell"
+              [class.muted]="!cell.inMonth"
+              [class.today]="cell.isToday"
+              [class.selected]="cell.date === selectedDate()"
+              (click)="selectDay(cell)"
+            >
+              <span class="dn tabular-nums">{{ cell.dayNum }}</span>
+              @if (cell.meetingCount === 1) {
+                <span class="cell-dot"></span>
+              } @else if (cell.meetingCount > 1) {
+                <span class="cell-count tabular-nums">{{ cell.meetingCount }}</span>
+              }
+            </button>
+          }
+        }
+      </div>
+    </section>
+
+    <section class="card day-panel">
+      <div class="dp-head">
+        <div class="dp-title">{{ selectedLabel() }}</div>
+        <div class="dp-sub">
+          @if (selectedMeetings().length === 1) { פגישה אחת }
+          @else if (selectedMeetings().length > 1) { {{ selectedMeetings().length }} פגישות }
+          @else { אין פגישות ליום זה }
+        </div>
+      </div>
+
+      @if (selectedMeetings().length === 0) {
+        <div class="dp-empty">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="openCreate()">
+            <svg lucidePlus class="icon"></svg> הוספת פגישה ליום זה
+          </button>
+        </div>
+      } @else {
+        @for (m of selectedMeetings(); track m.id) {
+          <div class="dp-meeting" [class.done]="m.completed">
+            <div class="dp-top">
+              <span class="dp-time tabular-nums">{{ formatTime(m.time) }}</span>
+              <a class="dp-name" [routerLink]="['/customers', m.customerId]">{{ m.customerName }}</a>
+              @if (m.zoomLink) {
+                <a class="dp-zoom" [href]="m.zoomLink" target="_blank" rel="noopener" title="פגישת Zoom">
+                  <svg lucideVideo class="icon"></svg>
                 </a>
-                <span class="badge" [class.badge-success]="m.completed" [class.badge-neutral]="!m.completed">
-                  {{ m.completed ? 'התקיימה' : 'מתוכננת' }}
-                </span>
-                <div class="meeting-actions">
-                  @if (!m.completed) {
-                    <button type="button" class="btn btn-secondary btn-sm" (click)="markCompleted(m)">
-                      <svg lucideCheck class="icon"></svg> סימון כהתקיימה
-                    </button>
-                  }
-                  <button type="button" class="btn btn-ghost btn-sm icon-only" title="עריכה" (click)="openEdit(m)">
-                    <svg lucidePencil class="icon"></svg>
-                  </button>
-                  @if (!m.completed) {
-                    <button type="button" class="btn btn-ghost btn-sm icon-only" title="מחיקה" (click)="deleteMeeting(m)">
-                      <svg lucideTrash2 class="icon"></svg>
-                    </button>
-                  }
-                </div>
-              </div>
+              }
+              @if (m.completed) { <span class="dp-done">התקיימה</span> }
+            </div>
+            <div class="dp-meta">
+              {{ m.type }}
+              @if (m.durationMinutes) { · {{ m.durationMinutes }} דק׳ }
+              @if (m.customerPhone) { · {{ m.customerPhone }} }
+            </div>
+            @if (m.notes) {
+              <div class="dp-notes">{{ m.notes }}</div>
             }
+            <div class="dp-actions">
+              @if (!m.completed) {
+                <button type="button" class="btn btn-secondary btn-sm" (click)="markCompleted(m)">
+                  <svg lucideCheck class="icon"></svg> סימון כהתקיימה
+                </button>
+              }
+              <button type="button" class="btn btn-ghost btn-sm icon-only" title="עריכה" (click)="openEdit(m)">
+                <svg lucidePencil class="icon"></svg>
+              </button>
+              @if (!m.completed) {
+                <button type="button" class="btn btn-ghost btn-sm icon-only" title="מחיקה" (click)="deleteMeeting(m)">
+                  <svg lucideTrash2 class="icon"></svg>
+                </button>
+              }
+            </div>
           </div>
-        </section>
+        }
       }
-    </div>
-  }
+    </section>
+  </div>
 </div>
 
 @if (dialogOpen()) {
-  <app-meeting-dialog [customerId]="editingMeeting()?.customerId ?? ''" [meeting]="editingMeeting()" (closed)="dialogOpen.set(false)" />
+  <app-meeting-dialog
+    [customerId]="editingMeeting()?.customerId ?? ''"
+    [meeting]="editingMeeting()"
+    [initialDate]="createDate()"
+    (closed)="dialogOpen.set(false)" />
 }
