@@ -1,26 +1,37 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CustomersService } from '../../core/services/customers.service';
-import { CUSTOMER_STATUS_LABELS, CustomerStatus, LeadSource, LEAD_SOURCE_LABELS } from '../../core/models/customer.model';
+import { ExpensesService } from '../../core/services/expenses.service';
+import {
+  CUSTOMER_STATUS_LABELS, CustomerStatus, ExpenseCategory, EXPENSE_CATEGORY_COLORS, EXPENSE_CATEGORY_LABELS,
+  LeadSource, LEAD_SOURCE_LABELS
+} from '../../core/models/customer.model';
 import { formatMonthLabel, formatWeightChange, todayIso } from '../../shared/status-utils';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
-import { LucideUsers } from '@lucide/angular';
+import { LucideReceipt, LucideUsers } from '@lucide/angular';
 
 @Component({
   selector: 'app-analytics',
   standalone: true,
-  imports: [EmptyStateComponent, LucideUsers],
+  imports: [EmptyStateComponent, LucideUsers, LucideReceipt],
   templateUrl: './analytics.component.html',
   styleUrl: './analytics.component.scss'
 })
 export class AnalyticsComponent {
   private customersService = inject(CustomersService);
+  private expensesService = inject(ExpensesService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
   statusLabels = CUSTOMER_STATUS_LABELS;
   sourceLabels = LEAD_SOURCE_LABELS;
+  categoryLabels = EXPENSE_CATEGORY_LABELS;
+  categoryColors = EXPENSE_CATEGORY_COLORS;
   formatMonthLabel = formatMonthLabel;
+
+  formatAmount(n: number): string {
+    return n.toLocaleString('he-IL', { maximumFractionDigits: 2 });
+  }
 
   /**
    * Fixed per-source, not per-rank, so a given source is always the same color regardless of which
@@ -40,11 +51,13 @@ export class AnalyticsComponent {
   private readonly donutGapPx = 3;
 
   hoveredSource = signal<LeadSource | null>(null);
+  hoveredCategory = signal<ExpenseCategory | null>(null);
 
   private readonly currentMonth = todayIso().slice(0, 7);
 
   customers = computed(() => this.customersService.customers());
   payments = computed(() => this.customersService.payments());
+  expenses = computed(() => this.expensesService.expenses());
 
   private rawSelectedMonth = signal(this.route.snapshot.queryParamMap.get('month') ?? this.currentMonth);
 
@@ -75,6 +88,54 @@ export class AnalyticsComponent {
   paymentsReceivedCount = computed(() => {
     const month = this.selectedMonth();
     return this.payments().filter(p => p.status === 'paid' && p.date.slice(0, 7) === month).length;
+  });
+
+  private monthExpenses = computed(() => {
+    const month = this.selectedMonth();
+    return this.expenses().filter(e => e.date.slice(0, 7) === month);
+  });
+
+  monthExpensesTotal = computed(() => this.monthExpenses().reduce((sum, e) => sum + e.amount, 0));
+  monthExpensesCount = computed(() => this.monthExpenses().length);
+
+  /** Revenue minus expenses for the selected month - the single "am I profitable this month" figure. */
+  netProfit = computed(() => this.monthRevenue() - this.monthExpensesTotal());
+
+  totalExpenses = computed(() => this.expenses().reduce((sum, e) => sum + e.amount, 0));
+
+  expenseCategoryBreakdown = computed(() => {
+    const list = this.monthExpenses();
+    const total = list.reduce((sum, e) => sum + e.amount, 0);
+    const byCategory = new Map<ExpenseCategory, number>();
+    for (const e of list) {
+      byCategory.set(e.category, (byCategory.get(e.category) ?? 0) + e.amount);
+    }
+    // Fixed draw order (order in EXPENSE_CATEGORY_LABELS) so slices don't jump around as data changes.
+    return (Object.keys(EXPENSE_CATEGORY_LABELS) as ExpenseCategory[])
+      .filter(c => byCategory.has(c))
+      .map(category => {
+        const amount = byCategory.get(category)!;
+        return { category, amount, percent: total ? Math.round((amount / total) * 100) : 0 };
+      });
+  });
+
+  expenseDonutSegments = computed(() => {
+    const items = this.expenseCategoryBreakdown();
+    const total = items.reduce((sum, i) => sum + i.amount, 0);
+    let cursor = 0;
+    return items.map(item => {
+      const fraction = total ? item.amount / total : 0;
+      const rawLength = fraction * this.donutCircumference;
+      const length = Math.max(rawLength - this.donutGapPx, 0);
+      const segment = {
+        ...item,
+        color: this.categoryColors[item.category],
+        dashArray: `${length} ${this.donutCircumference - length}`,
+        dashOffset: -cursor
+      };
+      cursor += rawLength;
+      return segment;
+    });
   });
 
   sourceBreakdown = computed(() => {

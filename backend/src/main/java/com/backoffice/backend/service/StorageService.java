@@ -37,6 +37,12 @@ public class StorageService {
         return "customers/%s/%s/%s-%s".formatted(customerId, category, UUID.randomUUID(), safeName);
     }
 
+    /** Business-level (not customer-scoped) objects, e.g. expense receipts. */
+    public String buildKey(String category, String fileName) {
+        String safeName = fileName.replaceAll("[^a-zA-Z0-9._-]", "_");
+        return "%s/%s-%s".formatted(category, UUID.randomUUID(), safeName);
+    }
+
     public String createUploadUrl(String key, String contentType) {
         try (S3Presigner presigner = buildPresigner()) {
             PutObjectRequest putRequest = PutObjectRequest.builder()

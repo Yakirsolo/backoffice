@@ -8,6 +8,7 @@ import {
   LucideHouse,
   LucideLogOut,
   LucidePlus,
+  LucideReceipt,
   LucideScale,
   LucideSettings,
   LucideSquareCheck,
@@ -27,7 +28,7 @@ interface NavItem {
     RouterLink, RouterLinkActive, RouterOutlet,
     LucideHouse, LucideUsers, LucideCalendar, LucideCreditCard,
     LucideSquareCheck, LucideChartColumn, LucideSettings,
-    LucidePlus, LucideLogOut, LucideScale, LucideFileSignature
+    LucidePlus, LucideLogOut, LucideScale, LucideFileSignature, LucideReceipt
   ],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss'
@@ -44,6 +45,7 @@ export class ShellComponent {
     { label: 'הסכמים', path: '/agreement' },
     { label: 'יומן', path: '/calendar' },
     { label: 'תשלומים', path: '/payments' },
+    { label: 'הוצאות', path: '/expenses' },
     { label: 'משימות', path: '/todos' },
     { label: 'אנליטיקה', path: '/analytics' },
     { label: 'הגדרות', path: '/settings' }

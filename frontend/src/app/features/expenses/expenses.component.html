@@ -1,0 +1,85 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">הוצאות</h1>
+      <p class="page-subtitle">מעקב אחר הוצאות העסק</p>
+    </div>
+
+    <div class="header-actions">
+      <div class="card month-switcher">
+        <button class="month-nav-btn" (click)="goPrev()" aria-label="חודש קודם">‹</button>
+        <div class="month-switcher-center">
+          <span class="month-label">{{ selectedMonthLabel() }}</span>
+          @if (!isCurrentMonth()) {
+            <button class="current-month-link" (click)="goToCurrentMonth()">לחודש הנוכחי</button>
+          }
+        </div>
+        <button class="month-nav-btn" (click)="goNext()" [disabled]="!canGoNext()" aria-label="חודש הבא">›</button>
+      </div>
+
+      <button class="btn btn-primary add-expense-btn" (click)="openAdd()">
+        <svg lucidePlus class="icon"></svg> הוספת הוצאה
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="card stat-card">
+      <div class="stat-value tabular-nums">{{ formatAmount(monthTotal()) }} ₪</div>
+      <div class="stat-label">סך ההוצאות</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-value tabular-nums">{{ monthCount() }}</div>
+      <div class="stat-label">מספר הוצאות</div>
+    </div>
+  </div>
+
+  @if (expensesInMonth().length === 0) {
+    <div class="card empty-card">
+      <app-empty-state heading="אין הוצאות החודש" message="הוסיפי את ההוצאה הראשונה שלך כדי להתחיל לעקוב.">
+        <svg lucideReceipt class="icon" empty-icon></svg>
+        <button empty-action class="btn btn-primary" (click)="openAdd()">
+          <svg lucidePlus class="icon"></svg> הוספת הוצאה
+        </button>
+      </app-empty-state>
+    </div>
+  } @else {
+    <div class="expense-list">
+      @for (expense of expensesInMonth(); track expense.id) {
+        <div class="card expense-row" (click)="openEdit(expense)">
+          <span class="category-dot" [style.background]="categoryColors[expense.category]"></span>
+
+          <div class="expense-main">
+            <div class="expense-description">{{ expense.description }}</div>
+            <div class="expense-meta">
+              {{ categoryLabels[expense.category] }} · {{ formatDate(expense.date) }}
+            </div>
+          </div>
+
+          @if (expense.hasReceipt) {
+            <button class="receipt-badge" title="צפייה בקבלה" aria-label="צפייה בקבלה" (click)="openReceipt(expense, $event)">
+              <svg lucidePaperclip class="icon"></svg>
+            </button>
+          }
+
+          <div class="expense-amount tabular-nums">{{ formatAmount(expense.amount) }} ₪</div>
+
+          <button class="btn btn-ghost btn-sm icon-only expense-delete" title="מחיקה" aria-label="מחיקה" (click)="deleteExpense(expense, $event)">
+            <svg lucideTrash2 class="icon"></svg>
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+  <button class="fab" aria-label="הוספת הוצאה" (click)="openAdd()">
+    <svg lucidePlus class="icon"></svg>
+  </button>
+</div>
+
+@if (dialogOpen()) {
+  <app-expense-dialog
+    [expense]="editingExpense()"
+    (closed)="closeDialog()"
+  />
+}
