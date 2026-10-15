@@ -1,0 +1,128 @@
+<div class="modal-overlay" (click)="close()" (keydown.escape)="close()">
+  <div class="modal-card expense-modal" role="dialog" aria-modal="true" aria-labelledby="expense-dialog-title" (click)="$event.stopPropagation()">
+    <div class="expense-modal-head">
+      <h3 id="expense-dialog-title">{{ isEdit() ? 'עריכת הוצאה' : 'הוצאה חדשה' }}</h3>
+      <button type="button" class="btn btn-ghost btn-sm icon-only" aria-label="סגירה" (click)="close()">
+        <svg lucideX class="icon"></svg>
+      </button>
+    </div>
+
+    <div class="expense-modal-body">
+      <div class="field-group">
+        <label class="field-label" for="expense-amount">סכום</label>
+        <div class="amount-field">
+          <input
+            id="expense-amount"
+            class="amount-input tabular-nums"
+            type="number"
+            inputmode="decimal"
+            min="0"
+            step="0.01"
+            placeholder="0"
+            [ngModel]="amount()"
+            (ngModelChange)="amount.set($event)"
+          />
+          <span class="amount-currency">₪</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="expense-description">תיאור</label>
+        <input
+          id="expense-description"
+          class="input-field"
+          type="text"
+          maxlength="200"
+          placeholder="על מה ההוצאה?"
+          [(ngModel)]="description"
+        />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">קטגוריה</label>
+        <div class="chip-row">
+          @for (c of categories; track c) {
+            <button
+              type="button"
+              class="chip"
+              [class.selected]="category() === c"
+              (click)="selectCategory(c)"
+            >{{ categoryLabels[c] }}</button>
+          }
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="expense-date">תאריך</label>
+        <input id="expense-date" class="input-field" type="date" [(ngModel)]="date" />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">קבלה <span class="optional-hint">(אופציונלי)</span></label>
+
+        <input
+          #receiptInput
+          type="file"
+          accept="image/*,application/pdf"
+          hidden
+          (change)="onFileSelected($event)"
+        />
+
+        @if (hasReceipt()) {
+          <div class="receipt-preview">
+            @if (previewIsImage() && previewUrl()) {
+              <a class="receipt-thumb" [href]="previewUrl()" target="_blank" rel="noopener">
+                <img [src]="previewUrl()" alt="תצוגה מקדימה של הקבלה" />
+              </a>
+            } @else {
+              <a class="receipt-file" [href]="previewUrl()" target="_blank" rel="noopener">
+                <svg lucideFileText class="icon"></svg>
+              </a>
+            }
+            <div class="receipt-info">
+              <div class="receipt-name">
+                @if (uploadingReceipt()) { מעלה קבלה... }
+                @else { {{ receiptFileName() ?? 'קבלה מצורפת' }} }
+              </div>
+              @if (!uploadingReceipt() && previewUrl()) {
+                <a class="receipt-view" [href]="previewUrl()" target="_blank" rel="noopener">צפייה בקבלה</a>
+              }
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm icon-only receipt-remove" aria-label="הסרת קבלה" (click)="removeReceipt()" [disabled]="uploadingReceipt()">
+              <svg lucideTrash2 class="icon"></svg>
+            </button>
+          </div>
+        } @else {
+          <button type="button" class="receipt-dropzone" (click)="receiptInput.click()">
+            <svg lucideReceipt class="icon"></svg>
+            <span class="receipt-dropzone-title">צילום או העלאת קבלה</span>
+            <span class="receipt-dropzone-hint">תמונה או PDF · עד 15MB</span>
+          </button>
+        }
+
+        @if (receiptError()) {
+          <div class="receipt-error">{{ receiptError() }}</div>
+        }
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="expense-notes">הערות <span class="optional-hint">(אופציונלי)</span></label>
+        <textarea
+          id="expense-notes"
+          class="input-field"
+          rows="2"
+          maxlength="2000"
+          placeholder="פרטים נוספים..."
+          [(ngModel)]="notes"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="modal-actions expense-modal-actions">
+      <button type="button" class="btn btn-primary" [disabled]="!canSave()" (click)="save()">
+        {{ saving() ? 'שומר...' : (isEdit() ? 'עדכון הוצאה' : 'שמירת הוצאה') }}
+      </button>
+      <button type="button" class="btn btn-secondary" [disabled]="saving() || uploadingReceipt()" (click)="close()">ביטול</button>
+    </div>
+  </div>
+</div>

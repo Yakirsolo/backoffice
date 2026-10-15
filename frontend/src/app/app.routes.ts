@@ -7,6 +7,7 @@ import { CustomerWizardComponent } from './features/customers/customer-wizard/cu
 import { AgreementGeneratorComponent } from './features/agreement/agreement-generator.component';
 import { CalendarComponent } from './features/calendar/calendar.component';
 import { PaymentsComponent } from './features/payments/payments.component';
+import { ExpensesComponent } from './features/expenses/expenses.component';
 import { AnalyticsComponent } from './features/analytics/analytics.component';
 import { SettingsComponent } from './features/settings/settings.component';
 import { TodosComponent } from './features/todos/todos.component';
@@ -32,6 +33,7 @@ export const routes: Routes = [
       { path: 'agreement', component: AgreementGeneratorComponent },
       { path: 'calendar', component: CalendarComponent },
       { path: 'payments', component: PaymentsComponent },
+      { path: 'expenses', component: ExpensesComponent },
       { path: 'analytics', component: AnalyticsComponent },
       { path: 'todos', component: TodosComponent },
       { path: 'settings', component: SettingsComponent },

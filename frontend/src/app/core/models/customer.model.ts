@@ -109,6 +109,46 @@ export interface Todo {
   createdAt: string;
 }
 
+export type ExpenseCategory = 'marketing' | 'software' | 'equipment' | 'office' | 'travel' | 'taxes' | 'other';
+
+export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategory, string> = {
+  marketing: 'שיווק ופרסום',
+  software: 'תוכנות ומנויים',
+  equipment: 'ציוד',
+  office: 'משרד',
+  travel: 'רכב ונסיעות',
+  taxes: 'מסים ואגרות',
+  other: 'אחר'
+};
+
+/**
+ * Fixed per-category (not per-rank) so a category keeps its color across months and between the
+ * expenses list and the analytics donut. Muted, warm-toned hues that harmonize with the app palette.
+ */
+export const EXPENSE_CATEGORY_COLORS: Record<ExpenseCategory, string> = {
+  marketing: '#c77b62',
+  software: '#6e90a8',
+  equipment: '#6e7d5e',
+  office: '#bc9a46',
+  travel: '#8f7a96',
+  taxes: '#a86b6b',
+  other: '#8a8578'
+};
+
+export interface Expense {
+  id: string;
+  amount: number;
+  date: string;
+  category: ExpenseCategory;
+  description: string;
+  notes?: string;
+  hasReceipt: boolean;
+  receiptContentType?: string;
+  receiptSizeBytes?: number;
+  receiptUrl?: string;
+  createdAt: string;
+}
+
 export interface Meeting {
   id: string;
   customerId: string;

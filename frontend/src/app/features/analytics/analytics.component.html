@@ -19,15 +19,27 @@
 
   <div class="stats-grid">
     <div class="card stat-card">
-      <div class="stat-value">{{ monthRevenue() }} ₪</div>
+      <div class="stat-value tabular-nums">{{ formatAmount(monthRevenue()) }} ₪</div>
       <div class="stat-label">הכנסות</div>
     </div>
     <div class="card stat-card">
-      <div class="stat-value">{{ newCustomersCount() }}</div>
+      <div class="stat-value tabular-nums">{{ formatAmount(monthExpensesTotal()) }} ₪</div>
+      <div class="stat-label">הוצאות</div>
+    </div>
+    <div class="card stat-card">
+      <div
+        class="stat-value tabular-nums"
+        [class.success-text]="netProfit() >= 0"
+        [class.danger-text]="netProfit() < 0"
+      >{{ formatAmount(netProfit()) }} ₪</div>
+      <div class="stat-label">רווח החודש</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-value tabular-nums">{{ newCustomersCount() }}</div>
       <div class="stat-label">לקוחות חדשות</div>
     </div>
     <div class="card stat-card">
-      <div class="stat-value">{{ paymentsReceivedCount() }}</div>
+      <div class="stat-value tabular-nums">{{ paymentsReceivedCount() }}</div>
       <div class="stat-label">תשלומים שהתקבלו</div>
     </div>
   </div>
@@ -82,6 +94,56 @@
     }
   </section>
 
+  <section class="card panel source-panel">
+    <h2 class="panel-title">פילוח הוצאות לפי קטגוריה</h2>
+    @if (monthExpensesCount() === 0) {
+      <app-empty-state heading="אין הוצאות בחודש זה">
+        <svg lucideReceipt class="icon" empty-icon></svg>
+      </app-empty-state>
+    } @else {
+      <div class="donut-layout">
+        <div class="donut-wrap">
+          <svg viewBox="0 0 140 140" class="donut-chart">
+            <circle cx="70" cy="70" r="60" fill="none" stroke="var(--color-surface-sunken)" stroke-width="20" />
+            @for (seg of expenseDonutSegments(); track seg.category) {
+              <circle
+                cx="70" cy="70" r="60" fill="none"
+                stroke-width="20"
+                stroke-linecap="butt"
+                transform="rotate(-90 70 70)"
+                class="donut-segment"
+                [style.stroke]="seg.color"
+                [attr.stroke-dasharray]="seg.dashArray"
+                [attr.stroke-dashoffset]="seg.dashOffset"
+                [class.dimmed]="hoveredCategory() !== null && hoveredCategory() !== seg.category"
+                (mouseenter)="hoveredCategory.set(seg.category)"
+                (mouseleave)="hoveredCategory.set(null)"
+              />
+            }
+          </svg>
+          <div class="donut-center">
+            <span class="donut-center-value tabular-nums">{{ formatAmount(monthExpensesTotal()) }} ₪</span>
+            <span class="donut-center-label">סך הוצאות</span>
+          </div>
+        </div>
+        <div class="donut-legend">
+          @for (seg of expenseDonutSegments(); track seg.category) {
+            <div
+              class="legend-row"
+              [class.active]="hoveredCategory() === seg.category"
+              (mouseenter)="hoveredCategory.set(seg.category)"
+              (mouseleave)="hoveredCategory.set(null)"
+            >
+              <span class="legend-dot" [style.background]="seg.color"></span>
+              <span class="legend-label">{{ categoryLabels[seg.category] }}</span>
+              <span class="legend-value tabular-nums">{{ formatAmount(seg.amount) }} ₪ · {{ seg.percent }}%</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </section>
+
   <div class="live-divider">
     <span class="live-label">מצב נוכחי</span>
   </div>
@@ -114,7 +176,11 @@
       </div>
       <div class="live-stat-row">
         <span class="live-stat-label">סך ההכנסות</span>
-        <span class="live-stat-value">{{ totalRevenue() }} ₪</span>
+        <span class="live-stat-value tabular-nums">{{ formatAmount(totalRevenue()) }} ₪</span>
+      </div>
+      <div class="live-stat-row">
+        <span class="live-stat-label">סך ההוצאות</span>
+        <span class="live-stat-value tabular-nums">{{ formatAmount(totalExpenses()) }} ₪</span>
       </div>
     </section>
   </div>

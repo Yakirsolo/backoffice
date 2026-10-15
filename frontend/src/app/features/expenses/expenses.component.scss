@@ -1,0 +1,166 @@
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.add-expense-btn {
+  white-space: nowrap;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.stat-card {
+  padding: var(--space-5) var(--space-4);
+  text-align: center;
+}
+
+.stat-label {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  margin-top: var(--space-2);
+}
+
+.empty-card {
+  padding: var(--space-8) var(--space-6);
+}
+
+.expense-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.expense-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.expense-row:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.category-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.expense-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.expense-description {
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.expense-meta {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.receipt-badge {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.receipt-badge:hover {
+  color: var(--color-primary);
+}
+.receipt-badge .icon {
+  width: 15px;
+  height: 15px;
+}
+
+.expense-amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.expense-delete {
+  flex-shrink: 0;
+  color: var(--color-text-faint);
+}
+.expense-delete:hover {
+  color: var(--color-danger);
+}
+
+/* Mobile-reachable add button; the header button is the desktop affordance. */
+.fab {
+  display: none;
+  position: fixed;
+  inset-block-end: var(--space-6);
+  inset-inline-start: var(--space-6);
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+.fab .icon {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 860px) {
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+  .stat-card {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    text-align: start;
+  }
+  .stat-label {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  /* On phones the FAB is the primary add affordance, so the header button steps aside. */
+  .add-expense-btn {
+    display: none;
+  }
+  .fab {
+    display: flex;
+  }
+}

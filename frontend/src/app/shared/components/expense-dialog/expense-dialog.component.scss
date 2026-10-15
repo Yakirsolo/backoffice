@@ -1,0 +1,197 @@
+:host {
+  direction: rtl;
+}
+
+.expense-modal {
+  max-width: 460px;
+  max-height: calc(100vh - var(--space-12));
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.expense-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.expense-modal-head h3 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.expense-modal-body {
+  padding: var(--space-5) var(--space-6) var(--space-2);
+  overflow-y: auto;
+}
+
+.expense-modal-body .field-group:last-of-type {
+  margin-bottom: var(--space-4);
+}
+
+/* Amount is the hero field: large, prominent, currency pinned to the (RTL) start. */
+.amount-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+  padding: var(--space-2) var(--space-4);
+}
+
+.amount-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--color-text);
+  padding: 0;
+}
+.amount-input:focus {
+  outline: none;
+}
+/* Trim native number spinners so the big figure stays clean. */
+.amount-input::-webkit-outer-spin-button,
+.amount-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.amount-input {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.amount-currency {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.chip:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+.chip.selected {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Receipt uploader */
+.receipt-dropzone {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-5);
+  border: 1.5px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.receipt-dropzone:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.receipt-dropzone .icon {
+  width: 26px;
+  height: 26px;
+}
+.receipt-dropzone-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+.receipt-dropzone-hint {
+  font-size: 11px;
+  color: var(--color-text-faint);
+}
+
+.receipt-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.receipt-thumb,
+.receipt-file {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-surface-sunken);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+.receipt-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.receipt-info {
+  flex: 1;
+  min-width: 0;
+}
+.receipt-name {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.receipt-view {
+  font-size: 12px;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+.receipt-view:hover {
+  text-decoration: underline;
+}
+.receipt-remove {
+  flex-shrink: 0;
+  color: var(--color-danger);
+}
+
+.receipt-error {
+  margin-top: var(--space-2);
+  font-size: 12px;
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+
+.expense-modal-actions {
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--color-border);
+}
