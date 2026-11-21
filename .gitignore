@@ -1,11 +1,5 @@
 .superpowers/
 
-# Local signed-agreement PDFs that may contain customer data. Listed by exact name
-# on purpose - a blanket *.pdf rule could hide legitimate assets added later.
-/b31e078c-e404-49c4-b171-ec32a4aa3ba7-signed-agreement.pdf
-/example_signed.pdf
-/not_working_contract.pdf
-
 # Environment files (secrets). Keep a committed .env.example if one is ever added.
 .env
 .env.*
