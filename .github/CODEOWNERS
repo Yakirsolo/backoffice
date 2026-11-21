@@ -1,0 +1,25 @@
+# Paths that always need the repository owner's review.
+# Only enforced once a ruleset/branch protection on main enables "Require review from Code Owners".
+
+# GitHub Actions workflows, CODEOWNERS itself and other repo automation
+/.github/                                                            @Yakirsolo
+
+# Database migrations (Flyway - shipped migrations must never be edited)
+/backend/src/main/resources/db/migration/                            @Yakirsolo
+
+# Backend configuration (JWT, CORS, admin seed, storage settings)
+/backend/src/main/resources/application.yml                          @Yakirsolo
+
+# Backend authentication and security
+/backend/src/main/java/com/backoffice/backend/security/              @Yakirsolo
+/backend/src/main/java/com/backoffice/backend/config/SecurityConfig.java @Yakirsolo
+/backend/src/main/java/com/backoffice/backend/config/AdminSeeder.java    @Yakirsolo
+/backend/src/main/java/com/backoffice/backend/web/AuthController.java    @Yakirsolo
+/backend/src/main/java/com/backoffice/backend/service/AuthService.java   @Yakirsolo
+# Unauthenticated endpoints (public signing links)
+/backend/src/main/java/com/backoffice/backend/web/PublicSigningController.java @Yakirsolo
+
+# Frontend authentication
+/frontend/src/app/core/services/auth.service.ts                      @Yakirsolo
+/frontend/src/app/core/services/auth.interceptor.ts                  @Yakirsolo
+/frontend/src/app/core/guards/auth.guard.ts                          @Yakirsolo
