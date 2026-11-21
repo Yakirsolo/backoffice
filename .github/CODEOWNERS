@@ -1,5 +1,9 @@
 # Paths that always need the repository owner's review.
 # Only enforced once a ruleset/branch protection on main enables "Require review from Code Owners".
+# The last matching pattern wins, so the catch-all must stay first.
+
+# Catch-all: every change needs the owner's review (so a bot approval can never satisfy review)
+*                                                                    @Yakirsolo
 
 # GitHub Actions workflows, CODEOWNERS itself and other repo automation
 /.github/                                                            @Yakirsolo
