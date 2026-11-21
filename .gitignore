@@ -1,1 +1,14 @@
 .superpowers/
+
+# Environment files (secrets). Keep a committed .env.example if one is ever added.
+.env
+.env.*
+!.env.example
+
+# Local Claude Code state (the shared .claude/settings.json is NOT ignored)
+.claude/settings.local.json
+.claude/worktrees/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
